@@ -1,7 +1,40 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npx create-next-app@latest . --typescript --tailwind --eslint --app --no-src-dir --import-alias \"@/*\")"
+      "Bash(npx create-next-app@latest . --typescript --tailwind --eslint --app --no-src-dir --import-alias \"@/*\")",
+      "Bash(npm run:*)",
+      "Skill(update-config)",
+      "Bash(npm install:*)",
+      "Bash(npm list:*)",
+      "Bash(npx tsc:*)",
+      "mcp__ide__getDiagnostics",
+      "Bash(curl -s http://localhost:3000)",
+      "Bash(node -e \"const http = require\\('http'\\); const req = http.get\\('http://localhost:3000', \\(res\\) => { console.log\\('Status:', res.statusCode\\); let d=''; res.on\\('data', c => d+=c\\); res.on\\('end', \\(\\) => console.log\\(d.substring\\(0,500\\)\\)\\); }\\); req.on\\('error', e => console.log\\('Error:', e.message\\)\\);\")",
+      "Read(//c/Users/cyril/OneDrive/02. Clement/Projets/**)",
+      "Bash(node -e \"const http = require\\('http'\\); const req = http.get\\('http://localhost:3000', \\(res\\) => { console.log\\('OK:', res.statusCode\\); }\\); req.on\\('error', e => console.log\\('ERREUR:', e.message\\)\\); req.setTimeout\\(3000, \\(\\) => { console.log\\('TIMEOUT'\\); req.destroy\\(\\); }\\);\")",
+      "Bash(node:*)",
+      "Bash(npx next *)",
+      "Bash(del *)",
+      "Bash(Start-Sleep -Seconds 5)",
+      "Bash(Get-Content \"C:\\\\Users\\\\cyril\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-cyril-OneDrive-02--Cl-ment-Projets-PythonKids\\\\fccf8a14-0701-4b92-b9dc-41b1654a520d\\\\tasks\\\\bvy2fvkx1.output\")",
+      "Bash(dir .next)",
+      "Bash(Remove-Item -Recurse -Force .next/dev/cache -ErrorAction SilentlyContinue)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\cyril\\\\OneDrive\\\\02. Clément\\\\Projets\\\\PythonKids\" -Recurse -Force)",
+      "Bash(Select-Object FullName)",
+      "PowerShell(\\(Get-Content \"C:\\\\Users\\\\cyril\\\\OneDrive\\\\02. Clément\\\\Projets\\\\PythonKids\\\\lib\\\\lessons.ts\" | Measure-Object -Line\\).Lines)",
+      "PowerShell(cd \"C:\\\\Users\\\\cyril\\\\OneDrive\\\\02. Clément\\\\Projets\\\\PythonKids\"; npx tsc --noEmit --strict 2>&1; echo \"EXIT: $LASTEXITCODE\")",
+      "PowerShell(\\(Get-Content \"C:\\\\Users\\\\cyril\\\\OneDrive\\\\02. Clément\\\\Projets\\\\PythonKids\\\\app\\\\profile\\\\page.tsx\" | Measure-Object -Line\\).Lines)",
+      "PowerShell(Get-Item *)",
+      "PowerShell(Get-Process *)",
+      "PowerShell(taskkill *)",
+      "PowerShell(Set-Location \"C:\\\\Users\\\\cyril\\\\OneDrive\\\\02. Clément\\\\Projets\\\\PythonKids\"; Start-Process powershell -ArgumentList \"-NoExit\", \"-Command\", \"npm run dev\" -WindowStyle Normal)",
+      "PowerShell(Start-Process -FilePath \"npm\" -ArgumentList \"run dev\" -WorkingDirectory \"C:\\\\Users\\\\cyril\\\\OneDrive\\\\02. Clément\\\\Projets\\\\PythonKids\" -WindowStyle Hidden)",
+      "PowerShell(Start-Process \"npm\" -ArgumentList \"run\", \"dev\" -WorkingDirectory \"C:\\\\Users\\\\cyril\\\\OneDrive\\\\02. Clément\\\\Projets\\\\PythonKids\")",
+      "Bash(Test-Path *)",
+      "Bash(powershell -Command \"Get-Process -Id 27840 -ErrorAction SilentlyContinue | Select-Object Id, ProcessName, Path | Format-List\")",
+      "Bash(powershell *)",
+      "Bash(gh auth *)",
+      "Bash(git add *)"
     ]
   }
 }

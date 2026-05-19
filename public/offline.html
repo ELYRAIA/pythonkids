@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PythonKids — Hors ligne</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #eef2ff 0%, #faf5ff 50%, #fdf2f8 100%);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      padding: 24px;
+      text-align: center;
+    }
+    .card {
+      background: white;
+      border-radius: 24px;
+      padding: 48px 32px;
+      max-width: 400px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(147, 51, 234, 0.12);
+      border: 1px solid rgba(147, 51, 234, 0.1);
+    }
+    .emoji { font-size: 72px; margin-bottom: 16px; display: block; }
+    h1 { font-size: 24px; font-weight: 800; color: #1e1b4b; margin-bottom: 8px; }
+    p { font-size: 15px; color: #6b7280; line-height: 1.6; margin-bottom: 24px; }
+    .tips {
+      background: #faf5ff;
+      border-radius: 16px;
+      padding: 16px;
+      text-align: left;
+      margin-bottom: 24px;
+    }
+    .tips-title { font-size: 13px; font-weight: 700; color: #7c3aed; margin-bottom: 10px; }
+    .tip { font-size: 13px; color: #4b5563; padding: 4px 0; display: flex; align-items: center; gap: 8px; }
+    button {
+      background: linear-gradient(to right, #9333ea, #ec4899);
+      color: white;
+      border: none;
+      border-radius: 9999px;
+      padding: 12px 32px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      width: 100%;
+    }
+    button:hover { opacity: 0.9; }
+    .snake { font-size: 14px; color: #9ca3af; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <span class="emoji">🐍</span>
+    <h1>Pas de connexion !</h1>
+    <p>PythonKids a besoin d'internet pour charger. Vérifie ta connexion et réessaie.</p>
+    <div class="tips">
+      <div class="tips-title">En attendant, tu peux…</div>
+      <div class="tip">📝 Relire tes notes de cours</div>
+      <div class="tip">🧠 Essayer de résoudre un problème sur papier</div>
+      <div class="tip">🎯 Planifier ce que tu veux apprendre ensuite</div>
+    </div>
+    <button onclick="window.location.reload()">🔄 Réessayer</button>
+    <p class="snake">🐍 PythonKids</p>
+  </div>
+</body>
+</html>

@@ -36,6 +36,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# Donnees runtime (rooms de duel temporaires, recreees au demarrage)
+/data/duels.json
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
