@@ -12,6 +12,7 @@ import SessionSummary from "@/components/SessionSummary";
 import PyodidePreloader from "@/components/PyodidePreloader";
 import DailyReward from "@/components/DailyReward";
 import HomeBanner from "@/components/HomeBanner";
+import HomeCoffresWidget from "@/components/HomeCoffresWidget";
 
 export default function Home() {
   return (
@@ -70,6 +71,9 @@ export default function Home() {
       <SessionSummary />
       <DailyReward />
       <HomeBanner />
+
+      {/* Coffres en attente */}
+      <HomeCoffresWidget />
 
       {/* Reprendre + Défi du jour */}
       <HomeResume />

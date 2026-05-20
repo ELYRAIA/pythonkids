@@ -5,6 +5,8 @@ import Link from "next/link";
 import AppHeader from "@/components/AppHeader";
 import { calculateScore } from "@/lib/score";
 import { getXP, getWeeklyXP } from "@/lib/xp";
+import { getEquippedSkin } from "@/lib/shop";
+import { SHOP_SKINS } from "@/lib/shop";
 import type { LeaderboardEntry } from "@/app/api/leaderboard/route";
 
 type Period = "all" | "month" | "week";
@@ -91,10 +93,12 @@ export default function LeaderboardPage() {
 
     // Soumet le score si l'utilisateur a un pseudo
     if (name && score > 0) {
+      const equippedSkinId = getEquippedSkin();
+      const skinGradient = equippedSkinId ? SHOP_SKINS.find((s) => s.id === equippedSkinId)?.gradient : undefined;
       fetch("/api/leaderboard", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: name, score }),
+        body: JSON.stringify({ username: name, score, skinGradient }),
       })
         .then(() => setSubmitted(true))
         .catch(() => {});
@@ -220,7 +224,7 @@ export default function LeaderboardPage() {
                   const barH = barHeights[colIdx];
                   const grad = PODIUM_GRADIENTS[colIdx];
                   const glow = PODIUM_GLOWS[colIdx];
-                  const avatarGrad = playerGradient(player.username);
+                  const avatarGrad = player.skinGradient ?? playerGradient(player.username);
 
                   return (
                     <div key={player.username} className="flex flex-col items-center gap-2 flex-1 max-w-[110px]">
@@ -265,7 +269,7 @@ export default function LeaderboardPage() {
               {filteredEntries.map((player, idx) => {
                 const rank = idx + 1;
                 const isMe = player.username === username;
-                const avatarGrad = playerGradient(player.username);
+                const avatarGrad = player.skinGradient ?? playerGradient(player.username);
                 const levelEmoji = LEVEL_FROM_SCORE(player.score);
                 return (
                   <div

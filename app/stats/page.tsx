@@ -35,19 +35,33 @@ export default function StatsPage() {
   const doneLessons = Object.values(progress.completedLessons).flat().length;
   const totalChallenges = CHALLENGES.length;
 
-  // 7-day activity chart
-  const last7 = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date();
-    d.setDate(d.getDate() - (6 - i));
+  // Heatmap 12 semaines
+  const HEATMAP_WEEKS = 12;
+  const HEATMAP_DAYS = HEATMAP_WEEKS * 7;
+  const todayHeatmap = new Date();
+  const heatmapCells = Array.from({ length: HEATMAP_DAYS }, (_, i) => {
+    const d = new Date(todayHeatmap);
+    d.setDate(todayHeatmap.getDate() - (HEATMAP_DAYS - 1 - i));
     const dateStr = d.toISOString().split("T")[0];
-    const dayNames = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
     return {
       date: dateStr,
-      label: dayNames[d.getDay()],
       active: streak.playDates.includes(dateStr),
-      isToday: i === 6,
+      isToday: i === HEATMAP_DAYS - 1,
+      weekday: d.getDay(), // 0=dim, 1=lun...
     };
   });
+  // Grouper par colonnes de 7 (semaine = colonne)
+  const heatmapWeeks = Array.from({ length: HEATMAP_WEEKS }, (_, w) =>
+    heatmapCells.slice(w * 7, (w + 1) * 7)
+  );
+  // Étiquettes de mois pour les colonnes
+  const monthLabels = heatmapWeeks.map((week) => {
+    const firstDay = new Date(week[0].date);
+    return firstDay.getDate() <= 7
+      ? firstDay.toLocaleDateString("fr-FR", { month: "short" })
+      : "";
+  });
+  const DAY_LABELS = ["D", "L", "M", "M", "J", "V", "S"];
 
   // Challenge breakdown by difficulty
   const diffStats = {
@@ -141,30 +155,65 @@ export default function StatsPage() {
           </div>
         </div>
 
-        {/* Activité des 7 derniers jours */}
+        {/* Heatmap calendrier 12 semaines */}
         <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-5">
-          <h2 className="text-sm font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-4">📅 Activité des 7 derniers jours</h2>
-          <div className="flex gap-2 justify-between">
-            {last7.map((day) => (
-              <div key={day.date} className="flex-1 flex flex-col items-center gap-1.5">
-                <div
-                  className={`w-full rounded-lg transition-all ${
-                    day.active
-                      ? "bg-orange-400 dark:bg-orange-500 shadow-sm"
-                      : "bg-gray-100 dark:bg-slate-700"
-                  } ${day.isToday ? "ring-2 ring-orange-300 dark:ring-orange-600" : ""}`}
-                  style={{ height: "52px" }}
-                />
-                <span className={`text-[10px] font-semibold ${day.isToday ? "text-orange-500 dark:text-orange-400" : "text-gray-400 dark:text-slate-500"}`}>
-                  {day.label}
-                </span>
-                {day.active && <span className="text-[8px] text-orange-400">●</span>}
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wide">📅 Calendrier d'activité</h2>
+            <div className="flex items-center gap-3 text-xs">
+              <span className="text-gray-400 dark:text-slate-500">Record : {streak.longestStreak}j</span>
+              <span className="text-orange-500 font-bold">Streak : {streak.currentStreak}j 🔥</span>
+            </div>
+          </div>
+
+          {/* Étiquettes de mois */}
+          <div className="flex gap-0.5 mb-1 pl-5">
+            {monthLabels.map((label, i) => (
+              <div key={i} className="flex-1 text-[9px] text-gray-400 dark:text-slate-500 font-semibold">
+                {label}
               </div>
             ))}
           </div>
-          <div className="flex justify-between mt-1">
-            <span className="text-xs text-gray-400 dark:text-slate-500">Record : {streak.longestStreak} jour{streak.longestStreak > 1 ? "s" : ""}</span>
-            <span className="text-xs text-orange-500 font-semibold">Streak actuel : {streak.currentStreak}j 🔥</span>
+
+          {/* Grille heatmap */}
+          <div className="flex gap-0.5">
+            {/* Étiquettes jours */}
+            <div className="flex flex-col gap-0.5 mr-1">
+              {DAY_LABELS.map((d, i) => (
+                <div key={i} className="h-3.5 flex items-center">
+                  <span className="text-[8px] text-gray-300 dark:text-slate-600 w-4 text-right">{i % 2 === 1 ? d : ""}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Colonnes semaines */}
+            {heatmapWeeks.map((week, wi) => (
+              <div key={wi} className="flex flex-col gap-0.5 flex-1">
+                {week.map((day, di) => (
+                  <div
+                    key={di}
+                    title={`${day.date}${day.active ? " — Joué !" : ""}`}
+                    className={`h-3.5 rounded-sm transition-all ${
+                      day.isToday
+                        ? "ring-1 ring-orange-400 dark:ring-orange-500"
+                        : ""
+                    } ${
+                      day.active
+                        ? "bg-orange-400 dark:bg-orange-500"
+                        : "bg-gray-100 dark:bg-slate-700"
+                    }`}
+                  />
+                ))}
+              </div>
+            ))}
+          </div>
+
+          {/* Légende */}
+          <div className="flex items-center gap-2 mt-3 justify-end">
+            <span className="text-[10px] text-gray-400 dark:text-slate-500">Moins</span>
+            {["bg-gray-100 dark:bg-slate-700", "bg-orange-200 dark:bg-orange-800", "bg-orange-400 dark:bg-orange-500"].map((cls, i) => (
+              <div key={i} className={`w-3 h-3 rounded-sm ${cls}`} />
+            ))}
+            <span className="text-[10px] text-gray-400 dark:text-slate-500">Plus</span>
           </div>
         </div>
 

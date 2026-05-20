@@ -7,6 +7,7 @@ export interface LeaderboardEntry {
   username: string;
   score: number;
   updatedAt: string;
+  skinGradient?: string;
 }
 
 function readData(): LeaderboardEntry[] {
@@ -33,8 +34,8 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const body = await request.json() as { username?: string; score?: number };
-  const { username, score } = body;
+  const body = await request.json() as { username?: string; score?: number; skinGradient?: string };
+  const { username, score, skinGradient } = body;
 
   if (!username || typeof score !== "number" || score < 0) {
     return Response.json({ error: "Invalid data" }, { status: 400 });
@@ -44,11 +45,15 @@ export async function POST(request: Request) {
   const idx = data.findIndex((e) => e.username === username);
 
   if (idx >= 0) {
-    if (score > data[idx].score) {
-      data[idx] = { username, score, updatedAt: new Date().toISOString() };
-    }
+    const updated: LeaderboardEntry = {
+      ...data[idx],
+      updatedAt: new Date().toISOString(),
+      ...(skinGradient ? { skinGradient } : {}),
+    };
+    if (score > data[idx].score) updated.score = score;
+    data[idx] = updated;
   } else {
-    data.push({ username, score, updatedAt: new Date().toISOString() });
+    data.push({ username, score, updatedAt: new Date().toISOString(), ...(skinGradient ? { skinGradient } : {}) });
   }
 
   writeData(data);

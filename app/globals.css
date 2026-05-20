@@ -247,6 +247,15 @@ body {
   animation: podium-grow-anim 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
+/* ── Achievement celebration ── */
+@keyframes achievement-popup-anim {
+  from { opacity: 0; transform: scale(0.65) translateY(40px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+.achievement-popup {
+  animation: achievement-popup-anim 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
 /* ── Daily Series ── */
 @keyframes daily-slot-pulse {
   0%, 100% { box-shadow: 0 0 0 0 rgba(251,191,36,0.7); }
