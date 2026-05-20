@@ -105,21 +105,28 @@ export default function Home() {
       {/* Badges gagnés */}
       <BadgeDisplay />
 
-      {/* Duel + Certificat */}
+      {/* Duel + Certificat + Détente */}
       <section className="w-full px-6 py-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl mx-auto">
           <Link href="/duel">
             <div className="bg-white dark:bg-slate-800 border-2 border-purple-100 dark:border-slate-700 rounded-2xl p-6 hover:shadow-lg hover:-translate-y-1 transition-all cursor-pointer text-center">
               <div className="text-4xl mb-2">⚔️</div>
               <h3 className="font-bold text-gray-800 dark:text-white mb-1">Mode Duel</h3>
-              <p className="text-xs text-gray-500 dark:text-slate-400">Affronte un ami en temps réel sur le même défi !</p>
+              <p className="text-xs text-gray-500 dark:text-slate-400">Affronte un ami en temps réel !</p>
             </div>
           </Link>
           <Link href="/certificate">
             <div className="bg-white dark:bg-slate-800 border-2 border-yellow-200 dark:border-yellow-800 rounded-2xl p-6 hover:shadow-lg hover:-translate-y-1 transition-all cursor-pointer text-center">
               <div className="text-4xl mb-2">🎓</div>
               <h3 className="font-bold text-gray-800 dark:text-white mb-1">Mon Certificat</h3>
-              <p className="text-xs text-gray-500 dark:text-slate-400">Obtiens ton certificat quand tu termines 5 niveaux !</p>
+              <p className="text-xs text-gray-500 dark:text-slate-400">Termine 5 niveaux pour l&apos;obtenir !</p>
+            </div>
+          </Link>
+          <Link href="/detente">
+            <div className="bg-white dark:bg-slate-800 border-2 border-green-200 dark:border-green-800 rounded-2xl p-6 hover:shadow-lg hover:-translate-y-1 transition-all cursor-pointer text-center">
+              <div className="text-4xl mb-2">🎮</div>
+              <h3 className="font-bold text-gray-800 dark:text-white mb-1">Espace Détente</h3>
+              <p className="text-xs text-gray-500 dark:text-slate-400">Joue à Snake et gagne des 💎 !</p>
             </div>
           </Link>
         </div>

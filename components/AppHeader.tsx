@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 const NAV_LINKS = [
   { href: "/challenges", label: "Défis", emoji: "🎯" },
   { href: "/duel", label: "Duel", emoji: "⚔️" },
+  { href: "/detente", label: "Détente", emoji: "🎮" },
   { href: "/friends", label: "Amis", emoji: "👥" },
   { href: "/shop", label: "Boutique", emoji: "🛒" },
   { href: "/leaderboard", label: "Classement", emoji: "🏅" },
