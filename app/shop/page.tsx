@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import AppHeader from "@/components/AppHeader";
 import {
   SHOP_SKINS, SHOP_STICKERS, getOwnedShopItems, getEquippedSkin,
@@ -8,14 +9,30 @@ import {
   RARITY_COLORS_SHOP, RARITY_LABELS_SHOP, RARITY_BORDER_SHOP,
   type ShopItem,
 } from "@/lib/shop";
-import { getGems } from "@/lib/gems";
+import { getGems, addGems } from "@/lib/gems";
 import { buyStreakFreeze, getStreakFreezeCount } from "@/lib/streak";
 import {
   COLOR_THEMES, getOwnedThemes, getActiveThemeId, purchaseTheme, applyTheme,
 } from "@/lib/themes";
 import { spendGems } from "@/lib/gems";
 
-type Tab = "skins" | "stickers" | "consumables" | "themes";
+type Tab = "skins" | "stickers" | "consumables" | "themes" | "gems";
+
+const GEM_PACKS = [
+  { id: "gems_100",  label: "Sachet",  amount: 100,  price: "1,99 €",  bonus: null,    color: "from-sky-400 to-cyan-500",     emoji: "💎" },
+  { id: "gems_300",  label: "Sac",     amount: 300,  price: "4,99 €",  bonus: "+20%",  color: "from-violet-500 to-purple-600", emoji: "💎" },
+  { id: "gems_700",  label: "Coffre",  amount: 700,  price: "9,99 €",  bonus: "+40%",  color: "from-orange-400 to-pink-500",  emoji: "💎" },
+  { id: "gems_1500", label: "Trésor",  amount: 1500, price: "19,99 €", bonus: "BEST",  color: "from-yellow-400 to-orange-500", emoji: "🌟" },
+] as const;
+
+const PROMO_CODES: Record<string, number> = {
+  BIENVENUE:     50,
+  PYTHON2025:   100,
+  STREAKMASTER:  75,
+  DUELCHAMPION: 120,
+  MILLIONNAIRE: 1000000,
+};
+const USED_CODES_KEY = "pythonkids_used_codes";
 
 function ItemCard({
   item,
@@ -99,6 +116,9 @@ export default function ShopPage() {
   const [freezeBought, setFreezeBought] = useState(false);
   const [ownedThemes, setOwnedThemes] = useState<string[]>(["default"]);
   const [activeTheme, setActiveTheme] = useState("default");
+  const [boughtPack, setBoughtPack] = useState<string | null>(null);
+  const [promoInput, setPromoInput] = useState("");
+  const [promoStatus, setPromoStatus] = useState<"idle" | "ok" | "used" | "invalid">("idle");
 
   const refresh = () => {
     setGems(getGems());
@@ -136,6 +156,26 @@ export default function ShopPage() {
     refresh();
   };
 
+  const redeemPromo = () => {
+    const code = promoInput.trim().toUpperCase();
+    if (!code) return;
+    const amount = PROMO_CODES[code];
+    if (!amount) { setPromoStatus("invalid"); return; }
+    try {
+      const used: string[] = JSON.parse(localStorage.getItem(USED_CODES_KEY) ?? "[]");
+      if (used.includes(code)) { setPromoStatus("used"); return; }
+      used.push(code);
+      localStorage.setItem(USED_CODES_KEY, JSON.stringify(used));
+    } catch {}
+    addGems(amount);
+    refresh();
+    setPromoInput("");
+    setPromoStatus("ok");
+    window.dispatchEvent(new CustomEvent("pythonkids:toast", {
+      detail: { msg: `Code promo : +${amount} gemmes !`, emoji: "🎁", type: "normal" },
+    }));
+  };
+
   const items = tab === "skins" ? SHOP_SKINS : SHOP_STICKERS;
 
   return (
@@ -163,6 +203,7 @@ export default function ShopPage() {
             { key: "stickers", label: "🏷️ Stickers" },
             { key: "consumables", label: "⚡ Consommables" },
             { key: "themes", label: "🎨 Thèmes" },
+            { key: "gems", label: "💎 Recharger" },
           ] as { key: Tab; label: string }[]).map((t) => (
             <button
               key={t.key}
@@ -179,7 +220,7 @@ export default function ShopPage() {
         </div>
 
         {/* Description */}
-        {tab !== "consumables" && (
+        {tab !== "consumables" && tab !== "themes" && tab !== "gems" && (
           <p className="text-xs text-gray-400 dark:text-slate-500 mb-4">
             {tab === "skins"
               ? "Les skins changent la couleur de fond de ton avatar. Tu peux en équiper un seul à la fois."
@@ -188,7 +229,7 @@ export default function ShopPage() {
         )}
 
         {/* Grid skins / stickers */}
-        {tab !== "consumables" && (
+        {tab !== "consumables" && tab !== "themes" && tab !== "gems" && (
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {items.map((item) => (
               <ItemCard
@@ -333,10 +374,157 @@ export default function ShopPage() {
           </div>
         )}
 
+        {/* Gemmes — recharge */}
+        {tab === "gems" && (
+          <PayPalScriptProvider options={{ clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID ?? "", currency: "EUR" }}>
+          <div className="space-y-6">
+
+            {/* Packs */}
+            <div>
+              <p className="text-xs text-gray-400 dark:text-slate-500 mb-4">
+                Recharge ton solde de gemmes pour débloquer des skins, stickers et thèmes exclusifs !
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                {GEM_PACKS.map((pack) => {
+                  const justBought = boughtPack === pack.id;
+                  return (
+                    <div
+                      key={pack.id}
+                      className={`relative rounded-2xl border-2 bg-white dark:bg-slate-800 p-4 flex flex-col gap-3 ${
+                        pack.bonus === "BEST"
+                          ? "border-yellow-400 dark:border-yellow-500"
+                          : "border-slate-200 dark:border-slate-700"
+                      }`}
+                    >
+                      {/* Badge bonus */}
+                      {pack.bonus && (
+                        <span className={`absolute -top-2.5 right-3 px-2 py-0.5 rounded-full text-[10px] font-extrabold text-white ${
+                          pack.bonus === "BEST"
+                            ? "bg-gradient-to-r from-yellow-400 to-orange-500"
+                            : "bg-gradient-to-r from-green-400 to-emerald-500"
+                        }`}>
+                          {pack.bonus === "BEST" ? "⭐ Meilleur prix" : pack.bonus}
+                        </span>
+                      )}
+
+                      {/* Visuel */}
+                      <div className={`w-full h-16 rounded-xl bg-gradient-to-br ${pack.color} flex items-center justify-center text-4xl shadow-sm`}>
+                        {pack.emoji}
+                      </div>
+
+                      {/* Info */}
+                      <div>
+                        <p className="text-sm font-extrabold text-gray-800 dark:text-white">{pack.label}</p>
+                        <p className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-cyan-500 leading-tight">
+                          {pack.amount} 💎
+                        </p>
+                        <p className="text-xs text-gray-400 dark:text-slate-500">{pack.price}</p>
+                      </div>
+
+                      {/* Bouton PayPal ou confirmation */}
+                      {justBought ? (
+                        <div className="w-full py-2.5 rounded-xl text-sm font-extrabold text-center bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300">
+                          ✓ {pack.amount} gemmes reçues !
+                        </div>
+                      ) : (
+                        <PayPalButtons
+                          style={{ layout: "vertical", shape: "pill", label: "pay", height: 40 }}
+                          createOrder={async () => {
+                            const res = await fetch("/api/paypal/create-order", {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({ packId: pack.id }),
+                            });
+                            const data = await res.json() as { id?: string; error?: string };
+                            if (!data.id) throw new Error(data.error ?? "Erreur création commande");
+                            return data.id;
+                          }}
+                          onApprove={async (data) => {
+                            const res = await fetch("/api/paypal/capture-order", {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({ orderID: data.orderID }),
+                            });
+                            const result = await res.json() as { gems?: number; error?: string };
+                            if (!result.gems) throw new Error(result.error ?? "Paiement échoué");
+                            addGems(result.gems);
+                            refresh();
+                            setBoughtPack(pack.id);
+                            window.dispatchEvent(new CustomEvent("pythonkids:toast", {
+                              detail: { msg: `+${result.gems} gemmes reçues !`, emoji: "💎", type: "normal" },
+                            }));
+                            setTimeout(() => setBoughtPack(null), 3000);
+                          }}
+                          onError={() => {
+                            window.dispatchEvent(new CustomEvent("pythonkids:toast", {
+                              detail: { msg: "Paiement annulé", emoji: "❌", type: "normal" },
+                            }));
+                          }}
+                        />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Code promo */}
+            <div className="bg-white dark:bg-slate-800 border-2 border-dashed border-purple-200 dark:border-purple-800 rounded-2xl p-5">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-lg">🎁</span>
+                <p className="font-extrabold text-gray-800 dark:text-white text-sm">Code promo</p>
+              </div>
+              <p className="text-xs text-gray-400 dark:text-slate-500 mb-3">
+                Tu as un code cadeau ? Entre-le ici pour recevoir tes gemmes.
+              </p>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={promoInput}
+                  onChange={(e) => { setPromoInput(e.target.value.toUpperCase()); setPromoStatus("idle"); }}
+                  onKeyDown={(e) => e.key === "Enter" && redeemPromo()}
+                  placeholder="EX : BIENVENUE"
+                  maxLength={20}
+                  className="flex-1 border-2 border-purple-200 dark:border-slate-600 rounded-xl px-4 py-2 text-sm font-mono font-bold uppercase tracking-wider focus:outline-none focus:border-purple-400 dark:bg-slate-700 dark:text-white"
+                />
+                <button
+                  onClick={redeemPromo}
+                  disabled={!promoInput.trim()}
+                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-pink-500 text-white text-sm font-bold hover:opacity-90 disabled:opacity-40 transition-opacity"
+                >
+                  Valider
+                </button>
+              </div>
+              {promoStatus === "ok" && (
+                <p className="text-green-600 dark:text-green-400 text-xs font-bold mt-2">
+                  ✓ Code validé ! Gemmes ajoutées à ton solde.
+                </p>
+              )}
+              {promoStatus === "used" && (
+                <p className="text-orange-500 text-xs font-bold mt-2">
+                  ⚠️ Ce code a déjà été utilisé sur cet appareil.
+                </p>
+              )}
+              {promoStatus === "invalid" && (
+                <p className="text-red-500 text-xs font-bold mt-2">
+                  ❌ Code invalide. Vérifie l'orthographe !
+                </p>
+              )}
+            </div>
+
+            <p className="text-center text-[11px] text-gray-300 dark:text-slate-600">
+              Paiement sécurisé via PayPal · Les gemmes sont créditées instantanément
+            </p>
+          </div>
+          </PayPalScriptProvider>
+        )}
+
         {/* Hint */}
+        {tab !== "gems" && (
         <p className="text-center text-xs text-gray-300 dark:text-slate-600 mt-8">
           💎 Gagne des gemmes en ouvrant des coffres dans la série quotidienne ou en terminant des niveaux !
         </p>
+        )}
       </div>
     </div>
   );

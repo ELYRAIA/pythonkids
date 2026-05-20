@@ -3,8 +3,6 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { isCurrentProfileLocal } from "@/lib/profiles";
-
 const NAV_LINKS = [
   { href: "/challenges", label: "Défis", emoji: "🎯" },
   { href: "/duel", label: "Duel", emoji: "⚔️" },
@@ -17,7 +15,6 @@ const NAV_LINKS = [
 export default function AppHeader({ right }: { right?: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const [profileEmoji, setProfileEmoji] = useState<string | null>(null);
-  const [isLocal, setIsLocal] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -30,7 +27,6 @@ export default function AppHeader({ right }: { right?: React.ReactNode }) {
         if (found) setProfileEmoji(found.emoji);
       }
     } catch {}
-    setIsLocal(isCurrentProfileLocal());
   }, []);
 
   const isActive = (href: string) =>

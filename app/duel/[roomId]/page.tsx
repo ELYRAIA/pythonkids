@@ -11,6 +11,8 @@ import { python } from "@codemirror/lang-python";
 import { oneDark } from "@codemirror/theme-one-dark";
 import { defaultKeymap, indentWithTab, historyKeymap, history } from "@codemirror/commands";
 import { playChallengeWinSound, playErrorSound } from "@/lib/sounds";
+import { addXP } from "@/lib/xp";
+import { postActivity } from "@/lib/activity";
 import type { DuelRoom } from "@/app/api/duel/route";
 import Confetti from "@/components/Confetti";
 import { useIsMobile } from "@/lib/useIsMobile";
@@ -36,6 +38,9 @@ export default function DuelRoomPage() {
   const editorContainerRef = useRef<HTMLDivElement>(null);
   const runRef = useRef<() => void>(() => {});
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const rewardedRef = useRef(false);
+  const prevTheysolvedRef = useRef(false);
   const isMobile = useIsMobile();
   const [mobileCode, setMobileCode] = useState("");
 
@@ -61,8 +66,8 @@ export default function DuelRoomPage() {
 
   // Timer
   useEffect(() => {
-    const t = setInterval(() => setElapsed((e) => e + 1), 1000);
-    return () => clearInterval(t);
+    timerRef.current = setInterval(() => setElapsed((e) => e + 1), 1000);
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, []);
 
   useEffect(() => {
@@ -102,6 +107,42 @@ export default function DuelRoomPage() {
       .then((py) => { pyodideRef.current = py; setPyodideReady(true); })
       .catch(() => {});
   }, []);
+
+  const me = room?.players.find((p) => p.username === username);
+  const opponent = room?.players.find((p) => p.username !== username);
+  const iSolved = me?.status === "solved";
+  const theySolved = opponent?.status === "solved";
+  const iWon = iSolved && !theySolved && (room?.players.length ?? 0) >= 2;
+  const iLost = (theySolved ?? false) && !iSolved;
+  const bothSolved = iSolved && (theySolved ?? false);
+
+  // Arrêter le timer quand la partie est terminée
+  useEffect(() => {
+    if ((iSolved || theySolved) && timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+  }, [iSolved, theySolved]);
+
+  // Récompenser la victoire + toast défaite
+  useEffect(() => {
+    if (theySolved && !prevTheysolvedRef.current && !iSolved) {
+      playErrorSound();
+      window.dispatchEvent(new CustomEvent("pythonkids:toast", {
+        detail: { msg: "Ton adversaire a résolu en premier !", emoji: "😅", type: "normal" },
+      }));
+    }
+    prevTheysolvedRef.current = theySolved ?? false;
+
+    if (iWon && !rewardedRef.current) {
+      rewardedRef.current = true;
+      addXP(150);
+      window.dispatchEvent(new CustomEvent("pythonkids:toast", {
+        detail: { msg: "Duel gagné ! +150 XP", emoji: "🏆", type: "rank" },
+      }));
+      postActivity("challenge", "Duel gagné ⚔️");
+    }
+  }, [iWon, iSolved, theySolved]);
 
   const runTests = async () => {
     if (!pyodideRef.current || !challenge) return;
@@ -144,13 +185,6 @@ export default function DuelRoomPage() {
   };
   runRef.current = runTests;
 
-  const me = room?.players.find((p) => p.username === username);
-  const opponent = room?.players.find((p) => p.username !== username);
-  const iSolved = me?.status === "solved";
-  const theySolved = opponent?.status === "solved";
-  const iWon = iSolved && !theySolved;
-  const iLost = theySolved && !iSolved;
-  const bothSolved = iSolved && theySolved;
   const formatTime = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 
   if (error) return (
@@ -225,8 +259,22 @@ export default function DuelRoomPage() {
               {iWon ? "Tu as gagné le duel !" : bothSolved ? "Égalité !" : "Ton adversaire a gagné…"}
             </p>
             <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">
-              {iWon ? "Bravo, tu as été le plus rapide !" : bothSolved ? "Vous avez résolu en même temps !" : "Bien tenté, réessaie !"}
+              {iWon ? "Bravo ! +150 XP" : bothSolved ? "Vous avez résolu en même temps !" : "Bien tenté, réessaie !"}
             </p>
+            <div className="flex gap-3 mt-4 justify-center">
+              <Link
+                href="/duel"
+                className="px-5 py-2 rounded-full border-2 border-gray-200 dark:border-slate-600 text-sm font-bold text-gray-500 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+              >
+                ← Retour
+              </Link>
+              <Link
+                href="/duel"
+                className="px-5 py-2 rounded-full bg-gradient-to-r from-purple-600 to-pink-500 text-white text-sm font-bold hover:opacity-90 transition-opacity"
+              >
+                Rejouer ⚔️
+              </Link>
+            </div>
           </div>
         )}
 

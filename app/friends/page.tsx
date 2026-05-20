@@ -56,6 +56,14 @@ export default function FriendsPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") { setDuelFriend(null); setDuelCode(null); }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
   async function loadAll(name: string) {
     setLoading(true);
     try {
@@ -108,6 +116,9 @@ export default function FriendsPage() {
       });
       if (!res.ok) throw new Error();
       setAddInput("");
+      window.dispatchEvent(new CustomEvent("pythonkids:toast", {
+        detail: { msg: `${friend} ajouté à tes amis !`, emoji: "👥", type: "normal" },
+      }));
       await loadAll(username);
     } catch {
       setAddError("Erreur lors de l'ajout.");
