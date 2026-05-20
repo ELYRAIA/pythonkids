@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { getProgress } from "@/lib/progress";
+import { getMastery, lessonKey } from "@/lib/mastery";
 import type { LevelData } from "@/lib/lessons";
 import Confetti from "./Confetti";
 
@@ -16,6 +17,8 @@ export default function LevelLessonsGrid({ level }: Props) {
   const [locked, setLocked] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
   const [confetti, setConfetti] = useState(false);
+  const [mastery, setMastery] = useState<Record<string, number>>({});
+  const [reviewMode, setReviewMode] = useState(false);
   const prevDoneRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -27,6 +30,7 @@ export default function LevelLessonsGrid({ level }: Props) {
       setLocked(!p.earnedBadges.includes(`level_${level.id - 1}`));
     }
 
+    setMastery(getMastery());
     setMounted(true);
     prevDoneRef.current = done.length;
 
@@ -34,6 +38,7 @@ export default function LevelLessonsGrid({ level }: Props) {
       const newP = getProgress();
       const newDone = newP.completedLessons[String(level.id)] ?? [];
       setCompleted(newDone);
+      setMastery(getMastery());
 
       if (prevDoneRef.current !== null && prevDoneRef.current < level.lessons.length && newDone.length >= level.lessons.length) {
         const key = `pythonkids_celebrated_${level.id}`;
@@ -147,18 +152,45 @@ export default function LevelLessonsGrid({ level }: Props) {
         )}
       </div>
 
+      {/* Bouton révision */}
+      {mounted && doneCount > 0 && (() => {
+        const lowStar = level.lessons.filter((_, i) =>
+          completed.includes(i) && (mastery[lessonKey(level.id, i)] ?? 0) < 3
+        ).length;
+        return lowStar > 0 ? (
+          <div className="flex justify-end mb-3">
+            <button
+              onClick={() => setReviewMode((v) => !v)}
+              className={`text-xs font-bold px-3 py-1.5 rounded-full border-2 transition-all ${
+                reviewMode
+                  ? "bg-amber-500 border-amber-500 text-white"
+                  : "border-amber-300 dark:border-amber-700 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20"
+              }`}
+            >
+              🔄 {reviewMode ? "Toutes les leçons" : `Réviser (${lowStar} à améliorer)`}
+            </button>
+          </div>
+        ) : null;
+      })()}
+
       {/* Grille de leçons */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {level.lessons.map((lesson, index) => {
           const isDone = mounted && completed.includes(index);
           const isMiniProject = lesson.title.toLowerCase().includes("mini-projet");
+          const stars = isDone ? (mastery[lessonKey(level.id, index)] ?? 0) : 0;
+          const needsReview = isDone && stars < 3;
+
+          if (reviewMode && !needsReview) return null;
 
           return (
             <Link key={index} href={`/levels/${level.id}/lessons/${index}`}>
               <div
                 className={`group relative rounded-2xl border-2 p-5 hover:shadow-lg hover:-translate-y-1 transition-all cursor-pointer h-full ${
                   isDone
-                    ? "bg-green-50 dark:bg-green-950/30 border-green-300 dark:border-green-700"
+                    ? needsReview && reviewMode
+                      ? "bg-amber-50 dark:bg-amber-950/20 border-amber-300 dark:border-amber-700"
+                      : "bg-green-50 dark:bg-green-950/30 border-green-300 dark:border-green-700"
                     : "bg-white dark:bg-slate-800 border-purple-50 dark:border-slate-700"
                 }`}
               >
@@ -179,7 +211,12 @@ export default function LevelLessonsGrid({ level }: Props) {
                         Projet
                       </span>
                     )}
-                    {isDone && (
+                    {isDone && stars > 0 && (
+                      <span className="text-sm leading-none">
+                        {"⭐".repeat(stars)}
+                      </span>
+                    )}
+                    {isDone && stars === 0 && (
                       <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 px-2 py-0.5 rounded-full font-bold">
                         Terminée
                       </span>
@@ -187,16 +224,21 @@ export default function LevelLessonsGrid({ level }: Props) {
                   </div>
                 </div>
 
-                <h3 className={`text-base font-bold mb-2 ${isDone ? "text-green-700 dark:text-green-400" : "text-gray-800 dark:text-white"}`}>
+                <h3 className={`text-base font-bold mb-2 ${isDone ? (needsReview && reviewMode ? "text-amber-700 dark:text-amber-400" : "text-green-700 dark:text-green-400") : "text-gray-800 dark:text-white"}`}>
                   {lesson.title}
                 </h3>
                 <p className="text-xs text-gray-500 dark:text-slate-400 leading-relaxed line-clamp-2">
                   {lesson.description.split("\n")[0]}
                 </p>
 
-                <div className="mt-3 flex items-center justify-end">
-                  <span className={`text-xs font-bold bg-gradient-to-r ${level.color} bg-clip-text text-transparent group-hover:opacity-80 transition-opacity`}>
-                    {isDone ? "Revoir →" : "Commencer →"}
+                <div className="mt-3 flex items-center justify-between">
+                  {needsReview && reviewMode && (
+                    <span className="text-xs text-amber-500 dark:text-amber-400 font-semibold">
+                      {"⭐".repeat(stars)}{"☆".repeat(3 - stars)} à améliorer
+                    </span>
+                  )}
+                  <span className={`text-xs font-bold bg-gradient-to-r ${level.color} bg-clip-text text-transparent group-hover:opacity-80 transition-opacity ml-auto`}>
+                    {isDone ? (needsReview ? "Réviser →" : "Revoir →") : "Commencer →"}
                   </span>
                 </div>
               </div>

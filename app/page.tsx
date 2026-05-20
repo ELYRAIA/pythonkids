@@ -13,6 +13,8 @@ import PyodidePreloader from "@/components/PyodidePreloader";
 import DailyReward from "@/components/DailyReward";
 import HomeBanner from "@/components/HomeBanner";
 import HomeCoffresWidget from "@/components/HomeCoffresWidget";
+import HomeQuestsWidget from "@/components/HomeQuestsWidget";
+import HomeProgressWidget from "@/components/HomeProgressWidget";
 
 export default function Home() {
   return (
@@ -72,8 +74,14 @@ export default function Home() {
       <DailyReward />
       <HomeBanner />
 
+      {/* Progression globale */}
+      <HomeProgressWidget />
+
       {/* Coffres en attente */}
       <HomeCoffresWidget />
+
+      {/* Quêtes du jour */}
+      <HomeQuestsWidget />
 
       {/* Reprendre + Défi du jour */}
       <HomeResume />

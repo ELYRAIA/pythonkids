@@ -31,13 +31,13 @@ const PODIUM_GLOWS = [
   "0 0 16px rgba(251,146,60,0.6)",
 ];
 
-const LEVEL_FROM_SCORE = (score: number) => {
-  if (score >= 20000) return "🌟";
-  if (score >= 10000) return "🐍";
-  if (score >= 5000)  return "⚡";
-  if (score >= 2000)  return "💻";
-  if (score >= 500)   return "📝";
-  return "🌱";
+const RANK_FROM_SCORE = (score: number): { emoji: string; label: string; color: string } => {
+  if (score >= 20000) return { emoji: "🌟", label: "Légendaire", color: "text-yellow-500 dark:text-yellow-400" };
+  if (score >= 10000) return { emoji: "🐍", label: "Maître",     color: "text-orange-500 dark:text-orange-400" };
+  if (score >= 5000)  return { emoji: "⚡", label: "Expert",     color: "text-pink-500 dark:text-pink-400"   };
+  if (score >= 2000)  return { emoji: "💻", label: "Bâtisseur",  color: "text-purple-500 dark:text-purple-400" };
+  if (score >= 500)   return { emoji: "📝", label: "Débutant",   color: "text-blue-500 dark:text-blue-400"   };
+  return               { emoji: "🌱", label: "Novice",     color: "text-green-500 dark:text-green-400"  };
 };
 
 function playerGradient(name: string): string {
@@ -225,6 +225,7 @@ export default function LeaderboardPage() {
                   const grad = PODIUM_GRADIENTS[colIdx];
                   const glow = PODIUM_GLOWS[colIdx];
                   const avatarGrad = player.skinGradient ?? playerGradient(player.username);
+                  const rankInfo = RANK_FROM_SCORE(player.score);
 
                   return (
                     <div key={player.username} className="flex flex-col items-center gap-2 flex-1 max-w-[110px]">
@@ -244,6 +245,11 @@ export default function LeaderboardPage() {
                       {/* Nom */}
                       <p className={`text-xs font-bold text-center leading-tight truncate w-full ${isMe ? "text-purple-600 dark:text-purple-300" : "text-gray-700 dark:text-slate-200"}`}>
                         {player.username}
+                      </p>
+
+                      {/* Rang */}
+                      <p className={`text-xs font-bold ${rankInfo.color}`}>
+                        {rankInfo.emoji} {rankInfo.label}
                       </p>
 
                       {/* Score */}
@@ -270,7 +276,7 @@ export default function LeaderboardPage() {
                 const rank = idx + 1;
                 const isMe = player.username === username;
                 const avatarGrad = player.skinGradient ?? playerGradient(player.username);
-                const levelEmoji = LEVEL_FROM_SCORE(player.score);
+                const rankInfo = RANK_FROM_SCORE(player.score);
                 return (
                   <div
                     key={player.username}
@@ -288,7 +294,9 @@ export default function LeaderboardPage() {
                       <div className={`font-semibold text-sm ${isMe ? "text-purple-700 dark:text-purple-300" : "text-gray-800 dark:text-white"}`}>
                         {player.username}{isMe ? " 👤" : ""}
                       </div>
-                      <div className="text-xs text-gray-400 dark:text-slate-500">{levelEmoji}</div>
+                      <div className={`text-xs font-semibold ${rankInfo.color}`}>
+                        {rankInfo.emoji} {rankInfo.label}
+                      </div>
                     </div>
                     <div className="text-right">
                       <div className={`font-bold text-sm ${isMe ? "text-purple-600 dark:text-purple-300" : "text-purple-600 dark:text-purple-400"}`}>

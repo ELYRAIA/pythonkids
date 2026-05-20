@@ -21,6 +21,7 @@ import { trackLessonWeek, refreshWeeklyQuests } from "@/lib/weeklyQuests";
 import { addXP } from "@/lib/xp";
 import { incrementCombo, type ComboResult } from "@/lib/combo";
 import { checkSecretBadges } from "@/lib/progress";
+import { checkAchievements } from "@/lib/achievements";
 import { notifyProgress } from "@/lib/events";
 import Confetti from "./Confetti";
 import BadgeCelebration from "./BadgeCelebration";
@@ -126,6 +127,7 @@ export default function LessonView({
     setLessonStars(levelId, lessonIndex, stars);
     refreshQuests();
     refreshWeeklyQuests();
+    checkAchievements();
     setDone(true);
     setConfetti(true);
     setTimeout(() => setConfetti(false), 100);
