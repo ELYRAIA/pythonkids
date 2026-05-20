@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 
 const SKIN_GRADIENTS = [
   "from-sky-200 via-sky-300 to-sky-500",
@@ -71,6 +71,7 @@ export default function PlayerAvatar({ username, playerLevel, skinGradient, hair
   const badge = CORNER_BADGES[level];
   const neckItem = NECK_ITEMS[level];
   const iris = IRIS[level];
+  const [hovered, setHovered] = useState(false);
 
   const W = 148;
   const faceTop = hat ? 42 : 14;
@@ -78,8 +79,12 @@ export default function PlayerAvatar({ username, playerLevel, skinGradient, hair
   const faceLeft = (W - FACE) / 2;
 
   return (
-    <div className={`relative mx-auto mb-3 ${level === 5 ? "avatar-legendary" : ""}`}
-         style={{ width: W, height: H }}>
+    <div
+      className={`relative mx-auto mb-3 cursor-pointer ${level === 5 ? "avatar-legendary" : ""} ${hovered ? "avatar-dance" : "avatar-float"}`}
+      style={{ width: W, height: H }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
 
       {/* Aura blur */}
       {AURA_BG[level] && (
@@ -151,8 +156,8 @@ export default function PlayerAvatar({ username, playerLevel, skinGradient, hair
 
           {/* Eyes */}
           <div className="flex" style={{ gap: 13 }}>
-            <BigEye iris={iris} level={level} />
-            <BigEye iris={iris} level={level} />
+            <BigEye iris={iris} level={level} blinkDelay="0s" />
+            <BigEye iris={iris} level={level} blinkDelay="0.04s" />
           </div>
 
           {/* Nose for level 3+ */}
@@ -292,7 +297,7 @@ function Eyebrow({ level, side }: { level: number; side: "left" | "right" }) {
   );
 }
 
-function BigEye({ iris, level }: { iris: { top: string; bot: string }; level: number }) {
+function BigEye({ iris, level, blinkDelay = "0s" }: { iris: { top: string; bot: string }; level: number; blinkDelay?: string }) {
   const scW = level >= 3 ? 20 : 18;
   const scH = level >= 3 ? 24 : 22;
   const irW = level >= 3 ? 13 : 11;
@@ -300,11 +305,17 @@ function BigEye({ iris, level }: { iris: { top: string; bot: string }; level: nu
   const lidH = level === 2 ? 10 : level >= 4 ? 7 : 5;
 
   return (
-    <div style={{ width: scW, height: scH, background: "white", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 5px rgba(0,0,0,0.25)", position: "relative", overflow: "hidden" }}>
+    <div
+      className="avatar-blink"
+      style={{ width: scW, height: scH, background: "white", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 5px rgba(0,0,0,0.25)", position: "relative", overflow: "hidden", animationDelay: blinkDelay }}
+    >
       {/* Eyelid shadow */}
       <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: lidH, background: "rgba(0,0,0,0.11)", borderRadius: "50% 50% 0 0" }} />
-      {/* Iris */}
-      <div style={{ width: irW, height: irH, borderRadius: "50%", background: `linear-gradient(to bottom, ${iris.top}, ${iris.bot})`, display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
+      {/* Iris — se déplace pour regarder autour */}
+      <div
+        className="avatar-look"
+        style={{ width: irW, height: irH, borderRadius: "50%", background: `linear-gradient(to bottom, ${iris.top}, ${iris.bot})`, display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}
+      >
         {/* Pupil */}
         <div style={{ width: irW - 6, height: irH - 7, background: "#060606", borderRadius: "50%" }} />
         {/* Main catchlight */}
