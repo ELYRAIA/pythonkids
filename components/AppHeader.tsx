@@ -65,7 +65,7 @@ export default function AppHeader({ right }: { right?: React.ReactNode }) {
           </Link>
         )}
 
-        <nav className="hidden sm:flex items-center gap-1 ml-2">
+        <nav className="hidden lg:flex items-center gap-1 ml-2">
           {NAV_LINKS.map((link) => (
             <Link
               key={link.href}
@@ -81,7 +81,7 @@ export default function AppHeader({ right }: { right?: React.ReactNode }) {
           ))}
         </nav>
 
-        <div className="ml-auto hidden sm:flex items-center gap-3">
+        <div className="ml-auto hidden lg:flex items-center gap-3">
           {right}
           {profileEmoji && (
             <Link
@@ -102,12 +102,12 @@ export default function AppHeader({ right }: { right?: React.ReactNode }) {
           </Link>
         </div>
 
-        {right && <div className="sm:hidden ml-auto mr-2">{right}</div>}
+        {right && <div className="lg:hidden ml-auto mr-2">{right}</div>}
 
         <button
           onClick={() => setOpen((v) => !v)}
           aria-label="Menu"
-          className={`sm:hidden flex flex-col justify-center gap-1.5 w-9 h-9 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors p-2 ${right ? "" : "ml-auto"}`}
+          className={`lg:hidden flex flex-col justify-center gap-1.5 w-9 h-9 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors p-2 ${right ? "" : "ml-auto"}`}
         >
           <span className={`block h-0.5 bg-gray-600 dark:bg-slate-300 transition-all duration-200 ${open ? "rotate-45 translate-y-2" : ""}`} />
           <span className={`block h-0.5 bg-gray-600 dark:bg-slate-300 transition-all duration-200 ${open ? "opacity-0" : ""}`} />
@@ -116,7 +116,7 @@ export default function AppHeader({ right }: { right?: React.ReactNode }) {
       </div>
 
       {open && (
-        <div className="sm:hidden border-t border-purple-100 dark:border-slate-700 bg-white/95 dark:bg-slate-900/95 px-6 py-4 flex flex-col gap-3">
+        <div className="lg:hidden border-t border-purple-100 dark:border-slate-700 bg-white/95 dark:bg-slate-900/95 px-6 py-4 flex flex-col gap-3">
           {NAV_LINKS.map((link) => (
             <Link
               key={link.href}
