@@ -15,6 +15,7 @@ const NAV_LINKS = [
 export default function AppHeader({ right }: { right?: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const [profileEmoji, setProfileEmoji] = useState<string | null>(null);
+  const [streakDanger, setStreakDanger] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -25,6 +26,12 @@ export default function AppHeader({ right }: { right?: React.ReactNode }) {
         const list = JSON.parse(profiles) as Array<{ name: string; emoji: string; local?: boolean }>;
         const found = list.find((p) => p.name === username);
         if (found) setProfileEmoji(found.emoji);
+      }
+      const streakRaw = localStorage.getItem("pythonkids_streak");
+      if (streakRaw) {
+        const s = JSON.parse(streakRaw) as { currentStreak: number; lastPlayDate: string };
+        const today = new Date().toISOString().split("T")[0];
+        setStreakDanger(s.currentStreak > 0 && s.lastPlayDate !== today);
       }
     } catch {}
   }, []);
@@ -79,13 +86,21 @@ export default function AppHeader({ right }: { right?: React.ReactNode }) {
 
         <div className="ml-auto hidden lg:flex items-center gap-3">
           {right}
+          {streakDanger && (
+            <span className="text-xs font-bold text-orange-500 dark:text-orange-400 animate-pulse bg-orange-50 dark:bg-orange-950/40 border border-orange-300 dark:border-orange-700 rounded-full px-2.5 py-1">
+              🔥 Streak en danger !
+            </span>
+          )}
           {profileEmoji && (
             <Link
               href="/profiles"
-              title="Changer de profil"
-              className="text-xl w-9 h-9 flex items-center justify-center rounded-full bg-white dark:bg-slate-800 border-2 border-purple-200 dark:border-slate-600 hover:border-purple-400 transition-colors shadow-sm"
+              title={streakDanger ? "⚠️ Tu n'as pas encore joué aujourd'hui !" : "Changer de profil"}
+              className="relative text-xl w-9 h-9 flex items-center justify-center rounded-full bg-white dark:bg-slate-800 border-2 border-purple-200 dark:border-slate-600 hover:border-purple-400 transition-colors shadow-sm"
             >
               {profileEmoji}
+              {streakDanger && (
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-orange-500 rounded-full flex items-center justify-center text-[9px] text-white font-black animate-pulse">!</span>
+              )}
             </Link>
           )}
         </div>

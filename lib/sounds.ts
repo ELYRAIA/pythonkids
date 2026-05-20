@@ -1,6 +1,21 @@
 let _ctx: AudioContext | null = null;
 
+const AUDIO_KEY = "pythonkids_audio_enabled";
+
+export function isAudioEnabled(): boolean {
+  if (typeof window === "undefined") return false;
+  return localStorage.getItem(AUDIO_KEY) !== "false";
+}
+
+export function toggleAudio(): boolean {
+  const next = !isAudioEnabled();
+  localStorage.setItem(AUDIO_KEY, String(next));
+  window.dispatchEvent(new Event("pythonkids:audio_toggle"));
+  return next;
+}
+
 function getCtx(): AudioContext | null {
+  if (!isAudioEnabled()) return null;
   if (typeof window === "undefined") return null;
   if (!_ctx || _ctx.state === "closed") {
     try {
@@ -83,4 +98,27 @@ export function playToastSound() {
 /** Montée de rang — fanfare ascendante */
 export function playRankUpSound() {
   seq([440, 554, 659, 880, 1109], "sine", 0.18, 0.28, 0.11);
+}
+
+/** Victoire en duel — fanfare héroïque */
+export function playDuelWinSound() {
+  seq([523, 659, 784, 1047, 784, 1047], "triangle", 0.22, 0.26, 0.1);
+  [659, 880].forEach((f, i) => note(f, 0.5, "sine", 0.2, 0.65 + i * 0.15));
+}
+
+/** Achat en boutique — ding satisfaction */
+export function playPurchaseSound() {
+  note(880, 0.07, "sine", 0.18, 0);
+  note(1100, 0.06, "sine", 0.15, 0.07);
+  note(1320, 0.14, "sine", 0.18, 0.13);
+}
+
+/** Succès débloqué — son spécial */
+export function playAchievementSound() {
+  seq([659, 784, 880, 1047, 1319], "sine", 0.25, 0.28, 0.09);
+}
+
+/** Streak — arpège de feu */
+export function playStreakMilestoneSound() {
+  seq([392, 494, 587, 740, 988], "sine", 0.2, 0.24, 0.1);
 }

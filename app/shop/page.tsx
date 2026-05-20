@@ -11,6 +11,8 @@ import {
 } from "@/lib/shop";
 import { getGems, addGems } from "@/lib/gems";
 import { buyStreakFreeze, getStreakFreezeCount } from "@/lib/streak";
+import { checkAchievements } from "@/lib/achievements";
+import { playPurchaseSound } from "@/lib/sounds";
 import {
   COLOR_THEMES, getOwnedThemes, getActiveThemeId, purchaseTheme, applyTheme,
 } from "@/lib/themes";
@@ -145,7 +147,11 @@ export default function ShopPage() {
   }, []);
 
   const handleBuy = (id: string) => {
-    if (purchaseItem(id)) refresh();
+    if (purchaseItem(id)) {
+      playPurchaseSound();
+      refresh();
+      checkAchievements();
+    }
   };
 
   const handleEquip = (id: string) => {
@@ -157,6 +163,7 @@ export default function ShopPage() {
       toggleSticker(id);
     }
     refresh();
+    checkAchievements();
   };
 
   const redeemPromo = () => {
@@ -187,6 +194,7 @@ export default function ShopPage() {
       window.dispatchEvent(new CustomEvent("pythonkids:toast", {
         detail: { msg: `Skin secret débloqué : ${reward.skinName} !`, emoji: "🐍", type: "normal" },
       }));
+      checkAchievements({ secretCode: true });
     }
   };
 

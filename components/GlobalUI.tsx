@@ -6,7 +6,7 @@ import { getStreak } from "@/lib/streak";
 import { calculateScore } from "@/lib/score";
 import { getPyodide } from "@/lib/pyodide";
 import { getPlayerRank, type Rank } from "@/lib/ranks";
-import { playToastSound, playRankUpSound } from "@/lib/sounds";
+import { playToastSound, playRankUpSound, isAudioEnabled, toggleAudio } from "@/lib/sounds";
 
 interface Toast {
   id: number;
@@ -30,6 +30,7 @@ export default function GlobalUI() {
   const nameInputRef = useRef<HTMLInputElement>(null);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const toastCounterRef = useRef(0);
+  const [audioOn, setAudioOn] = useState(true);
 
   const refreshStats = () => {
     const s = getStreak();
@@ -66,6 +67,7 @@ export default function GlobalUI() {
 
   useEffect(() => {
     setMounted(true);
+    setAudioOn(isAudioEnabled());
     getPyodide().catch(() => {});
     if ("serviceWorker" in navigator) {
       if (process.env.NODE_ENV === "production") {
@@ -111,10 +113,13 @@ export default function GlobalUI() {
     window.addEventListener("pythonkids:progress", refreshStats);
     // Mise à jour inter-onglets
     window.addEventListener("storage", refreshStats);
+    const onAudioToggle = () => setAudioOn(isAudioEnabled());
+    window.addEventListener("pythonkids:audio_toggle", onAudioToggle);
     return () => {
       window.removeEventListener("pythonkids:toast", onToast);
       window.removeEventListener("pythonkids:progress", refreshStats);
       window.removeEventListener("storage", refreshStats);
+      window.removeEventListener("pythonkids:audio_toggle", onAudioToggle);
       mq.removeEventListener("change", onSystemTheme);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -214,6 +219,14 @@ export default function GlobalUI() {
           className="w-10 h-10 rounded-full bg-white dark:bg-slate-700 border-2 border-purple-200 dark:border-slate-600 shadow-md flex items-center justify-center text-lg hover:scale-110 transition-transform"
         >
           {isDark ? "☀️" : "🌙"}
+        </button>
+        {/* Toggle sons */}
+        <button
+          onClick={() => { const next = toggleAudio(); setAudioOn(next); }}
+          title={audioOn ? "Couper les sons" : "Activer les sons"}
+          className="w-10 h-10 rounded-full bg-white dark:bg-slate-700 border-2 border-purple-200 dark:border-slate-600 shadow-md flex items-center justify-center text-lg hover:scale-110 transition-transform"
+        >
+          {audioOn ? "🔊" : "🔇"}
         </button>
 
         {/* Streak */}

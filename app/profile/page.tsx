@@ -27,6 +27,9 @@ import ChestOpener from "@/components/ChestOpener";
 import DailySeries from "@/components/DailySeries";
 import StreakCalendar from "@/components/StreakCalendar";
 import { getXPInfo } from "@/lib/xp";
+import { getDuelWins } from "@/lib/duels";
+import { getUnlockedAchievements, checkAchievements, ACHIEVEMENTS, type Achievement } from "@/lib/achievements";
+import { isAudioEnabled, toggleAudio } from "@/lib/sounds";
 import type { ActivityEvent } from "@/app/api/activity/route";
 
 interface FriendStatus {
@@ -56,6 +59,9 @@ export default function ProfilePage() {
   const [equippedHeadId, setEquippedHeadId] = useState<string | null>(null);
   const [xpInfo, setXpInfo] = useState(() => ({ rank: { id: "novice", title: "Novice", emoji: "🌱", color: "text-gray-400", bgGradient: "from-gray-400 to-slate-500", minXP: 0 }, nextRank: null as null | { id: string; title: string; emoji: string; color: string; bgGradient: string; minXP: number }, xp: 0, progress: 0, xpToNext: 0 }));
   const [friendStatuses, setFriendStatuses] = useState<FriendStatus[]>([]);
+  const [duelWins, setDuelWins] = useState(0);
+  const [unlockedAchievements, setUnlockedAchievements] = useState<string[]>([]);
+  const [audioOn, setAudioOn] = useState(true);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -111,6 +117,10 @@ export default function ProfilePage() {
     loadChests();
     loadShop();
     loadXP();
+    setDuelWins(getDuelWins());
+    setUnlockedAchievements(getUnlockedAchievements());
+    setAudioOn(isAudioEnabled());
+    checkAchievements();
 
     // Chargement des amis avec polling toutes les 30s
     const name = localStorage.getItem("pythonkids_username");
@@ -298,20 +308,39 @@ export default function ProfilePage() {
             )}
 
             {/* Stat chips */}
-            <div className="grid grid-cols-4 gap-2.5 mt-5 w-full">
+            <div className="grid grid-cols-5 gap-2 mt-5 w-full">
               <StatChip value={score > 999 ? `${(score / 1000).toFixed(1)}k` : String(score)} label="points" emoji="⭐" />
               <StatChip value={String(mounted ? gems : 0)} label="gemmes" emoji="💎" />
               <StatChip value={`${streak.currentStreak}j`} label="streak" emoji="🔥" />
               <StatChip value={`${mounted ? earnedBadges.length : 0}`} label="badges" emoji="🏅" />
+              <StatChip value={String(mounted ? duelWins : 0)} label="duels" emoji="⚔️" />
             </div>
 
-            {/* Bouton Coder maintenant */}
-            <a
-              href="/editor"
-              className="mt-5 w-full max-w-xs flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-pink-500 hover:opacity-90 active:scale-95 transition-all text-white font-bold text-sm rounded-2xl py-3 shadow-lg"
-            >
-              <span className="text-lg">💻</span> Coder maintenant
-            </a>
+            {/* Boutons hero */}
+            <div className="mt-5 w-full max-w-xs flex gap-2">
+              <a
+                href="/editor"
+                className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-pink-500 hover:opacity-90 active:scale-95 transition-all text-white font-bold text-sm rounded-2xl py-3 shadow-lg"
+              >
+                <span className="text-lg">💻</span> Coder
+              </a>
+              <button
+                onClick={() => generateShareCard({ username, score, streak: streak.currentStreak, lessons: doneLessons, totalLessons, badges: earnedBadges.length, achievements: unlockedAchievements.length, duelWins })}
+                className="px-3 py-3 rounded-2xl text-sm font-bold transition-all hover:opacity-90 active:scale-95"
+                style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.2)", color: "rgba(255,255,255,0.9)" }}
+                title="Télécharger ma carte de profil"
+              >
+                📸
+              </button>
+              <button
+                onClick={() => { const next = toggleAudio(); setAudioOn(next); }}
+                className="px-3 py-3 rounded-2xl text-sm font-bold transition-all hover:opacity-90 active:scale-95"
+                style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.2)", color: "rgba(255,255,255,0.9)" }}
+                title={audioOn ? "Couper les sons" : "Activer les sons"}
+              >
+                {mounted ? (audioOn ? "🔊" : "🔇") : "🔊"}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -637,6 +666,9 @@ export default function ProfilePage() {
           </div>
         </div>
 
+        {/* ── SUCCÈS ── */}
+        <AchievementsSection unlocked={mounted ? unlockedAchievements : []} />
+
         {/* ── ACTIONS ── */}
         <div className="grid grid-cols-3 gap-3 pb-8">
           <Link href="/stats"
@@ -683,6 +715,119 @@ export default function ProfilePage() {
           }}
         />
       )}
+    </div>
+  );
+}
+
+function generateShareCard({ username, score, streak, lessons, totalLessons, badges, achievements, duelWins }: {
+  username: string; score: number; streak: number; lessons: number; totalLessons: number;
+  badges: number; achievements: number; duelWins: number;
+}) {
+  const W = 700, H = 370;
+  const canvas = document.createElement("canvas");
+  canvas.width = W; canvas.height = H;
+  const c = canvas.getContext("2d");
+  if (!c) return;
+
+  // Background
+  const bg = c.createLinearGradient(0, 0, W, H);
+  bg.addColorStop(0, "#0f0c29"); bg.addColorStop(0.55, "#302b63"); bg.addColorStop(1, "#1a0533");
+  c.fillStyle = bg; c.fillRect(0, 0, W, H);
+
+  // Top shimmer
+  const sh = c.createLinearGradient(0, 0, W, 0);
+  sh.addColorStop(0, "transparent"); sh.addColorStop(0.5, "rgba(167,139,250,0.9)"); sh.addColorStop(1, "transparent");
+  c.fillStyle = sh; c.fillRect(0, 0, W, 3);
+
+  // Logo
+  c.font = "bold 17px system-ui,sans-serif"; c.fillStyle = "rgba(255,255,255,0.55)";
+  c.textAlign = "left"; c.textBaseline = "top"; c.fillText("🐍 PythonKids", 28, 22);
+
+  // Avatar circle
+  const ax = W / 2, ay = 130, ar = 65;
+  const ag = c.createLinearGradient(ax - ar, ay - ar, ax + ar, ay + ar);
+  ag.addColorStop(0, "#a78bfa"); ag.addColorStop(1, "#f472b6");
+  c.beginPath(); c.arc(ax, ay, ar, 0, Math.PI * 2); c.fillStyle = ag; c.fill();
+  c.font = "bold 54px system-ui,sans-serif"; c.fillStyle = "white";
+  c.textAlign = "center"; c.textBaseline = "middle";
+  c.fillText((username[0] ?? "?").toUpperCase(), ax, ay);
+
+  // Rank badge
+  const rank = getPlayerRank();
+  c.font = "bold 15px system-ui,sans-serif"; c.fillStyle = "rgba(167,139,250,0.9)";
+  c.textBaseline = "top"; c.fillText(rank.emoji + " " + rank.title, ax, 210);
+
+  // Username
+  c.font = "bold 26px system-ui,sans-serif"; c.fillStyle = "white"; c.textBaseline = "top";
+  c.fillText(username || "Codeur", ax, 232);
+
+  // Stats boxes
+  const stats = [
+    { emoji: "⭐", label: "Points", val: score > 999 ? `${(score / 1000).toFixed(1)}k` : String(score) },
+    { emoji: "🔥", label: "Streak", val: `${streak}j` },
+    { emoji: "📖", label: "Leçons", val: `${lessons}/${totalLessons}` },
+    { emoji: "🏅", label: "Badges", val: String(badges) },
+    { emoji: "⚔️", label: "Duels", val: String(duelWins) },
+    { emoji: "✨", label: "Succès", val: String(achievements) },
+  ];
+  const bw = 100, bh = 64, gap = 10;
+  const totalW = stats.length * bw + (stats.length - 1) * gap;
+  const bx0 = (W - totalW) / 2, by = 278;
+  stats.forEach((s, i) => {
+    const x = bx0 + i * (bw + gap);
+    c.fillStyle = "rgba(255,255,255,0.08)";
+    c.beginPath(); c.roundRect(x, by, bw, bh, 10); c.fill();
+    c.font = "bold 18px system-ui,sans-serif"; c.fillStyle = "white"; c.textBaseline = "middle";
+    c.fillText(s.emoji + " " + s.val, x + bw / 2, by + 22);
+    c.font = "11px system-ui,sans-serif"; c.fillStyle = "rgba(255,255,255,0.45)";
+    c.fillText(s.label, x + bw / 2, by + 48);
+  });
+
+  // Footer
+  const today = new Date().toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+  c.font = "12px system-ui,sans-serif"; c.fillStyle = "rgba(255,255,255,0.25)"; c.textBaseline = "bottom";
+  c.fillText(today, W / 2, H - 12);
+
+  canvas.toBlob((blob) => {
+    if (!blob) return;
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = `pythonkids-${username || "profil"}.png`; a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }, "image/png");
+}
+
+function AchievementsSection({ unlocked }: { unlocked: string[] }) {
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-sm font-extrabold text-gray-800 dark:text-white">✨ Succès</h2>
+        <span className="text-xs font-bold text-purple-500">{unlocked.length}/{ACHIEVEMENTS.length}</span>
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+        {ACHIEVEMENTS.map((ach: Achievement) => {
+          const earned = unlocked.includes(ach.id);
+          return (
+            <div
+              key={ach.id}
+              className={`rounded-2xl p-4 border-2 flex items-center gap-3 transition-all ${
+                earned
+                  ? `bg-gradient-to-br ${ach.color} border-transparent shadow-md`
+                  : "bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-700 opacity-40 grayscale"
+              }`}
+            >
+              <span className={`text-3xl shrink-0 ${earned ? "drop-shadow-md" : ""}`}>{ach.emoji}</span>
+              <div className="min-w-0">
+                <p className={`text-xs font-bold truncate ${earned ? "text-white" : "text-gray-700 dark:text-slate-300"}`}>
+                  {earned ? ach.name : `🔒 ${ach.name}`}
+                </p>
+                <p className={`text-[10px] leading-snug mt-0.5 ${earned ? "text-white/80" : "text-gray-400 dark:text-slate-500"}`}>
+                  {ach.desc}
+                </p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

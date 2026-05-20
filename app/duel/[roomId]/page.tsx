@@ -10,9 +10,10 @@ import { EditorState } from "@codemirror/state";
 import { python } from "@codemirror/lang-python";
 import { oneDark } from "@codemirror/theme-one-dark";
 import { defaultKeymap, indentWithTab, historyKeymap, history } from "@codemirror/commands";
-import { playChallengeWinSound, playErrorSound } from "@/lib/sounds";
+import { playChallengeWinSound, playErrorSound, playDuelWinSound } from "@/lib/sounds";
 import { addXP } from "@/lib/xp";
 import { addDuelWin } from "@/lib/duels";
+import { checkAchievements } from "@/lib/achievements";
 import { calculateScore } from "@/lib/score";
 import { postActivity } from "@/lib/activity";
 import type { DuelRoom } from "@/app/api/duel/route";
@@ -138,8 +139,10 @@ export default function DuelRoomPage() {
 
     if (iWon && !rewardedRef.current) {
       rewardedRef.current = true;
+      playDuelWinSound();
       addXP(150);
       addDuelWin();
+      checkAchievements();
       const newScore = calculateScore();
       const storedUser = localStorage.getItem("pythonkids_username");
       if (storedUser) {

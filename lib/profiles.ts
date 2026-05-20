@@ -37,6 +37,7 @@ const PROFILE_KEYS = [
   "pythonkids_owned_themes",
   "pythonkids_color_theme",
   "pythonkids_duel_wins",
+  "pythonkids_achievements",
 ];
 
 export function getProfiles(): Profile[] {
