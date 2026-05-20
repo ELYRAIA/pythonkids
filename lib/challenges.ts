@@ -401,6 +401,7 @@ export const CHALLENGES: Challenge[] = [
 
 import { getProgress, saveProgress } from "./progress";
 import { notifyProgress } from "./events";
+import { postActivity } from "./activity";
 
 const STORAGE_KEY = "pythonkids_challenges";
 
@@ -437,5 +438,7 @@ export function markChallengeComplete(id: string): string[] {
   } catch { /* ignore */ }
 
   notifyProgress();
+  postActivity("challenge", id);
+  for (const badge of newBadges) postActivity("badge", badge);
   return newBadges;
 }

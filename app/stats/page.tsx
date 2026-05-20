@@ -65,10 +65,8 @@ export default function StatsPage() {
   const timeHours = Math.floor(timeMinutes / 60);
   const timeMin = timeMinutes % 60;
 
-  if (!mounted) return null;
-
   return (
-    <div className="min-h-screen">
+    <div className={`min-h-screen ${mounted ? "fade-in" : "invisible"}`}>
       <AppHeader />
       <div className="w-full px-6 py-8 max-w-2xl mx-auto space-y-6">
 

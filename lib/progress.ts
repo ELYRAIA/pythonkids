@@ -1,4 +1,5 @@
 import { notifyProgress } from "./events";
+import { postActivity } from "./activity";
 
 export interface Progress {
   completedLessons: Record<string, number[]>;
@@ -215,6 +216,8 @@ export function markLessonComplete(levelId: number, lessonIndex: number): string
 
   saveProgress({ ...progress, earnedBadges: [...progress.earnedBadges, ...newBadges] });
   notifyProgress();
+  postActivity("lesson", `Niveau ${levelId}, leçon ${lessonIndex + 1}`);
+  for (const badge of newBadges) postActivity("badge", badge);
   return newBadges;
 }
 
@@ -242,6 +245,7 @@ export function markLevelComplete(levelId: number, totalLessons: number): string
   if (newBadges.length > 0) {
     saveProgress({ ...progress, earnedBadges: [...progress.earnedBadges, ...newBadges] });
     notifyProgress();
+    for (const badge of newBadges) postActivity("badge", badge);
   }
   return newBadges;
 }

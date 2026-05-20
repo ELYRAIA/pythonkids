@@ -93,15 +93,13 @@ export default function QuizReviewPage() {
     }
   };
 
-  if (!mounted) return null;
-
   const question = active?.questions[current];
   const totalWrongFinal = wrong;
   const scoreFinal = active ? active.questions.length - totalWrongFinal : 0;
   const starsFinal = totalWrongFinal === 0 ? 3 : totalWrongFinal === 1 ? 2 : 1;
 
   return (
-    <div className="min-h-screen bg-slate-100 dark:bg-slate-950">
+    <div className={`min-h-screen bg-slate-100 dark:bg-slate-950 ${mounted ? "fade-in" : "invisible"}`}>
       <AppHeader />
 
       <div className="max-w-xl mx-auto px-4 py-6">

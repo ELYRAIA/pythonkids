@@ -141,10 +141,8 @@ export default function ParentPage() {
     return d.toISOString().split("T")[0];
   });
 
-  if (!mounted) return null;
-
   return (
-    <div className="min-h-screen">
+    <div className={`min-h-screen ${mounted ? "fade-in" : "invisible"}`}>
       <AppHeader />
       <div className="w-full px-6 py-8 max-w-2xl mx-auto space-y-6">
 

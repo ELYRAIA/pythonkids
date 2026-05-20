@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const NAV_LINKS = [
   { href: "/challenges", label: "Défis", emoji: "🎯" },
   { href: "/duel", label: "Duel", emoji: "⚔️" },
+  { href: "/friends", label: "Amis", emoji: "👥" },
   { href: "/shop", label: "Boutique", emoji: "🛒" },
   { href: "/leaderboard", label: "Classement", emoji: "🏅" },
   { href: "/profile", label: "Profil", emoji: "👤" },
@@ -14,7 +15,20 @@ const NAV_LINKS = [
 
 export default function AppHeader({ right }: { right?: React.ReactNode }) {
   const [open, setOpen] = useState(false);
+  const [profileEmoji, setProfileEmoji] = useState<string | null>(null);
   const pathname = usePathname();
+
+  useEffect(() => {
+    try {
+      const profiles = localStorage.getItem("pythonkids_profiles");
+      const username = localStorage.getItem("pythonkids_username");
+      if (profiles && username) {
+        const list = JSON.parse(profiles) as Array<{ name: string; emoji: string }>;
+        const found = list.find((p) => p.name === username);
+        if (found) setProfileEmoji(found.emoji);
+      }
+    } catch {}
+  }, []);
 
   const isActive = (href: string) =>
     pathname === href || pathname.startsWith(href + "/");
@@ -66,6 +80,15 @@ export default function AppHeader({ right }: { right?: React.ReactNode }) {
 
         <div className="ml-auto hidden sm:flex items-center gap-3">
           {right}
+          {profileEmoji && (
+            <Link
+              href="/profiles"
+              title="Changer de profil"
+              className="text-xl w-9 h-9 flex items-center justify-center rounded-full bg-white dark:bg-slate-800 border-2 border-purple-200 dark:border-slate-600 hover:border-purple-400 transition-colors shadow-sm"
+            >
+              {profileEmoji}
+            </Link>
+          )}
           <Link
             href="/editor"
             className={`bg-gradient-to-r from-purple-600 to-pink-500 text-white px-4 py-2 rounded-full text-sm font-semibold hover:opacity-90 transition-opacity ${
@@ -105,6 +128,13 @@ export default function AppHeader({ right }: { right?: React.ReactNode }) {
               {link.emoji} {link.label}
             </Link>
           ))}
+          <Link
+            href="/profiles"
+            onClick={() => setOpen(false)}
+            className={`font-semibold text-sm ${isActive("/profiles") ? "text-purple-600 dark:text-purple-400" : "text-gray-600 dark:text-slate-300"}`}
+          >
+            {profileEmoji ?? "👤"} Changer de profil
+          </Link>
           <Link
             href="/editor"
             onClick={() => setOpen(false)}

@@ -27,6 +27,13 @@ import ChestOpener from "@/components/ChestOpener";
 import DailySeries from "@/components/DailySeries";
 import StreakCalendar from "@/components/StreakCalendar";
 import { getXPInfo } from "@/lib/xp";
+import type { ActivityEvent } from "@/app/api/activity/route";
+
+interface FriendStatus {
+  name: string;
+  lastEvent: ActivityEvent | null;
+  online: boolean; // activité dans les 30 dernières minutes
+}
 
 export default function ProfilePage() {
   const [username, setUsername] = useState("");
@@ -48,6 +55,7 @@ export default function ProfilePage() {
   const [unlockedHeads, setUnlockedHeads] = useState<string[]>([]);
   const [equippedHeadId, setEquippedHeadId] = useState<string | null>(null);
   const [xpInfo, setXpInfo] = useState(() => ({ rank: { id: "novice", title: "Novice", emoji: "🌱", color: "text-gray-400", bgGradient: "from-gray-400 to-slate-500", minXP: 0 }, nextRank: null as null | { id: string; title: string; emoji: string; color: string; bgGradient: string; minXP: number }, xp: 0, progress: 0, xpToNext: 0 }));
+  const [friendStatuses, setFriendStatuses] = useState<FriendStatus[]>([]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -104,12 +112,54 @@ export default function ProfilePage() {
     loadShop();
     loadXP();
 
+    // Chargement des amis avec polling toutes les 30s
+    const name = localStorage.getItem("pythonkids_username");
+    async function loadFriends() {
+      if (!name) return;
+      try {
+        // Profils locaux sur cet appareil (hors profil actif)
+        const profilesRaw = localStorage.getItem("pythonkids_profiles");
+        const localNames: string[] = profilesRaw
+          ? (JSON.parse(profilesRaw) as Array<{ name: string }>)
+              .map((p) => p.name)
+              .filter((n) => n !== name)
+          : [];
+
+        // Amis distants (autres appareils)
+        const friendsRes = await fetch(`/api/friends?username=${encodeURIComponent(name)}`);
+        const remoteNames: string[] = await friendsRes.json();
+
+        // Fusion sans doublons
+        const allNames = [...new Set([...localNames, ...remoteNames])];
+        if (allNames.length === 0) { setFriendStatuses([]); return; }
+
+        const actRes = await fetch(`/api/activity?friends=${allNames.map(encodeURIComponent).join(",")}`);
+        const events: ActivityEvent[] = await actRes.json();
+        const now = Date.now();
+        const statuses: FriendStatus[] = allNames.map((f) => {
+          const lastEvent = events.find((e) => e.username === f) ?? null;
+          const online = lastEvent ? (now - new Date(lastEvent.timestamp).getTime()) < 30 * 60 * 1000 : false;
+          return { name: f, lastEvent, online };
+        });
+        statuses.sort((a, b) => {
+          if (a.online !== b.online) return a.online ? -1 : 1;
+          const ta = a.lastEvent ? new Date(a.lastEvent.timestamp).getTime() : 0;
+          const tb = b.lastEvent ? new Date(b.lastEvent.timestamp).getTime() : 0;
+          return tb - ta;
+        });
+        setFriendStatuses(statuses);
+      } catch {}
+    }
+    loadFriends();
+    const pollInterval = setInterval(loadFriends, 30000);
+
     window.addEventListener("pythonkids:progress", load);
     window.addEventListener("pythonkids:xp", loadXP);
     window.addEventListener("pythonkids:chests", loadChests);
     window.addEventListener("pythonkids:gems", loadShop);
     window.addEventListener("pythonkids:shop", loadShop);
     return () => {
+      clearInterval(pollInterval);
       window.removeEventListener("pythonkids:progress", load);
       window.removeEventListener("pythonkids:chests", loadChests);
       window.removeEventListener("pythonkids:gems", loadShop);
@@ -145,7 +195,7 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-slate-100 dark:bg-slate-950">
       <AppHeader />
 
-      <div className="max-w-2xl mx-auto px-4 py-6 space-y-4">
+      <div className={`max-w-2xl mx-auto px-4 py-6 space-y-4 ${mounted ? "fade-in" : "opacity-0"}`}>
 
         {/* ── HERO CARD ── */}
         <div className="rounded-3xl overflow-hidden relative shadow-2xl"
@@ -256,6 +306,9 @@ export default function ProfilePage() {
             </div>
           </div>
         </div>
+
+        {/* ── AMIS EN LIGNE ── */}
+        {mounted && <FriendsWidget statuses={friendStatuses} />}
 
         {/* ── COLLECTION DE TÊTES ── */}
         <div className="rounded-3xl overflow-hidden shadow-lg relative"
@@ -621,6 +674,119 @@ export default function ProfilePage() {
           }}
         />
       )}
+    </div>
+  );
+}
+
+const ACTIVITY_VERBS: Record<ActivityEvent["type"], string> = {
+  lesson:    "📖 Fait une leçon",
+  badge:     "🏅 Badge obtenu",
+  challenge: "🎯 Défi réussi",
+  streak:    "🔥 Streak",
+};
+
+function timeAgo(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return "à l'instant";
+  if (m < 60) return `${m} min`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h`;
+  return `${Math.floor(h / 24)}j`;
+}
+
+function FriendsWidget({ statuses }: { statuses: FriendStatus[] }) {
+  const onlineCount = statuses.filter((s) => s.online).length;
+
+  if (statuses.length === 0) {
+    return (
+      <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+        <div className="flex items-center justify-between px-5 pt-4 pb-3">
+          <div className="flex items-center gap-2">
+            <span className="text-base">👥</span>
+            <span className="text-sm font-extrabold text-gray-800 dark:text-white">Mes amis</span>
+          </div>
+          <a href="/friends" className="text-xs text-purple-500 dark:text-purple-400 font-semibold hover:underline">
+            Ajouter →
+          </a>
+        </div>
+        <div className="px-5 pb-4 flex flex-col items-center gap-2 text-center">
+          <span className="text-3xl">🤝</span>
+          <p className="text-sm text-gray-500 dark:text-slate-400">Tu n&apos;as pas encore d&apos;amis.</p>
+          <a
+            href="/friends"
+            className="bg-gradient-to-r from-purple-600 to-pink-500 text-white px-4 py-1.5 rounded-full text-xs font-bold hover:opacity-90 transition-opacity mt-1"
+          >
+            Trouver des amis
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+      <div className="flex items-center justify-between px-5 pt-4 pb-3">
+        <div className="flex items-center gap-2">
+          <span className="text-base">👥</span>
+          <span className="text-sm font-extrabold text-gray-800 dark:text-white">Mes amis</span>
+          {onlineCount > 0 && (
+            <span className="bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400 text-xs font-bold px-2 py-0.5 rounded-full">
+              {onlineCount} en ligne
+            </span>
+          )}
+        </div>
+        <a
+          href="/friends"
+          className="text-xs text-purple-500 dark:text-purple-400 font-semibold hover:underline"
+        >
+          Voir tout →
+        </a>
+      </div>
+
+      <div className="divide-y divide-slate-100 dark:divide-slate-700">
+        {statuses.slice(0, 5).map((s) => (
+          <div key={s.name} className="flex items-center gap-3 px-5 py-3">
+            {/* Avatar + dot */}
+            <div className="relative shrink-0">
+              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white font-bold text-sm">
+                {s.name[0].toUpperCase()}
+              </div>
+              <span
+                className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white dark:border-slate-800 ${
+                  s.online ? "bg-green-400" : "bg-slate-300 dark:bg-slate-600"
+                }`}
+              />
+            </div>
+
+            {/* Info */}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold text-gray-800 dark:text-white truncate">{s.name}</p>
+              {s.lastEvent ? (
+                <p className="text-xs text-gray-400 dark:text-slate-500 truncate">
+                  {ACTIVITY_VERBS[s.lastEvent.type]}
+                  {s.lastEvent.type !== "streak" && (
+                    <span className="text-purple-500 dark:text-purple-400"> · {s.lastEvent.detail}</span>
+                  )}
+                </p>
+              ) : (
+                <p className="text-xs text-gray-300 dark:text-slate-600">Pas encore d&apos;activité</p>
+              )}
+            </div>
+
+            {/* Timestamp */}
+            {s.lastEvent && (
+              <span
+                className={`text-xs font-semibold shrink-0 ${
+                  s.online ? "text-green-500 dark:text-green-400" : "text-gray-400 dark:text-slate-500"
+                }`}
+              >
+                {timeAgo(s.lastEvent.timestamp)}
+              </span>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

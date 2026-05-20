@@ -161,13 +161,11 @@ export default function CertificatePage() {
     setCompletionDate(date);
   }, []);
 
-  if (!mounted) return null;
+  const badgesToShow = BADGES.filter((b) => mounted && earnedBadges.includes(b.id));
 
-  const badgesToShow = BADGES.filter((b) => earnedBadges.includes(b.id));
-
-  if (!allDone) {
+  if (!mounted || !allDone) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center px-6 text-center">
+      <div className={`min-h-screen flex flex-col items-center justify-center px-6 text-center ${mounted ? "fade-in" : "invisible"}`}>
         <div className="text-6xl mb-4">🔒</div>
         <h1 className="text-2xl font-extrabold text-gray-800 dark:text-white mb-3">
           Certificat non disponible

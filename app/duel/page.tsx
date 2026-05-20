@@ -63,10 +63,8 @@ export default function DuelPage() {
     }
   };
 
-  if (!mounted) return null;
-
   return (
-    <div className="min-h-screen">
+    <div className={`min-h-screen ${mounted ? "fade-in" : "invisible"}`}>
       <AppHeader />
 
       <div className="max-w-xl mx-auto px-6 py-12">

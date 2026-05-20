@@ -138,8 +138,26 @@ export default function LeaderboardPage() {
         </div>
 
         {loading ? (
-          <div className="text-center py-12 text-gray-400 dark:text-slate-500 animate-pulse">
-            Chargement du classement…
+          <div className="max-w-2xl mx-auto space-y-2">
+            {/* Podium skeleton */}
+            <div className="flex justify-center items-end gap-6 mb-8 mt-4">
+              {[80, 112, 64].map((h, i) => (
+                <div key={i} className="flex flex-col items-center gap-2">
+                  <div className="skeleton w-10 h-10 rounded-full" />
+                  <div className="skeleton w-14 h-3 rounded" />
+                  <div className="skeleton rounded-t-xl w-14" style={{ height: h }} />
+                </div>
+              ))}
+            </div>
+            {/* Rows skeleton */}
+            {Array.from({ length: 7 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-4 px-5 py-3 bg-white dark:bg-slate-800 rounded-xl">
+                <div className="skeleton w-8 h-4 rounded" />
+                <div className="skeleton w-9 h-9 rounded-full" />
+                <div className="skeleton flex-1 h-4 rounded" />
+                <div className="skeleton w-16 h-4 rounded" />
+              </div>
+            ))}
           </div>
         ) : filteredEntries.length === 0 ? (
           <div className="text-center py-12">
