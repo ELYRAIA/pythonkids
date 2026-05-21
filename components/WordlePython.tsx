@@ -88,6 +88,26 @@ const KEY_COLORS: Record<LetterState, string> = {
 };
 
 const GEMS_BY_ATTEMPT = [15, 10, 7, 5, 3, 2];
+const HISTORY_KEY = "pythonkids_wordle_history";
+
+type HistoryEntry = { date: string; won: boolean; attempts: number; word: string };
+
+function getHistory(): HistoryEntry[] {
+  try {
+    const raw = localStorage.getItem(HISTORY_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+
+function saveToHistory(date: string, won: boolean, attempts: number, word: string) {
+  try {
+    const h = getHistory().filter((e) => e.date !== date);
+    h.push({ date, won, attempts, word });
+    // keep last 30 days
+    h.sort((a, b) => a.date.localeCompare(b.date));
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(h.slice(-30)));
+  } catch {}
+}
 
 export default function WordlePython() {
   const { word: target, hint } = getDailyWord();
@@ -102,7 +122,9 @@ export default function WordlePython() {
   const [reveal, setReveal]   = useState<number | null>(null);
   const [gemsEarned, setGemsEarned] = useState(0);
   const [loaded, setLoaded]   = useState(false);
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
+  const todayDate = new Date().toISOString().split("T")[0];
 
   // Load saved state
   useEffect(() => {
@@ -114,6 +136,7 @@ export default function WordlePython() {
         if (gems) setGemsEarned(gems);
       }
     } catch { /* ignore */ }
+    setHistory(getHistory());
     setLoaded(true);
   }, [storageKey]);
 
@@ -162,6 +185,10 @@ export default function WordlePython() {
       setLost(isLost);
       setReveal(null);
       save(newGuesses, newScores, isWon, isLost, gems);
+      if (isWon || isLost) {
+        saveToHistory(todayDate, isWon, newGuesses.length, target);
+        setHistory(getHistory());
+      }
     }, WORD_LEN * 300 + 200);
 
     // Optimistic state for animation
@@ -268,6 +295,35 @@ export default function WordlePython() {
           <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">
             Nouveau mot demain !
           </p>
+        </div>
+      )}
+
+      {/* History — last 7 days */}
+      {history.length > 0 && (
+        <div className="w-full max-w-xs">
+          <p className="text-xs text-gray-400 dark:text-slate-500 text-center mb-2">Historique (7 derniers jours)</p>
+          <div className="flex justify-center gap-1.5 flex-wrap">
+            {(() => {
+              const days: string[] = [];
+              for (let i = 6; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                days.push(d.toISOString().split("T")[0]);
+              }
+              return days.map((day) => {
+                const entry = history.find((h) => h.date === day);
+                let emoji = "⬜";
+                let title = "Pas joué";
+                if (entry) {
+                  emoji = entry.won ? "🟩" : "🟥";
+                  title = entry.won ? `${entry.word.toUpperCase()} — Gagné en ${entry.attempts}` : `${entry.word.toUpperCase()} — Perdu`;
+                }
+                return (
+                  <span key={day} title={`${day} · ${title}`} className="text-lg cursor-default select-none">{emoji}</span>
+                );
+              });
+            })()}
+          </div>
         </div>
       )}
 

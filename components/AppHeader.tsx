@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { isAudioEnabled, toggleAudio } from "@/lib/sounds";
 const NAV_LINKS = [
   { href: "/challenges", label: "Défis", emoji: "🎯" },
   { href: "/duel", label: "Duel", emoji: "⚔️" },
@@ -17,7 +18,15 @@ export default function AppHeader({ right }: { right?: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const [profileEmoji, setProfileEmoji] = useState<string | null>(null);
   const [streakDanger, setStreakDanger] = useState(false);
+  const [audioOn, setAudioOn] = useState(true);
   const pathname = usePathname();
+
+  useEffect(() => {
+    setAudioOn(isAudioEnabled());
+    const onToggle = () => setAudioOn(isAudioEnabled());
+    window.addEventListener("pythonkids:audio_toggle", onToggle);
+    return () => window.removeEventListener("pythonkids:audio_toggle", onToggle);
+  }, []);
 
   useEffect(() => {
     try {
@@ -87,6 +96,13 @@ export default function AppHeader({ right }: { right?: React.ReactNode }) {
 
         <div className="ml-auto hidden lg:flex items-center gap-3">
           {right}
+          <button
+            onClick={() => toggleAudio()}
+            title={audioOn ? "Couper le son" : "Activer le son"}
+            className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-300 hover:bg-purple-50 dark:hover:bg-slate-800 transition-colors text-base"
+          >
+            {audioOn ? "🔊" : "🔇"}
+          </button>
           {streakDanger && (
             <span className="text-xs font-bold text-orange-500 dark:text-orange-400 animate-pulse bg-orange-50 dark:bg-orange-950/40 border border-orange-300 dark:border-orange-700 rounded-full px-2.5 py-1">
               🔥 Streak en danger !
@@ -142,6 +158,12 @@ export default function AppHeader({ right }: { right?: React.ReactNode }) {
           >
             {profileEmoji ?? "👤"} Changer de profil
           </Link>
+          <button
+            onClick={() => toggleAudio()}
+            className="font-semibold text-sm text-gray-600 dark:text-slate-300 text-left"
+          >
+            {audioOn ? "🔊" : "🔇"} {audioOn ? "Couper le son" : "Activer le son"}
+          </button>
         </div>
       )}
     </header>

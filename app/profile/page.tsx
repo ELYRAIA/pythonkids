@@ -62,6 +62,7 @@ export default function ProfilePage() {
   const [duelWins, setDuelWins] = useState(0);
   const [unlockedAchievements, setUnlockedAchievements] = useState<string[]>([]);
   const [audioOn, setAudioOn] = useState(true);
+  const [shareCopied, setShareCopied] = useState(false);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -331,6 +332,21 @@ export default function ProfilePage() {
                 title="Télécharger ma carte de profil"
               >
                 📸
+              </button>
+              <button
+                onClick={() => {
+                  const text = `🐍 ${username} sur PythonKids !\n${xpInfo.rank.emoji} Rang : ${xpInfo.rank.title}\n⭐ ${score} points · 🔥 Streak ${streak.currentStreak}j\n✏️ ${doneLessons}/${totalLessons} leçons · 🏅 ${earnedBadges.length} badges`;
+                  if (navigator.share) {
+                    navigator.share({ title: "Mon profil PythonKids", text }).catch(() => {});
+                  } else {
+                    navigator.clipboard.writeText(text).then(() => { setShareCopied(true); setTimeout(() => setShareCopied(false), 2000); }).catch(() => {});
+                  }
+                }}
+                className="px-3 py-3 rounded-2xl text-sm font-bold transition-all hover:opacity-90 active:scale-95"
+                style={{ background: shareCopied ? "rgba(74,222,128,0.25)" : "rgba(255,255,255,0.12)", border: shareCopied ? "1px solid rgba(74,222,128,0.5)" : "1px solid rgba(255,255,255,0.2)", color: "rgba(255,255,255,0.9)" }}
+                title="Partager mon profil"
+              >
+                {shareCopied ? "✓" : "🔗"}
               </button>
               <button
                 onClick={() => { const next = toggleAudio(); setAudioOn(next); }}

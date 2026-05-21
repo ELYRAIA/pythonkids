@@ -19,6 +19,7 @@ export default function LevelLessonsGrid({ level }: Props) {
   const [confetti, setConfetti] = useState(false);
   const [mastery, setMastery] = useState<Record<string, number>>({});
   const [reviewMode, setReviewMode] = useState(false);
+  const [search, setSearch] = useState("");
   const prevDoneRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -152,6 +153,17 @@ export default function LevelLessonsGrid({ level }: Props) {
         )}
       </div>
 
+      {/* Recherche */}
+      <div className="mb-4">
+        <input
+          type="text"
+          placeholder="🔍 Rechercher une leçon..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full px-4 py-2.5 rounded-xl border-2 border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-gray-700 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:border-purple-400 dark:focus:border-purple-500 transition-colors"
+        />
+      </div>
+
       {/* Bouton révision */}
       {mounted && doneCount > 0 && (() => {
         const lowStar = level.lessons.filter((_, i) =>
@@ -182,6 +194,9 @@ export default function LevelLessonsGrid({ level }: Props) {
           const needsReview = isDone && stars < 3;
 
           if (reviewMode && !needsReview) return null;
+
+          const q = search.trim().toLowerCase();
+          if (q && !lesson.title.toLowerCase().includes(q) && !lesson.description.toLowerCase().includes(q)) return null;
 
           return (
             <Link key={index} href={`/levels/${level.id}/lessons/${index}`}>

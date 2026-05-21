@@ -2,6 +2,7 @@ import AppHeader from "@/components/AppHeader";
 import SnakeGame from "@/components/SnakeGame";
 import MemoryGame from "@/components/MemoryGame";
 import WordlePython from "@/components/WordlePython";
+import FlashcardGame from "@/components/FlashcardGame";
 import Link from "next/link";
 
 export default function DetentePage() {
@@ -46,7 +47,7 @@ export default function DetentePage() {
         </div>
 
         {/* Wordle */}
-        <div className="bg-white dark:bg-slate-800 rounded-3xl border border-green-100 dark:border-slate-700 p-6 shadow-sm">
+        <div className="bg-white dark:bg-slate-800 rounded-3xl border border-green-100 dark:border-slate-700 p-6 shadow-sm mb-6">
           <div className="flex items-center gap-2 mb-4">
             <span className="text-xl">🟩</span>
             <div>
@@ -55,6 +56,18 @@ export default function DetentePage() {
             </div>
           </div>
           <WordlePython />
+        </div>
+
+        {/* Flashcards */}
+        <div className="bg-white dark:bg-slate-800 rounded-3xl border border-indigo-100 dark:border-slate-700 p-6 shadow-sm">
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-xl">🃏</span>
+            <div>
+              <h2 className="font-extrabold text-gray-800 dark:text-white">Flashcards Python</h2>
+              <p className="text-xs text-gray-400 dark:text-slate-500">10 questions · 15s chrono · +💎 par bonne réponse</p>
+            </div>
+          </div>
+          <FlashcardGame />
         </div>
 
         <div className="mt-6 text-center">

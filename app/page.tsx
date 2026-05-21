@@ -19,6 +19,8 @@ import HomeCoffresWidget from "@/components/HomeCoffresWidget";
 import HomeQuestsWidget from "@/components/HomeQuestsWidget";
 import HomeWeeklyWidget from "@/components/HomeWeeklyWidget";
 import HomeProgressWidget from "@/components/HomeProgressWidget";
+import HomeRankWidget from "@/components/HomeRankWidget";
+import HomeRevisionWidget from "@/components/HomeRevisionWidget";
 
 export default function Home() {
   return (
@@ -81,6 +83,12 @@ export default function Home() {
       {/* Progression globale */}
       <HomeProgressWidget />
 
+      {/* Rang XP */}
+      <HomeRankWidget />
+
+      {/* Révision espacée */}
+      <HomeRevisionWidget />
+
       {/* Coffres en attente */}
       <HomeCoffresWidget />
 
@@ -133,7 +141,7 @@ export default function Home() {
             <div className="bg-white dark:bg-slate-800 border-2 border-green-200 dark:border-green-800 rounded-2xl p-6 hover:shadow-lg hover:-translate-y-1 transition-all cursor-pointer text-center">
               <div className="text-4xl mb-2">🎮</div>
               <h3 className="font-bold text-gray-800 dark:text-white mb-1">Espace Détente</h3>
-              <p className="text-xs text-gray-500 dark:text-slate-400">Snake, Memory, Wordle et 💎 !</p>
+              <p className="text-xs text-gray-500 dark:text-slate-400">Snake, Memory, Wordle, Flashcards 💎 !</p>
             </div>
           </Link>
         </div>

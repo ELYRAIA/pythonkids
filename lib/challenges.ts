@@ -545,6 +545,102 @@ export const CHALLENGES: Challenge[] = [
     solutionCode: "def puissance(base, exp):\n    if exp == 0:\n        return 1\n    return base * puissance(base, exp - 1)\n\nprint(puissance(2, 8))",
     minLevel: 4,
   },
+
+  // ── FACILE (extra) ────────────────────────────────────────────────────
+  {
+    id: "temperature",
+    emoji: "🌡️",
+    title: "Celsius en Fahrenheit",
+    difficulty: "Facile",
+    difficultyColor: "from-green-400 to-emerald-500",
+    description: "Convertis 100 degrés Celsius en Fahrenheit et affiche le résultat.\nFormule : F = C × 9/5 + 32",
+    starterCode: "celsius = 100\n# Calcule et affiche la valeur en Fahrenheit\n",
+    hint: "Applique la formule : fahrenheit = celsius * 9/5 + 32.",
+    hints: [
+      "Il existe une formule mathématique simple pour convertir Celsius en Fahrenheit.",
+      "Applique la formule : fahrenheit = celsius * 9 / 5 + 32.",
+      "fahrenheit = celsius * 9 / 5 + 32\nprint(fahrenheit)",
+    ],
+    expectedOutput: "212.0",
+    solutionCode: "celsius = 100\nfahrenheit = celsius * 9 / 5 + 32\nprint(fahrenheit)",
+    minLevel: 0,
+  },
+  {
+    id: "min_max",
+    emoji: "📊",
+    title: "Mini-stats",
+    difficulty: "Facile",
+    difficultyColor: "from-green-400 to-emerald-500",
+    description: "Affiche le minimum, le maximum et la moyenne de cette liste.\nUne valeur par ligne.\nFormat :\nMin: 3\nMax: 95\nMoyenne: 42.0",
+    starterCode: "notes = [15, 3, 87, 42, 95, 68, 24]\n# Affiche min, max et moyenne\n",
+    hint: "Utilise min(), max() et sum()/len() pour la moyenne.",
+    hints: [
+      "Python a des fonctions intégrées pour trouver le minimum et le maximum d'une liste.",
+      "Utilise min(), max() et sum(notes)/len(notes) pour la moyenne.",
+      "print(f'Min: {min(notes)}')\nprint(f'Max: {max(notes)}')\nprint(f'Moyenne: {sum(notes)/len(notes)}')",
+    ],
+    expectedOutput: "Min: 3\nMax: 95\nMoyenne: 47.71428571428571",
+    solutionCode: "notes = [15, 3, 87, 42, 95, 68, 24]\nprint(f'Min: {min(notes)}')\nprint(f'Max: {max(notes)}')\nprint(f'Moyenne: {sum(notes)/len(notes)}')",
+    minLevel: 1,
+  },
+
+  // ── MOYEN (extra) ─────────────────────────────────────────────────────
+  {
+    id: "anagram",
+    emoji: "🔀",
+    title: "Anagramme",
+    difficulty: "Moyen",
+    difficultyColor: "from-yellow-400 to-orange-400",
+    description: "'listen' et 'silent' sont-ils des anagrammes ?\nAffiche 'oui' si les deux mots ont exactement les mêmes lettres (dans n'importe quel ordre), sinon 'non'.",
+    starterCode: "a = \"listen\"\nb = \"silent\"\n# Vérifie si ce sont des anagrammes\n",
+    hint: "Trie les lettres des deux mots et compare : sorted(a) == sorted(b).",
+    hints: [
+      "Deux anagrammes ont les mêmes lettres — comment les rendre comparables ?",
+      "Trie les lettres des deux mots et compare-les.",
+      "if sorted(a) == sorted(b):\n    print('oui')\nelse:\n    print('non')",
+    ],
+    expectedOutput: "oui",
+    solutionCode: "a = \"listen\"\nb = \"silent\"\nif sorted(a) == sorted(b):\n    print('oui')\nelse:\n    print('non')",
+    minLevel: 2,
+  },
+  {
+    id: "matrix_diag",
+    emoji: "🔷",
+    title: "Diagonale d'une matrice",
+    difficulty: "Moyen",
+    difficultyColor: "from-yellow-400 to-orange-400",
+    description: "Affiche la somme des éléments de la diagonale principale de cette matrice 3×3.\nDiagonale : 1, 5, 9 → Somme : 15",
+    starterCode: "matrice = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]\n# Affiche la somme de la diagonale\n",
+    hint: "Les éléments de la diagonale ont le même indice de ligne et de colonne : matrice[i][i].",
+    hints: [
+      "Pense aux indices : pour une matrice n×n, la diagonale est matrice[0][0], matrice[1][1], matrice[2][2]...",
+      "Utilise sum(matrice[i][i] for i in range(len(matrice))).",
+      "print(sum(matrice[i][i] for i in range(len(matrice))))",
+    ],
+    expectedOutput: "15",
+    solutionCode: "matrice = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]\nprint(sum(matrice[i][i] for i in range(len(matrice))))",
+    minLevel: 3,
+  },
+
+  // ── DIFFICILE (extra) ─────────────────────────────────────────────────
+  {
+    id: "caesar_cipher",
+    emoji: "🔐",
+    title: "Chiffre de César",
+    difficulty: "Difficile",
+    difficultyColor: "from-purple-500 to-violet-600",
+    description: "Encode le message 'hello' avec le chiffre de César (décalage de 3).\nh→k, e→h, l→o, l→o, o→r\nRésultat attendu : khoor",
+    starterCode: "message = \"hello\"\ndecalage = 3\n# Encode le message\n",
+    hint: "Pour chaque lettre, utilise chr((ord(c) - ord('a') + decalage) % 26 + ord('a')).",
+    hints: [
+      "Tu dois décaler chaque lettre de 3 positions dans l'alphabet, en bouclant si besoin.",
+      "ord() convertit un caractère en nombre, chr() fait l'inverse.",
+      "result = ''\nfor c in message:\n    result += chr((ord(c) - ord('a') + decalage) % 26 + ord('a'))\nprint(result)",
+    ],
+    expectedOutput: "khoor",
+    solutionCode: "message = \"hello\"\ndecalage = 3\nresult = \"\"\nfor c in message:\n    result += chr((ord(c) - ord(\"a\") + decalage) % 26 + ord(\"a\"))\nprint(result)",
+    minLevel: 4,
+  },
 ];
 
 import { getProgress, saveProgress } from "./progress";
