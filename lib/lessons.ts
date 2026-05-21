@@ -987,4 +987,221 @@ export const LEVELS_DATA: Record<string, LevelData> = {
       },
     ],
   },
+  "10": {
+    id: 10,
+    emoji: "⚒️",
+    name: "Maître Artisan",
+    color: "from-lime-500 to-green-600",
+    lessons: [
+      {
+        title: "Les énumérations (enum)",
+        description: "Un enum est un ensemble de constantes nommées — comme un menu fixe de valeurs possibles.\nPlus lisible que des entiers magiques : Couleur.ROUGE plutôt que 1.\nauto() génère les valeurs automatiquement.\nFlag permet de combiner des valeurs avec | (opérateur OU).\nLes enums sont comparables, itérables, et sérialisables en JSON.",
+        code: 'from enum import Enum, Flag, auto\n\nclass Direction(Enum):\n    NORD  = auto()\n    SUD   = auto()\n    EST   = auto()\n    OUEST = auto()\n\nclass Permission(Flag):\n    LIRE    = auto()\n    ECRIRE  = auto()\n    EXECUTER = auto()\n    TOUT    = LIRE | ECRIRE | EXECUTER\n\nclass Statut(Enum):\n    ATTENTE   = "attente"\n    EN_COURS  = "en_cours"\n    TERMINE   = "termine"\n    ANNULE    = "annule"\n    \n    def est_actif(self):\n        return self in (Statut.ATTENTE, Statut.EN_COURS)\n\n# Itérer sur un enum\nprint("Directions :", [d.name for d in Direction])\n\n# Comparer\ndir_actuelle = Direction.NORD\nif dir_actuelle == Direction.NORD:\n    print("On va vers le nord !")\n\n# Combiner des flags\ndroits = Permission.LIRE | Permission.ECRIRE\nprint(f"Droits : {droits}")\nprint(f"Peut lire : {Permission.LIRE in droits}")\nprint(f"Peut executer : {Permission.EXECUTER in droits}")\n\n# Enum avec méthode\ncommande = Statut.EN_COURS\nprint(f"Statut actif : {commande.est_actif()}")',
+        exercise: {
+          instruction: "Crée un enum Saison avec PRINTEMPS=1, ETE=2, AUTOMNE=3, HIVER=4.\nAffiche la valeur de Saison.ETE.",
+          starterCode: "from enum import Enum\n\nclass Saison(Enum):\n    PRINTEMPS = 1\n    ETE = 2\n    AUTOMNE = 3\n    HIVER = 4\n\nprint(Saison.ETE.value)\n",
+          expectedOutput: "2",
+          hints: [
+            "Un enum se définit avec class NomEnum(Enum): et des constantes MAJUSCULES.",
+            "Pour accéder à la valeur, utilise .value.",
+            "Le code est déjà complet — clique ▶ pour vérifier.",
+          ],
+        },
+        quiz: {
+          questions: [
+            {
+              question: "Pourquoi utiliser un enum plutôt qu'un entier ?",
+              options: [
+                "Les enums sont plus rapides",
+                "Les enums ont des noms lisibles et évitent les valeurs magiques",
+                "Les enums prennent moins de mémoire",
+                "Les enums sont obligatoires en Python 3",
+              ],
+              correct: 1,
+              explanation: "Couleur.ROUGE est bien plus lisible que 1. Les enums préviennent les erreurs de valeur invalide.",
+            },
+            {
+              question: "À quoi sert auto() dans un enum ?",
+              options: [
+                "Génère automatiquement une valeur unique pour chaque membre",
+                "Rend l'enum automatiquement sérialisable",
+                "Crée un enum avec des méthodes automatiques",
+                "Trie les membres alphabétiquement",
+              ],
+              correct: 0,
+              explanation: "auto() assigne automatiquement une valeur entière croissante à chaque membre, évitant de les numéroter manuellement.",
+            },
+          ],
+        },
+      },
+      {
+        title: "SQLite3 : base de données en Python",
+        description: "sqlite3 est une base de données SQL intégrée à Python — aucune installation requise !\n':memory:' crée une base entièrement en mémoire (parfait pour les tests).\nLes opérations de base : CREATE TABLE, INSERT, SELECT, UPDATE, DELETE.\nToujours utiliser des paramètres ? pour éviter les injections SQL.\nSQLite3 est utilisé par Firefox, Android, et des milliers d'applications !",
+        code: 'import sqlite3\n\n# Connexion en mémoire\nconn = sqlite3.connect(":memory:")\nconn.row_factory = sqlite3.Row  # Accès par nom de colonne\ncur = conn.cursor()\n\n# Créer la table\ncur.execute("""\n    CREATE TABLE eleves (\n        id    INTEGER PRIMARY KEY AUTOINCREMENT,\n        nom   TEXT NOT NULL,\n        note  REAL,\n        classe TEXT\n    )\n""")\n\n# Insérer des données avec des paramètres (anti-injection)\neleves = [\n    ("Alice",   17.5, "3A"),\n    ("Bob",     12.0, "3A"),\n    ("Charlie", 15.5, "3B"),\n    ("Diana",   18.0, "3B"),\n    ("Eve",      9.5, "3A"),\n]\ncur.executemany(\n    "INSERT INTO eleves (nom, note, classe) VALUES (?, ?, ?)",\n    eleves\n)\nconn.commit()\n\n# Requête SELECT\nprint("=== Tous les élèves ===")\nfor row in cur.execute("SELECT nom, note, classe FROM eleves ORDER BY note DESC"):\n    print(f"  {row[\'nom\']:<10} {row[\'note\']:5.1f}/20  ({row[\'classe\']})")\n\n# Agrégation\ncur.execute("SELECT classe, AVG(note) as moy FROM eleves GROUP BY classe")\nprint("\\n=== Moyenne par classe ===")\nfor row in cur.fetchall():\n    print(f"  Classe {row[\'classe\']} : {row[\'moy\']:.2f}/20")\n\n# Recherche avec WHERE\ncur.execute("SELECT COUNT(*) FROM eleves WHERE note >= 15")\ncount = cur.fetchone()[0]\nprint(f"\\nÉlèves >= 15/20 : {count}")\n\nconn.close()',
+        exercise: {
+          instruction: "Crée une table 'produits' avec nom (TEXT) et prix (REAL).\nInsère pomme=0.50, banane=0.30, cerise=2.00.\nAffiche le nombre de produits dont le prix est inférieur à 1.00.",
+          starterCode: "import sqlite3\n\nconn = sqlite3.connect(':memory:')\ncur = conn.cursor()\n\ncur.execute('CREATE TABLE produits (nom TEXT, prix REAL)')\ncur.executemany('INSERT INTO produits VALUES (?, ?)', [\n    ('pomme', 0.50), ('banane', 0.30), ('cerise', 2.00)\n])\nconn.commit()\n\ncur.execute('SELECT COUNT(*) FROM produits WHERE prix < 1.00')\nprint(cur.fetchone()[0])\nconn.close()\n",
+          expectedOutput: "2",
+          hints: [
+            "La table et les données sont déjà insérées — il faut juste compter avec COUNT(*).",
+            "SELECT COUNT(*) FROM produits WHERE prix < 1.00 compte les lignes correspondantes.",
+            "Le code est déjà complet — clique ▶ pour vérifier.",
+          ],
+        },
+      },
+      {
+        title: "Logging professionnel",
+        description: "print() c'est bien pour déboguer, mais logging c'est mieux pour la production !\nlogging a 5 niveaux : DEBUG < INFO < WARNING < ERROR < CRITICAL.\nTu peux filtrer par niveau, formater les messages, les envoyer dans un fichier ou la console.\nEn production, on met le niveau à WARNING — en développement à DEBUG.\nDjango, Flask, et tous les grands frameworks utilisent logging.",
+        code: 'import logging\nimport io\n\n# Configurer un handler vers un buffer (pour tester sans fichier)\nbuffer = io.StringIO()\nhandler = logging.StreamHandler(buffer)\nhandler.setFormatter(logging.Formatter("%(levelname)-8s | %(name)s | %(message)s"))\n\nlogger = logging.getLogger("mon_app")\nlogger.setLevel(logging.DEBUG)\nlogger.addHandler(handler)\nlogger.propagate = False\n\n# Émettre des messages à différents niveaux\nlogger.debug("Démarrage du module")\nlogger.info("Connexion établie avec la base de données")\nlogger.warning("Mémoire disponible faible : 12%")\nlogger.error("Impossible de lire le fichier config.json")\nlogger.critical("Crash critique — arrêt immédiat")\n\n# Lire ce qui a été enregistré\nbuffer.seek(0)\nfor ligne in buffer:\n    print(ligne.rstrip())\n\n# Exemple : logger enfant hérite du parent\nlogger_db = logging.getLogger("mon_app.db")\nlogger_db.addHandler(handler)\nlogger_db.propagate = False\nlogger_db.setLevel(logging.WARNING)\n\nlogger_db.debug("Cette ligne ne sera PAS affichée")  # sous le niveau\nlogger_db.warning("Requête lente détectée : 3.2s")',
+        exercise: {
+          instruction: "Crée un logger nommé 'test' avec niveau WARNING.\nÉmets un debug, un warning et une error.\nCompte combien de lignes ont été enregistrées (seules WARNING et ERROR passent).\nAffiche ce nombre.",
+          starterCode: "import logging, io\n\nbuffer = io.StringIO()\nhandler = logging.StreamHandler(buffer)\nlogger = logging.getLogger('test')\nlogger.setLevel(logging.WARNING)\nlogger.addHandler(handler)\nlogger.propagate = False\n\nlogger.debug('invisible')\nlogger.warning('attention')\nlogger.error('erreur')\n\nbuffer.seek(0)\nlignes = [l for l in buffer if l.strip()]\nprint(len(lignes))\n",
+          expectedOutput: "2",
+          hints: [
+            "Avec setLevel(WARNING), debug() est ignoré. Seuls warning() et error() sont enregistrés.",
+            "Le buffer contiendra 2 lignes — compte-les.",
+            "Le code est déjà complet — clique ▶ pour vérifier.",
+          ],
+        },
+      },
+      {
+        title: "Surcharge d'opérateurs",
+        description: "En Python tu peux définir ce que font +, -, *, ==, <, len() sur tes propres classes !\nCes méthodes spéciales s'appellent dunder methods (double underscore).\n__add__ : l'opérateur +\n__mul__ : l'opérateur *\n__eq__ : l'opérateur ==\n__lt__ : l'opérateur <\n__len__ : la fonction len()\nC'est ainsi que numpy, pandas et SQLAlchemy fonctionnent !",
+        code: 'class Vecteur:\n    def __init__(self, x: float, y: float):\n        self.x = x\n        self.y = y\n    \n    def __repr__(self) -> str:\n        return f"Vecteur({self.x}, {self.y})"\n    \n    def __add__(self, other: "Vecteur") -> "Vecteur":\n        return Vecteur(self.x + other.x, self.y + other.y)\n    \n    def __sub__(self, other: "Vecteur") -> "Vecteur":\n        return Vecteur(self.x - other.x, self.y - other.y)\n    \n    def __mul__(self, scalaire: float) -> "Vecteur":\n        return Vecteur(self.x * scalaire, self.y * scalaire)\n    \n    def __rmul__(self, scalaire: float) -> "Vecteur":\n        return self.__mul__(scalaire)  # 3 * v fonctionne aussi\n    \n    def __abs__(self) -> float:\n        return (self.x**2 + self.y**2) ** 0.5\n    \n    def __eq__(self, other: object) -> bool:\n        if not isinstance(other, Vecteur): return False\n        return self.x == other.x and self.y == other.y\n    \n    def __neg__(self) -> "Vecteur":\n        return Vecteur(-self.x, -self.y)\n\nu = Vecteur(1, 2)\nv = Vecteur(3, 4)\n\nprint(f"u = {u}")\nprint(f"v = {v}")\nprint(f"u + v = {u + v}")\nprint(f"u - v = {u - v}")\nprint(f"3 * u = {3 * u}")\nprint(f"|v|  = {abs(v):.2f}")\nprint(f"-u   = {-u}")\nprint(f"u == Vecteur(1,2) : {u == Vecteur(1, 2)}")',
+        exercise: {
+          instruction: "Crée une classe Fraction(num, den) avec __add__ pour additionner deux fractions.\nFraction(1,2) + Fraction(1,3) doit donner Fraction(5,6).\nAffiche str(Fraction(1,2) + Fraction(1,3)) → '5/6'.",
+          starterCode: "class Fraction:\n    def __init__(self, num, den):\n        self.num = num\n        self.den = den\n    def __repr__(self):\n        return f'{self.num}/{self.den}'\n    def __add__(self, other):\n        # num/den + other.num/other.den = (num*other.den + other.num*den) / (den*other.den)\n        nouveau_num = self.num * other.den + other.num * self.den\n        nouveau_den = self.den * other.den\n        return Fraction(nouveau_num, nouveau_den)\n\nprint(Fraction(1, 2) + Fraction(1, 3))\n",
+          expectedOutput: "5/6",
+          hints: [
+            "Pour additionner a/b + c/d = (a*d + c*b) / (b*d).",
+            "Le code de __add__ est déjà là — complète ou exécute.",
+            "Le code est déjà complet — clique ▶ pour vérifier.",
+          ],
+        },
+      },
+      {
+        title: "Les descripteurs",
+        description: "Un descripteur contrôle l'accès à un attribut d'une classe via __get__, __set__, __delete__.\nC'est ce qui alimente @property, @staticmethod, @classmethod — ce sont tous des descripteurs !\nUn descripteur de données implémente __set__ — il prend la priorité sur l'instance.\nC'est la façon élégante d'ajouter de la validation sans toucher à __init__.",
+        code: 'class Valide:\n    """Descripteur qui valide les valeurs selon un prédicat."""\n    \n    def __init__(self, predicat, message):\n        self.predicat = predicat\n        self.message  = message\n        self.attr     = None  # nom de l\'attribut, défini par __set_name__\n    \n    def __set_name__(self, owner, name):\n        self.attr = f"_{name}"  # stocké dans _age, _note, etc.\n    \n    def __get__(self, obj, objtype=None):\n        if obj is None: return self\n        return getattr(obj, self.attr, None)\n    \n    def __set__(self, obj, value):\n        if not self.predicat(value):\n            raise ValueError(f"{value} : {self.message}")\n        setattr(obj, self.attr, value)\n\nclass Etudiant:\n    age  = Valide(lambda v: 5 <= v <= 120,    "âge entre 5 et 120")\n    note = Valide(lambda v: 0.0 <= v <= 20.0, "note entre 0 et 20")\n    nom  = Valide(lambda v: len(v) >= 2,      "nom trop court")\n    \n    def __init__(self, nom, age, note):\n        self.nom  = nom\n        self.age  = age\n        self.note = note\n    \n    def __repr__(self):\n        return f"Etudiant({self.nom}, {self.age} ans, {self.note}/20)"\n\n# Cas valides\nalice = Etudiant("Alice", 16, 15.5)\nprint(alice)\n\n# Mise à jour valide\nalice.note = 17.0\nprint(f"Nouvelle note : {alice.note}")\n\n# Cas invalides\nfor cas in [("Etudiant age -1", lambda: Etudiant("Bob", -1, 10)),\n            ("Note > 20",       lambda: Etudiant("Eve", 15, 25)),\n            ("Nom court",       lambda: Etudiant("X",   12, 10))]:\n    try:\n        cas[1]()\n    except ValueError as e:\n        print(f"❌ {cas[0]}: {e}")',
+        exercise: {
+          instruction: "Crée un descripteur PositifStrict qui lève ValueError si la valeur <= 0.\nApplique-le à l'attribut prix d'une classe Produit.\nTeste avec prix=5 (OK) et prix=-1 (erreur).",
+          starterCode: "class PositifStrict:\n    def __set_name__(self, owner, name):\n        self.attr = f'_{name}'\n    def __get__(self, obj, objtype=None):\n        return getattr(obj, self.attr, None) if obj else self\n    def __set__(self, obj, value):\n        if value <= 0:\n            raise ValueError(f'Doit etre positif, recu {value}')\n        setattr(obj, self.attr, value)\n\nclass Produit:\n    prix = PositifStrict()\n    def __init__(self, prix):\n        self.prix = prix\n\np = Produit(5)\nprint(p.prix)\ntry:\n    Produit(-1)\nexcept ValueError as e:\n    print(e)\n",
+          expectedOutput: "5\nDoit etre positif, recu -1",
+          hints: [
+            "Le descripteur est déjà implémenté — il valide dans __set__.",
+            "Produit(5) doit réussir, Produit(-1) doit lever ValueError.",
+            "Le code est déjà complet — clique ▶ pour vérifier.",
+          ],
+        },
+      },
+      {
+        title: "Mini-projet : Bibliothèque SQLite",
+        description: "On combine enum, SQLite3 et surcharge d'opérateurs pour créer une mini-bibliothèque.\nLes statuts de livre sont des enum, les requêtes utilisent SQLite3.\nLa classe Collection supporte len(), in et l'itération (for livre in collection).\nC'est le type de code qu'on écrit pour des apps de gestion réelles !",
+        code: 'import sqlite3\nfrom enum import Enum, auto\n\nclass Statut(Enum):\n    DISPONIBLE = auto()\n    EMPRUNTE   = auto()\n    RESERVE    = auto()\n\nclass Bibliotheque:\n    def __init__(self):\n        self.conn = sqlite3.connect(":memory:")\n        self.conn.row_factory = sqlite3.Row\n        self._init_db()\n    \n    def _init_db(self):\n        self.conn.execute("""\n            CREATE TABLE livres (\n                id      INTEGER PRIMARY KEY AUTOINCREMENT,\n                titre   TEXT NOT NULL,\n                auteur  TEXT NOT NULL,\n                statut  TEXT DEFAULT \'DISPONIBLE\'\n            )\n        """)\n        self.conn.commit()\n    \n    def ajouter(self, titre, auteur):\n        self.conn.execute(\n            "INSERT INTO livres (titre, auteur) VALUES (?, ?)",\n            (titre, auteur)\n        )\n        self.conn.commit()\n    \n    def emprunter(self, titre):\n        cur = self.conn.execute(\n            "SELECT statut FROM livres WHERE titre=?", (titre,)\n        )\n        row = cur.fetchone()\n        if not row:\n            print(f"Livre inconnu : {titre}")\n            return\n        if row["statut"] != Statut.DISPONIBLE.name:\n            print(f"Indisponible : {titre} ({row[\'statut\']})")\n            return\n        self.conn.execute(\n            "UPDATE livres SET statut=? WHERE titre=?",\n            (Statut.EMPRUNTE.name, titre)\n        )\n        self.conn.commit()\n        print(f"Emprunte : {titre}")\n    \n    def __len__(self):\n        return self.conn.execute("SELECT COUNT(*) FROM livres").fetchone()[0]\n    \n    def __contains__(self, titre):\n        return bool(self.conn.execute(\n            "SELECT 1 FROM livres WHERE titre=?", (titre,)\n        ).fetchone())\n    \n    def afficher(self):\n        print(f"Bibliotheque ({len(self)} livres) :")\n        for row in self.conn.execute("SELECT titre, auteur, statut FROM livres"):\n            s = "✅" if row["statut"] == "DISPONIBLE" else "📖"\n            print(f"  {s} {row[\'titre\']} — {row[\'auteur\']}")\n\nbib = Bibliotheque()\nfor titre, auteur in [\n    ("Le Petit Prince",   "Saint-Exupery"),\n    ("1984",              "Orwell"),\n    ("Python Fluent",     "Ramalho"),\n]:\n    bib.ajouter(titre, auteur)\n\nbib.emprunter("1984")\nbib.afficher()\nprint(f"Contient Python Fluent : {\'Python Fluent\' in bib}")\nprint(f"Contient Java : {\'Java\' in bib}")',
+      },
+    ],
+  },
+  "11": {
+    id: 11,
+    emoji: "👑",
+    name: "Grand Maître",
+    color: "from-yellow-400 to-amber-500",
+    lessons: [
+      {
+        title: "TypeVar et types génériques",
+        description: "Les génériques permettent d'écrire du code qui fonctionne avec n'importe quel type tout en restant sûr.\nTypeVar('T') est un type paramétrique — il peut être int, str, n'importe quoi.\nGeneric[T] est la base pour créer des classes génériques comme list[int].\nEn pratique : une Pile[str] ne peut contenir que des chaînes, une Pile[int] que des entiers.\nC'est ce qui fait que list, dict, Optional sont typés dans Python moderne.",
+        code: 'from typing import TypeVar, Generic, Optional\n\nT = TypeVar("T")\nK = TypeVar("K")\nV = TypeVar("V")\n\nclass Pile(Generic[T]):\n    """Pile LIFO générique."""\n    \n    def __init__(self):\n        self._items: list[T] = []\n    \n    def empiler(self, item: T) -> None:\n        self._items.append(item)\n    \n    def depiler(self) -> T:\n        if not self._items:\n            raise IndexError("Pile vide !")\n        return self._items.pop()\n    \n    def sommet(self) -> Optional[T]:\n        return self._items[-1] if self._items else None\n    \n    def __len__(self) -> int:\n        return len(self._items)\n    \n    def __repr__(self) -> str:\n        return f"Pile({self._items})"\n\nclass PaireTriee(Generic[K, V]):\n    """Paire clé-valeur avec clé comparable."""\n    \n    def __init__(self, cle: K, valeur: V):\n        self.cle = cle\n        self.valeur = valeur\n    \n    def __lt__(self, other: "PaireTriee[K, V]") -> bool:\n        return self.cle < other.cle\n    \n    def __repr__(self) -> str:\n        return f"({self.cle}: {self.valeur})"\n\n# Pile d\'entiers\npile_int: Pile[int] = Pile()\nfor n in [10, 20, 30]:\n    pile_int.empiler(n)\nprint(f"Pile : {pile_int}, sommet : {pile_int.sommet()}")\nprint(f"Défile : {pile_int.depiler()}, {pile_int.depiler()}, {pile_int.depiler()}")\n\n# Pile de chaînes\npile_str: Pile[str] = Pile()\nfor mot in ["Python", "est", "génial"]:\n    pile_str.empiler(mot)\nphrase = []\nwhile len(pile_str):\n    phrase.append(pile_str.depiler())\nprint(" ".join(phrase))\n\n# Paires triées\npaires = [PaireTriee(3, "C"), PaireTriee(1, "A"), PaireTriee(2, "B")]\nprint(sorted(paires))',
+        exercise: {
+          instruction: "Crée une Pile d'entiers, empile 1, 2, 3, puis dépile tout et affiche chaque valeur.\nLa pile est LIFO : le dernier entré sort en premier.",
+          starterCode: "from typing import TypeVar, Generic\n\nT = TypeVar('T')\n\nclass Pile(Generic[T]):\n    def __init__(self):\n        self._items = []\n    def empiler(self, item):\n        self._items.append(item)\n    def depiler(self):\n        return self._items.pop()\n    def __len__(self):\n        return len(self._items)\n\np = Pile()\np.empiler(1)\np.empiler(2)\np.empiler(3)\nwhile len(p):\n    print(p.depiler())\n",
+          expectedOutput: "3\n2\n1",
+          hints: [
+            "Une pile LIFO : dernier entré = premier sorti. pop() retourne le dernier élément.",
+            "Empile 1, 2, 3 puis dépile : on obtient 3, 2, 1.",
+            "Le code est déjà complet — clique ▶ pour vérifier.",
+          ],
+        },
+        quiz: {
+          questions: [
+            {
+              question: "À quoi sert TypeVar('T') ?",
+              options: [
+                "Créer un type personnalisé nommé T",
+                "Déclarer un paramètre de type pour les génériques",
+                "Convertir n'importe quelle valeur en T",
+                "Limiter T aux types numériques",
+              ],
+              correct: 1,
+              explanation: "TypeVar déclare un paramètre de type — T peut représenter int, str, ou n'importe quel type selon le contexte d'utilisation.",
+            },
+          ],
+        },
+      },
+      {
+        title: "Protocol : le duck typing structurel",
+        description: "Un Protocol définit une interface sans héritage — une classe n'a pas besoin d'en hériter pour la respecter !\nSi un objet a les bonnes méthodes, il est compatible. C'est le duck typing formalisé.\nruntime_checkable permet d'utiliser isinstance() avec un Protocol.\nContrairement à ABC, les Protocols ne nécessitent aucune modification des classes existantes.\nC'est utilisé dans les bibliothèques modernes : pathlib, typing, numpy...",
+        code: 'from typing import Protocol, runtime_checkable\n\n@runtime_checkable\nclass Dessinable(Protocol):\n    def dessiner(self) -> str: ...\n    def couleur(self) -> str: ...\n\n@runtime_checkable\nclass Serialisable(Protocol):\n    def to_dict(self) -> dict: ...\n\n# Ces classes ne héritent PAS de Dessinable !\nclass Cercle:\n    def __init__(self, r: float, coul: str):\n        self.r = r\n        self._coul = coul\n    def dessiner(self) -> str:\n        return f"O ({self.r}cm)"\n    def couleur(self) -> str:\n        return self._coul\n    def to_dict(self) -> dict:\n        return {"type": "cercle", "r": self.r}\n\nclass Carre:\n    def __init__(self, c: float, coul: str):\n        self.c = c\n        self._coul = coul\n    def dessiner(self) -> str:\n        return f"[] ({self.c}cm)"\n    def couleur(self) -> str:\n        return self._coul\n\n# isinstance() fonctionne avec @runtime_checkable\nformes = [Cercle(5, "rouge"), Carre(3, "bleu")]\n\nfor f in formes:\n    if isinstance(f, Dessinable):\n        print(f"Dessinable : {f.dessiner()} ({f.couleur()})")\n    if isinstance(f, Serialisable):\n        print(f"  -> sérialisable : {f.to_dict()}")\n\n# Fonction qui accepte tout objet Dessinable\ndef afficher_canvas(objets: list[Dessinable]) -> None:\n    print("\\n=== Canvas ===")\n    for obj in objets:\n        print(f"  {obj.couleur():6} | {obj.dessiner()}")\n\nafficher_canvas(formes)',
+        exercise: {
+          instruction: "Crée un Protocol Comparable avec une méthode comparer(other) -> int.\nCrée une classe Temperature qui l'implémente : comparer retourne -1, 0 ou 1.\nAffiche Temperature(20).comparer(Temperature(30)).",
+          starterCode: "from typing import Protocol\n\nclass Comparable(Protocol):\n    def comparer(self, other) -> int: ...\n\nclass Temperature:\n    def __init__(self, valeur: float):\n        self.valeur = valeur\n    def comparer(self, other: 'Temperature') -> int:\n        if self.valeur < other.valeur: return -1\n        if self.valeur > other.valeur: return 1\n        return 0\n\nprint(Temperature(20).comparer(Temperature(30)))\n",
+          expectedOutput: "-1",
+          hints: [
+            "Temperature(20) < Temperature(30), donc comparer retourne -1.",
+            "Le code est déjà complet — clique ▶ pour vérifier.",
+            "La valeur attendue est -1 (20 est inférieur à 30).",
+          ],
+        },
+      },
+      {
+        title: "__slots__ et optimisation mémoire",
+        description: "Par défaut chaque instance Python stocke ses attributs dans un dictionnaire __dict__.\n__slots__ remplace ce dict par un stockage fixe — moins de mémoire, accès plus rapide.\nPour des millions d'objets, la différence peut être énorme : 50% de mémoire en moins !\nLimite : tu ne peux pas ajouter d'attributs dynamiques à une classe avec __slots__.\nIdéal pour : data objects, points de coordonnées, vecteurs, enregistrements.",
+        code: 'import sys\n\nclass PointNormal:\n    def __init__(self, x, y, z):\n        self.x = x\n        self.y = y\n        self.z = z\n\nclass PointSlots:\n    __slots__ = ("x", "y", "z")\n    def __init__(self, x, y, z):\n        self.x = x\n        self.y = y\n        self.z = z\n\np1 = PointNormal(1.0, 2.0, 3.0)\np2 = PointSlots(1.0, 2.0, 3.0)\n\ntaille_normale = sys.getsizeof(p1) + sys.getsizeof(p1.__dict__)\ntaille_slots   = sys.getsizeof(p2)\n\nprint(f"Avec __dict__ : {taille_normale} octets")\nprint(f"Avec __slots__: {taille_slots} octets")\nprint(f"Gain mémoire  : ~{round((1 - taille_slots/taille_normale)*100)}%")\n\n# Les slots limitent les attributs dynamiques\ntry:\n    p2.w = 4.0  # Interdit !\nexcept AttributeError as e:\n    print(f"\\n❌ {e}")\n\n# Mais les attributs déclarés fonctionnent normalement\np2.x = 99.0\nprint(f"✅ p2.x = {p2.x}")\n\n# Performance sur 100k objets\nimport time\nn = 100_000\n\nt0 = time.perf_counter()\nnormaux = [PointNormal(i, i, i) for i in range(n)]\nt1 = time.perf_counter()\nslots_pts = [PointSlots(i, i, i) for i in range(n)]\nt2 = time.perf_counter()\n\nprint(f"\\n{n} objets normaux : {(t1-t0)*1000:.1f}ms")\nprint(f"{n} objets slots   : {(t2-t1)*1000:.1f}ms")',
+        exercise: {
+          instruction: "Crée une classe Pixel avec __slots__ = ('r', 'g', 'b').\nCrée Pixel(255, 128, 0) et affiche r, g, b sur une ligne séparée par des virgules.",
+          starterCode: "class Pixel:\n    __slots__ = ('r', 'g', 'b')\n    def __init__(self, r, g, b):\n        self.r = r\n        self.g = g\n        self.b = b\n\np = Pixel(255, 128, 0)\nprint(p.r, p.g, p.b, sep=',')\n",
+          expectedOutput: "255,128,0",
+          hints: [
+            "__slots__ déclare les seuls attributs autorisés — r, g et b ici.",
+            "print(p.r, p.g, p.b, sep=',') affiche les trois valeurs séparées par des virgules.",
+            "Le code est déjà complet — clique ▶ pour vérifier.",
+          ],
+        },
+      },
+      {
+        title: "Regex avancé : groupes et assertions",
+        description: "Les groupes nommés (?P<nom>...) rendent les regex lisibles et les résultats accessibles par nom.\nLes assertions sont des conditions de contexte sans capturer de texte :\n(?=...) lookahead : suivi de...\n(?!...) negative lookahead : pas suivi de...\n(?<=...) lookbehind : précédé de...\n(?<!...) negative lookbehind : pas précédé de...\nLes regex avancées servent en data science, parsing de logs, validation...",
+        code: 'import re\n\n# Groupes nommés : beaucoup plus lisibles !\npattern_date = r"(?P<jour>\\d{2})/(?P<mois>\\d{2})/(?P<annee>\\d{4})"\ndates = ["25/12/2024", "01/01/2025", "invalide", "31/03/2023"]\n\nprint("=== Dates ===")\nfor texte in dates:\n    m = re.fullmatch(pattern_date, texte)\n    if m:\n        print(f"  {m.group(\'annee\')}-{m.group(\'mois\')}-{m.group(\'jour\')}")\n    else:\n        print(f"  {texte!r} → invalide")\n\n# Lookahead : mot suivi de certains caractères\npattern_prix = r"\\d+\\.?\\d*(?= ?€)"  # nombre suivi de €\ntexte = "Pomme 0.80€, Banane 0.30 €, Raisin 2.50€"\nprint("\\n=== Prix (€) ===")\nfor prix in re.findall(pattern_prix, texte):\n    print(f"  {prix}€")\n\n# Lookbehind : chiffre précédé de €\npattern_apres = r"(?<=@)[a-z]+(?=\\.)"  # domaine dans un email\nemails = ["alice@gmail.com", "bob@yahoo.fr", "eve@hotmail.com"]\nprint("\\n=== Domaines ===" )\nfor email in emails:\n    m = re.search(pattern_apres, email)\n    if m:\n        print(f"  {email} → domaine: {m.group()}")\n\n# Substitution avec groupes\npattern_tel = r"(?P<indicatif>0\\d)(?P<suite>[\\d]{8})"\ntel = "0612345678"\nformate = re.sub(pattern_tel, r"\\g<indicatif> \\g<suite>", tel)\nprint(f"\\nTéléphone : {formate}")',
+        exercise: {
+          instruction: "Utilise une regex avec groupes nommés pour extraire l'année, le mois et le jour de '2025-01-15'.\nAffiche l'année, puis le mois, puis le jour sur 3 lignes séparées.",
+          starterCode: "import re\n\npattern = r'(?P<annee>\\d{4})-(?P<mois>\\d{2})-(?P<jour>\\d{2})'\nm = re.fullmatch(pattern, '2025-01-15')\nif m:\n    print(m.group('annee'))\n    print(m.group('mois'))\n    print(m.group('jour'))\n",
+          expectedOutput: "2025\n01\n15",
+          hints: [
+            "(?P<nom>...) capture dans un groupe nommé 'nom'.",
+            "m.group('annee') retourne la valeur du groupe nommé 'annee'.",
+            "Le code est déjà complet — clique ▶ pour vérifier.",
+          ],
+        },
+      },
+      {
+        title: "__init_subclass__ : hooks de sous-classement",
+        description: "__init_subclass__ est appelé automatiquement chaque fois qu'une classe hérite d'une autre.\nC'est plus propre que les métaclasses pour beaucoup de cas !\nOn peut enregistrer des sous-classes dans un registre, valider la définition de la classe...\nPydantic, Django et attrs utilisent ce mécanisme pour créer des registres de modèles.",
+        code: 'class Plugin:\n    """Classe de base avec registre automatique des sous-classes."""\n    \n    _registre: dict = {}\n    \n    def __init_subclass__(cls, nom: str = "", **kwargs):\n        super().__init_subclass__(**kwargs)\n        if nom:\n            Plugin._registre[nom] = cls\n            print(f"  Plugin enregistré : {nom!r} → {cls.__name__}")\n    \n    @classmethod\n    def obtenir(cls, nom: str):\n        return cls._registre.get(nom)\n\nprint("=== Chargement des plugins ===")\n\nclass PluginJson(Plugin, nom="json"):\n    def traiter(self, data):\n        import json\n        return json.dumps(data)\n\nclass PluginTexte(Plugin, nom="texte"):\n    def traiter(self, data):\n        return str(data)\n\nclass PluginUpper(Plugin, nom="upper"):\n    def traiter(self, data):\n        return str(data).upper()\n\nprint(f"\\nRegistre : {list(Plugin._registre)}")\n\n# Utilisation\ndonnees = {"cle": "valeur", "n": 42}\nfor nom in ["json", "texte", "upper", "inconnu"]:\n    cls = Plugin.obtenir(nom)\n    if cls:\n        print(f"{nom:8} → {cls().traiter(donnees)}")\n    else:\n        print(f"{nom:8} → plugin inconnu")',
+        exercise: {
+          instruction: "Crée une classe Forme avec __init_subclass__ qui enregistre les sous-classes dans Forme._registre.\nCrée Cercle et Carre comme sous-classes.\nAffiche la liste des clés du registre (les noms de classes).",
+          starterCode: "class Forme:\n    _registre = {}\n    def __init_subclass__(cls, **kwargs):\n        super().__init_subclass__(**kwargs)\n        Forme._registre[cls.__name__] = cls\n\nclass Cercle(Forme): pass\nclass Carre(Forme): pass\n\nprint(sorted(Forme._registre.keys()))\n",
+          expectedOutput: "['Carre', 'Cercle']",
+          hints: [
+            "__init_subclass__ reçoit cls qui est la sous-classe en cours de création.",
+            "cls.__name__ donne le nom de la classe (ex: 'Cercle').",
+            "Le code est déjà complet — clique ▶ pour vérifier.",
+          ],
+        },
+      },
+      {
+        title: "Mini-projet final : Framework de validation",
+        description: "Le projet final combine TypeVar, Protocol, descripteurs, __init_subclass__ et enum !\nOn crée un mini-framework de validation inspiré de Pydantic.\nChaque champ est un descripteur, le modèle s'enregistre automatiquement, les erreurs sont collectées.\nC'est le genre de bibliothèque que les développeurs Python expérimentés construisent pour gagner du temps.",
+        code: 'from typing import TypeVar, Any\nfrom enum import Enum, auto\n\n# ── Types ─────────────────────────────────────────────────────────────\nclass TypeChamp(Enum):\n    TEXTE   = auto()\n    ENTIER  = auto()\n    REEL    = auto()\n    BOOLEEN = auto()\n\nTYPE_PYTHON = {\n    TypeChamp.TEXTE:   str,\n    TypeChamp.ENTIER:  int,\n    TypeChamp.REEL:    float,\n    TypeChamp.BOOLEEN: bool,\n}\n\n# ── Descripteur de champ validé ───────────────────────────────────────\nclass Champ:\n    def __init__(self, type_champ: TypeChamp, obligatoire: bool = True,\n                 mini=None, maxi=None):\n        self.type_champ   = type_champ\n        self.obligatoire  = obligatoire\n        self.mini         = mini\n        self.maxi         = maxi\n        self.nom          = ""\n    \n    def __set_name__(self, owner, name):\n        self.nom = name\n    \n    def __get__(self, obj, objtype=None):\n        return obj.__dict__.get(self.nom) if obj else self\n    \n    def valider(self, valeur) -> list[str]:\n        erreurs = []\n        if valeur is None:\n            if self.obligatoire:\n                erreurs.append(f"{self.nom} est obligatoire")\n            return erreurs\n        type_attendu = TYPE_PYTHON[self.type_champ]\n        if not isinstance(valeur, type_attendu):\n            erreurs.append(f"{self.nom} doit etre {type_attendu.__name__}")\n            return erreurs\n        if self.mini is not None and valeur < self.mini:\n            erreurs.append(f"{self.nom} >= {self.mini} requis")\n        if self.maxi is not None and valeur > self.maxi:\n            erreurs.append(f"{self.nom} <= {self.maxi} requis")\n        return erreurs\n    \n    def __set__(self, obj, valeur):\n        obj.__dict__[self.nom] = valeur\n\n# ── Modèle de base ────────────────────────────────────────────────────\nclass Modele:\n    _modeles: dict = {}\n    \n    def __init_subclass__(cls, **kwargs):\n        super().__init_subclass__(**kwargs)\n        Modele._modeles[cls.__name__] = cls\n    \n    def __init__(self, **kwargs):\n        for k, v in kwargs.items():\n            setattr(self, k, v)\n    \n    def valider(self) -> list[str]:\n        erreurs = []\n        for nom, champ in self.__class__.__dict__.items():\n            if isinstance(champ, Champ):\n                valeur = self.__dict__.get(nom)\n                erreurs.extend(champ.valider(valeur))\n        return erreurs\n    \n    def est_valide(self) -> bool:\n        return len(self.valider()) == 0\n\n# ── Définition de modèles métier ──────────────────────────────────────\nclass Utilisateur(Modele):\n    nom  = Champ(TypeChamp.TEXTE,  mini=2, maxi=50)\n    age  = Champ(TypeChamp.ENTIER, mini=0, maxi=120)\n    note = Champ(TypeChamp.REEL,   mini=0.0, maxi=20.0, obligatoire=False)\n\nprint("=== Tests de validation ===")\ncas = [\n    {"nom": "Alice", "age": 25, "note": 17.5},\n    {"nom": "B",     "age": 25},\n    {"nom": "Charlie", "age": -1, "note": 25.0},\n]\nfor data in cas:\n    u = Utilisateur(**data)\n    erreurs = u.valider()\n    if erreurs:\n        print(f"Invalide : {erreurs}")\n    else:\n        print(f"Valide   : {u.__dict__}")\n\nprint(f"\\nModeles enregistres : {list(Modele._modeles)}")',
+      },
+    ],
+  },
 };
