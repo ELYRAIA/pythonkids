@@ -4,7 +4,7 @@ const PAYPAL_API = process.env.PAYPAL_API_URL ?? "https://api-m.sandbox.paypal.c
 
 async function getAccessToken(): Promise<string> {
   const auth = Buffer.from(
-    `${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_CLIENT_SECRET}`
+    `${process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID}:${process.env.PAYPAL_CLIENT_SECRET}`
   ).toString("base64");
   const res = await fetch(`${PAYPAL_API}/v1/oauth2/token`, {
     method: "POST",
@@ -17,7 +17,7 @@ async function getAccessToken(): Promise<string> {
 
 export async function POST(request: Request) {
   const { packId } = await request.json() as { packId: string };
-  const pack = PACK_CATALOG[packId as keyof typeof PACK_CATALOG];
+  const pack = PACK_CATALOG[packId];
   if (!pack) return Response.json({ error: "Pack inconnu" }, { status: 400 });
 
   try {

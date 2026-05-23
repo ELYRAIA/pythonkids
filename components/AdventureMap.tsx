@@ -96,7 +96,8 @@ export default function AdventureMap() {
                       {isComplete && <span className="text-xs font-bold text-green-500">Terminé !</span>}
                       {isCurrent && done > 0 && <span className="text-xs font-bold text-purple-500">{pct}%</span>}
                     </div>
-                    <h3 className="font-bold text-gray-800 dark:text-white text-sm mb-2">{level.name}</h3>
+                    <h3 className="font-bold text-gray-800 dark:text-white text-sm mb-1">{level.name}</h3>
+                    <p className="text-xs text-gray-400 dark:text-slate-500 mb-2 line-clamp-2 leading-relaxed">{level.description}</p>
 
                     {/* Barre de progression */}
                     <div className="w-full bg-gray-100 dark:bg-slate-700 rounded-full h-1.5 mb-2">

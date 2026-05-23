@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { getProgress } from "@/lib/progress";
 import { getMastery, lessonKey } from "@/lib/mastery";
+import { LEVELS } from "@/lib/levels";
 import type { LevelData } from "@/lib/lessons";
 import Confetti from "./Confetti";
 
@@ -105,7 +106,7 @@ export default function LevelLessonsGrid({ level }: Props) {
               Tu viens de gagner un badge.
             </p>
             <div className="flex flex-col gap-3">
-              {level.id < 5 && (
+              {LEVELS.some((l) => l.id === level.id + 1) && (
                 <Link
                   href={`/levels/${level.id + 1}`}
                   onClick={() => setShowCelebration(false)}
@@ -114,7 +115,7 @@ export default function LevelLessonsGrid({ level }: Props) {
                   Niveau suivant →
                 </Link>
               )}
-              {level.id === 5 && (
+              {!LEVELS.some((l) => l.id === level.id + 1) && (
                 <Link
                   href="/certificate"
                   onClick={() => setShowCelebration(false)}

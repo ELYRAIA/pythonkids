@@ -12,6 +12,7 @@ import { oneDark } from "@codemirror/theme-one-dark";
 import { defaultKeymap, indentWithTab, historyKeymap, history } from "@codemirror/commands";
 import { playChallengeWinSound, playErrorSound, playDuelWinSound } from "@/lib/sounds";
 import { addXP } from "@/lib/xp";
+import { addBattlePassXP } from "@/lib/battlePass";
 import { addDuelWin } from "@/lib/duels";
 import { checkAchievements } from "@/lib/achievements";
 import { calculateScore } from "@/lib/score";
@@ -141,6 +142,7 @@ export default function DuelRoomPage() {
       rewardedRef.current = true;
       playDuelWinSound();
       addXP(150);
+      addBattlePassXP(100);
       addDuelWin();
       checkAchievements();
       const newScore = calculateScore();
@@ -153,7 +155,7 @@ export default function DuelRoomPage() {
         }).catch(() => {});
       }
       window.dispatchEvent(new CustomEvent("pythonkids:toast", {
-        detail: { msg: "Duel gagné ! +150 pts +150 XP", emoji: "🏆", type: "rank" },
+        detail: { msg: "Duel gagné ! +150 pts +150 XP +100 🎖️", emoji: "🏆", type: "rank" },
       }));
       postActivity("challenge", "Duel gagné ⚔️");
     }

@@ -21,6 +21,7 @@ import HomeWeeklyWidget from "@/components/HomeWeeklyWidget";
 import HomeProgressWidget from "@/components/HomeProgressWidget";
 import HomeRankWidget from "@/components/HomeRankWidget";
 import HomeRevisionWidget from "@/components/HomeRevisionWidget";
+import HomeBattlePassWidget from "@/components/HomeBattlePassWidget";
 
 export default function Home() {
   return (
@@ -85,6 +86,9 @@ export default function Home() {
 
       {/* Rang XP */}
       <HomeRankWidget />
+
+      {/* Pass de Combat */}
+      <HomeBattlePassWidget />
 
       {/* Révision espacée */}
       <HomeRevisionWidget />

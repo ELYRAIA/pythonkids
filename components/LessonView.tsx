@@ -19,6 +19,8 @@ import { setLessonStars } from "@/lib/mastery";
 import { trackLessonToday, refreshQuests } from "@/lib/quests";
 import { trackLessonWeek, refreshWeeklyQuests } from "@/lib/weeklyQuests";
 import { addXP } from "@/lib/xp";
+import { addBattlePassXP } from "@/lib/battlePass";
+import { calculateScore } from "@/lib/score";
 import { incrementCombo, type ComboResult } from "@/lib/combo";
 import { checkSecretBadges } from "@/lib/progress";
 import { checkAchievements } from "@/lib/achievements";
@@ -102,6 +104,7 @@ export default function LessonView({
     setShowQuiz(false);
     playLessonDoneSound();
     addXP(15);
+    addBattlePassXP(50);
     trackLessonToday();
     trackLessonWeek();
     const combo = incrementCombo();
@@ -129,6 +132,16 @@ export default function LessonView({
     refreshQuests();
     refreshWeeklyQuests();
     checkAchievements();
+    // Mise à jour classement
+    const newScore = calculateScore();
+    const storedUser = localStorage.getItem("pythonkids_username");
+    if (storedUser) {
+      fetch("/api/leaderboard", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: storedUser, score: newScore }),
+      }).catch(() => {});
+    }
     setDone(true);
     setConfetti(true);
     setTimeout(() => setConfetti(false), 100);

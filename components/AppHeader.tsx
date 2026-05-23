@@ -5,8 +5,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { isAudioEnabled, toggleAudio } from "@/lib/sounds";
 const NAV_LINKS = [
+  { href: "/battle-pass", label: "Pass", emoji: "⚔️" },
   { href: "/challenges", label: "Défis", emoji: "🎯" },
-  { href: "/duel", label: "Duel", emoji: "⚔️" },
+  { href: "/duel", label: "Duel", emoji: "🥊" },
   { href: "/detente", label: "Détente", emoji: "🎮" },
   { href: "/friends", label: "Amis", emoji: "👥" },
   { href: "/shop", label: "Boutique", emoji: "🛒" },

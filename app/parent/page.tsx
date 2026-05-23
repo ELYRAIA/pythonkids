@@ -10,6 +10,7 @@ import { LEVELS_DATA } from "@/lib/lessons";
 import { LEVELS } from "@/lib/levels";
 import { getLevelAvgStars } from "@/lib/mastery";
 import { getPlayerRank } from "@/lib/ranks";
+import { getBattlePassState, getBPXPInfo, BP_MAX_LEVEL, BP_SEASON_END } from "@/lib/battlePass";
 
 interface SharedData {
   username: string;
@@ -28,6 +29,9 @@ export default function ParentPage() {
   const [streak, setStreak] = useState({ currentStreak: 0, longestStreak: 0, playDates: [] as string[] });
   const [isReadOnly, setIsReadOnly] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
+  const [bpLevel, setBpLevel] = useState(0);
+  const [bpProgress, setBpProgress] = useState(0);
+  const [bpPremium, setBpPremium] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -60,6 +64,14 @@ export default function ParentPage() {
     const s = getStreak();
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setStreak({ currentStreak: s.currentStreak, longestStreak: s.longestStreak, playDates: s.playDates ?? [] });
+    const bp = getBattlePassState();
+    const bpInfo = getBPXPInfo();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setBpLevel(bp.currentLevel);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setBpProgress(bpInfo.progress);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setBpPremium(bp.isPremium);
   }, []);
 
   const handleExport = () => {
@@ -332,6 +344,42 @@ export default function ParentPage() {
             </div>
           )}
         </div>
+
+        {/* Pass de Combat */}
+        {mounted && (
+          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-5">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wide">⚔️ Pass de Combat — Saison 1</h2>
+              {bpPremium && (
+                <span className="text-xs bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 border border-yellow-200 dark:border-yellow-700 rounded-full px-2 py-0.5 font-bold">✨ Premium</span>
+              )}
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="text-center shrink-0">
+                <div className="text-3xl font-black text-gray-800 dark:text-white">{bpLevel}</div>
+                <div className="text-xs text-gray-400 dark:text-slate-500">/ {BP_MAX_LEVEL}</div>
+              </div>
+              <div className="flex-1">
+                <div className="w-full bg-gray-100 dark:bg-slate-700 rounded-full h-2.5 mb-1">
+                  <div
+                    className="h-2.5 rounded-full bg-gradient-to-r from-yellow-500 to-orange-500 transition-all"
+                    style={{ width: `${bpProgress}%` }}
+                  />
+                </div>
+                <p className="text-xs text-gray-400 dark:text-slate-500">
+                  {bpLevel >= BP_MAX_LEVEL
+                    ? "Pass terminé 🏆"
+                    : `Niveau ${bpLevel} — fin de saison le ${new Date(BP_SEASON_END).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}`}
+                </p>
+              </div>
+            </div>
+            {!bpPremium && (
+              <p className="text-xs text-gray-400 dark:text-slate-500 mt-2">
+                Le Pass Premium (4,99 €) débloque des récompenses exclusives supplémentaires.
+              </p>
+            )}
+          </div>
+        )}
 
         {/* Note pédagogique */}
         <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900 rounded-2xl p-5">

@@ -1635,7 +1635,385 @@ export const LEVELS_DATA: Record<string, LevelData> = {
       {
         title: "Mini-projet final : Framework de validation",
         description: "Le projet final combine TypeVar, Protocol, descripteurs, __init_subclass__ et enum !\nOn crée un mini-framework de validation inspiré de Pydantic.\nChaque champ est un descripteur, le modèle s'enregistre automatiquement, les erreurs sont collectées.\nC'est le genre de bibliothèque que les développeurs Python expérimentés construisent pour gagner du temps.",
+
         code: 'from typing import TypeVar, Any\nfrom enum import Enum, auto\n\n# ── Types ─────────────────────────────────────────────────────────────\nclass TypeChamp(Enum):\n    TEXTE   = auto()\n    ENTIER  = auto()\n    REEL    = auto()\n    BOOLEEN = auto()\n\nTYPE_PYTHON = {\n    TypeChamp.TEXTE:   str,\n    TypeChamp.ENTIER:  int,\n    TypeChamp.REEL:    float,\n    TypeChamp.BOOLEEN: bool,\n}\n\n# ── Descripteur de champ validé ───────────────────────────────────────\nclass Champ:\n    def __init__(self, type_champ: TypeChamp, obligatoire: bool = True,\n                 mini=None, maxi=None):\n        self.type_champ   = type_champ\n        self.obligatoire  = obligatoire\n        self.mini         = mini\n        self.maxi         = maxi\n        self.nom          = ""\n    \n    def __set_name__(self, owner, name):\n        self.nom = name\n    \n    def __get__(self, obj, objtype=None):\n        return obj.__dict__.get(self.nom) if obj else self\n    \n    def valider(self, valeur) -> list[str]:\n        erreurs = []\n        if valeur is None:\n            if self.obligatoire:\n                erreurs.append(f"{self.nom} est obligatoire")\n            return erreurs\n        type_attendu = TYPE_PYTHON[self.type_champ]\n        if not isinstance(valeur, type_attendu):\n            erreurs.append(f"{self.nom} doit etre {type_attendu.__name__}")\n            return erreurs\n        if self.mini is not None and valeur < self.mini:\n            erreurs.append(f"{self.nom} >= {self.mini} requis")\n        if self.maxi is not None and valeur > self.maxi:\n            erreurs.append(f"{self.nom} <= {self.maxi} requis")\n        return erreurs\n    \n    def __set__(self, obj, valeur):\n        obj.__dict__[self.nom] = valeur\n\n# ── Modèle de base ────────────────────────────────────────────────────\nclass Modele:\n    _modeles: dict = {}\n    \n    def __init_subclass__(cls, **kwargs):\n        super().__init_subclass__(**kwargs)\n        Modele._modeles[cls.__name__] = cls\n    \n    def __init__(self, **kwargs):\n        for k, v in kwargs.items():\n            setattr(self, k, v)\n    \n    def valider(self) -> list[str]:\n        erreurs = []\n        for nom, champ in self.__class__.__dict__.items():\n            if isinstance(champ, Champ):\n                valeur = self.__dict__.get(nom)\n                erreurs.extend(champ.valider(valeur))\n        return erreurs\n    \n    def est_valide(self) -> bool:\n        return len(self.valider()) == 0\n\n# ── Définition de modèles métier ──────────────────────────────────────\nclass Utilisateur(Modele):\n    nom  = Champ(TypeChamp.TEXTE,  mini=2, maxi=50)\n    age  = Champ(TypeChamp.ENTIER, mini=0, maxi=120)\n    note = Champ(TypeChamp.REEL,   mini=0.0, maxi=20.0, obligatoire=False)\n\nprint("=== Tests de validation ===")\ncas = [\n    {"nom": "Alice", "age": 25, "note": 17.5},\n    {"nom": "B",     "age": 25},\n    {"nom": "Charlie", "age": -1, "note": 25.0},\n]\nfor data in cas:\n    u = Utilisateur(**data)\n    erreurs = u.valider()\n    if erreurs:\n        print(f"Invalide : {erreurs}")\n    else:\n        print(f"Valide   : {u.__dict__}")\n\nprint(f"\\nModeles enregistres : {list(Modele._modeles)}")',
+      },
+    ],
+  },
+
+  "12": {
+    id: 12,
+    emoji: "🌐",
+    name: "Data & APIs",
+    color: "from-sky-500 to-indigo-600",
+    lessons: [
+      {
+        title: "JSON : le format universel des données",
+        description: "JSON (JavaScript Object Notation) est LE format universel d'échange de données sur internet.\nPython le gère nativement avec le module json.\njson.loads(chaine) convertit du texte JSON en objet Python.\njson.dumps(objet) convertit un objet Python en texte JSON.\nindent=2 formate joliment, ensure_ascii=False conserve les accents.\nToutes les APIs web (météo, paiement, réseaux sociaux) communiquent en JSON.",
+        code: 'import json\n\n# Dict Python ↔ JSON\ncatalogue = {\n    "boutique": "PyShop",\n    "produits": [\n        {"nom": "Python Book", "prix": 30, "dispo": True},\n        {"nom": "Clavier",     "prix": 80, "dispo": True},\n        {"nom": "Souris",      "prix": 35, "dispo": False},\n    ]\n}\n\n# Sérialiser en JSON\ntexte = json.dumps(catalogue, ensure_ascii=False, indent=2)\nprint(texte[:60], "...")\n\n# Désérialiser\ndata = json.loads(texte)\nboutique = data["boutique"]\nprint(f"\\nBoutique : {boutique}")\n\ndispos = [p for p in data["produits"] if p["dispo"]]\nfor p in dispos:\n    nom = p["nom"]\n    prix = p["prix"]\n    print(f"  {nom} : {prix}€")\n\ntotal = sum(p["prix"] for p in dispos)\nprint(f"Total dispo : {total}€")\n\n# Aller-retour avec structure imbriquée\nresume = {"nb_total": len(data["produits"]), "nb_dispos": len(dispos)}\nprint("\\nRésumé :", json.dumps(resume))',
+        exercise: {
+          instruction: "Parse ce JSON et affiche le nom du produit, son prix, puis True si le stock est supérieur à 0.",
+          starterCode: 'import json\ndata = \'{"produit": "Ordinateur", "prix": 899, "stock": 42}\'\nobj = json.loads(data)\nprint(obj["produit"])\nprint(obj["prix"])\nprint(obj["stock"] > 0)\n',
+          expectedOutput: "Ordinateur\n899\nTrue",
+          hints: [
+            "json.loads() convertit une chaîne JSON en dictionnaire Python.",
+            "Accède aux clés avec obj[\"produit\"], obj[\"prix\"] et obj[\"stock\"].",
+            "Le code est déjà complet — clique ▶ pour vérifier.",
+          ],
+        },
+        quiz: {
+          questions: [
+            {
+              question: "Que fait json.loads() ?",
+              options: [
+                "Charge un fichier .json depuis le disque",
+                "Convertit une chaîne JSON en objet Python",
+                "Convertit un objet Python en chaîne JSON",
+                "Valide la syntaxe d'un fichier JSON",
+              ],
+              correct: 1,
+              explanation: "json.loads() (load string) parse une chaîne JSON et retourne le dict/list/int/str Python correspondant.",
+            },
+            {
+              question: "Quel paramètre de json.dumps() formate le JSON lisiblement ?",
+              options: ["format=True", "pretty=True", "indent=2", "style='pretty'"],
+              correct: 2,
+              explanation: "indent=N ajoute une indentation de N espaces — json.dumps(data, indent=2) produit un JSON bien indenté.",
+            },
+          ],
+        },
+      },
+      {
+        title: "CSV : lire et traiter des données tabulaires",
+        description: "CSV (Comma-Separated Values) est le format le plus simple pour stocker des tableaux de données.\nLe module csv de Python offre des outils puissants.\ncsv.DictReader lit chaque ligne comme un dict {colonne: valeur}.\nio.StringIO permet de simuler un fichier en mémoire — idéal pour tester.\ncsv.DictWriter écrit des lignes en précisant les noms de colonnes.\nLes fichiers CSV s'ouvrent dans Excel, LibreOffice Calc, pandas...",
+        code: 'import csv\nimport io\n\ncontenu = """nom,age,note,ville\nAlice,15,18.5,Paris\nBob,16,14.0,Lyon\nCharlie,15,16.5,Paris\nDiana,17,19.0,Bordeaux\nEve,16,12.5,Lyon\n"""\n\nfichier = io.StringIO(contenu)\neleves = list(csv.DictReader(fichier))\nprint(f"Nombre d\'élèves : {len(eleves)}")\n\nnotes = [float(e["note"]) for e in eleves]\nmoyenne = sum(notes) / len(notes)\nprint(f"Moyenne : {moyenne:.1f}")\n\nparis = [e for e in eleves if e["ville"] == "Paris"]\nprint("\\nÉlèves de Paris :")\nfor e in paris:\n    nom = e["nom"]\n    note = e["note"]\n    print(f"  {nom} : {note}/20")\n\n# Écrire un CSV résultat\nsortie = io.StringIO()\necrivain = csv.DictWriter(sortie, fieldnames=["nom", "mention"])\necrivain.writeheader()\nfor e in eleves:\n    n = float(e["note"])\n    if n >= 16:\n        mention = "TB"\n    elif n >= 14:\n        mention = "B"\n    elif n >= 12:\n        mention = "AB"\n    else:\n        mention = "P"\n    ecrivain.writerow({"nom": e["nom"], "mention": mention})\n\nprint("\\nCSV mentions :")\nprint(sortie.getvalue().strip())',
+        exercise: {
+          instruction: "Lis ce CSV et affiche la somme totale des quantités.",
+          starterCode: 'import csv, io\ncsv_data = "fruit,quantite\\npomme,5\\nbanane,3\\ncerise,12\\n"\nf = io.StringIO(csv_data)\ntotal = sum(int(row["quantite"]) for row in csv.DictReader(f))\nprint(total)\n',
+          expectedOutput: "20",
+          hints: [
+            "csv.DictReader(f) lit chaque ligne comme un dict.",
+            "row[\"quantite\"] donne la valeur de la colonne quantite (sous forme de chaîne — convertis en int).",
+            "sum(int(row[\"quantite\"]) for row in ...) somme toutes les quantités.",
+          ],
+        },
+        quiz: {
+          questions: [
+            {
+              question: "Quelle est la différence entre csv.reader et csv.DictReader ?",
+              options: [
+                "reader lit des dict, DictReader lit des listes",
+                "reader lit des listes, DictReader lit des dict avec la 1re ligne comme clés",
+                "DictReader est plus lent",
+                "reader ne fonctionne qu'avec des virgules",
+              ],
+              correct: 1,
+              explanation: "csv.DictReader utilise la première ligne du CSV comme noms de colonnes et retourne chaque ligne sous forme de dict.",
+            },
+          ],
+        },
+      },
+      {
+        title: "collections : Counter, defaultdict, namedtuple, deque",
+        description: "Le module collections offre des structures de données spécialisées très efficaces.\nCounter compte les occurrences et trouve les plus fréquentes avec most_common().\ndefaultdict évite les KeyError en créant automatiquement une valeur par défaut.\nnamedtuple crée des tuples avec champs nommés — lisibles comme des mini-classes.\ndeque est une file double-entrée ultra-efficace pour les insertions aux deux extrémités.\nCes types sont souvent plus lisibles et performants que leurs équivalents manuels.",
+        code: 'from collections import Counter, defaultdict, namedtuple, deque\n\n# Counter : comptage automatique\nvotes = ["Alice", "Bob", "Alice", "Charlie", "Bob", "Alice", "Bob", "Alice"]\ncompteur = Counter(votes)\nprint("Résultats élection :")\nfor nom, nb in compteur.most_common():\n    s = "s" if nb > 1 else ""\n    print(f"  {nom}: {nb} vote{s}")\nvainqueur = compteur.most_common(1)[0][0]\nprint(f"Vainqueur : {vainqueur}")\n\n# defaultdict : grouper sans KeyError\neleves_par_ville = defaultdict(list)\ndonnees = [("Alice","Paris"),("Bob","Lyon"),("Charlie","Paris"),("Diana","Lyon"),("Eve","Bordeaux")]\nfor nom, ville in donnees:\n    eleves_par_ville[ville].append(nom)\nprint("\\nÉlèves par ville :")\nfor ville in sorted(eleves_par_ville):\n    noms = ", ".join(sorted(eleves_par_ville[ville]))\n    print(f"  {ville}: {noms}")\n\n# namedtuple : tuple avec champs nommés\nPoint3D = namedtuple("Point3D", ["x", "y", "z"])\np = Point3D(3.0, 4.0, 0.0)\ndist = (p.x**2 + p.y**2 + p.z**2)**0.5\nprint(f"\\nPoint : {p}")\nprint(f"Distance : {dist:.1f}")\n\n# deque : file FIFO avec taille max\nfile = deque(maxlen=3)\nfor i in [1, 2, 3, 4, 5]:\n    file.append(i)\nprint(f"\\ndeque(maxlen=3) après 1-5 : {list(file)}")',
+        exercise: {
+          instruction: "Utilise Counter pour trouver le candidat le plus voté et le nombre de ses votes.",
+          starterCode: 'from collections import Counter\nvotes = ["Alice", "Bob", "Alice", "Charlie", "Alice", "Bob"]\nc = Counter(votes)\nprint(c.most_common(1)[0][0])\nprint(c.most_common(1)[0][1])\n',
+          expectedOutput: "Alice\n3",
+          hints: [
+            "Counter(votes) compte les occurrences de chaque élément.",
+            "most_common(1) retourne une liste avec le tuple (élément, count) le plus fréquent.",
+            "most_common(1)[0][0] donne le nom, most_common(1)[0][1] donne le count.",
+          ],
+        },
+        quiz: {
+          questions: [
+            {
+              question: "Que fait defaultdict(list) ?",
+              options: [
+                "Crée un dict dont les valeurs sont des listes vides par défaut",
+                "Trie un dict par valeurs",
+                "Filtre les clés dont la valeur est une liste",
+                "Convertit un dict en liste",
+              ],
+              correct: 0,
+              explanation: "defaultdict(list) crée un dictionnaire qui retourne une liste vide [] pour toute clé inexistante — plus besoin de vérifier si la clé existe avant d'appeler .append().",
+            },
+          ],
+        },
+      },
+      {
+        title: "statistics : analyser des données sans bibliothèque externe",
+        description: "Python inclut le module statistics pour les calculs statistiques courants.\nmean() calcule la moyenne arithmétique.\nmedian() trouve la valeur médiane (robuste aux valeurs extrêmes).\nstdev() mesure la dispersion des données (écart-type).\nmode() trouve la valeur la plus fréquente.\nLa médiane est souvent préférable à la moyenne quand des outliers existent (salaires, prix...).",
+        code: 'import statistics as stats\n\nnotes = [12.5, 14.0, 17.5, 9.0, 15.0, 18.5, 13.0, 11.5, 16.0, 14.5]\nprint(f"Moyenne  : {stats.mean(notes):.2f}")\nprint(f"Médiane  : {stats.median(notes):.2f}")\nprint(f"Écart-type : {stats.stdev(notes):.2f}")\nprint(f"Min / Max : {min(notes)} / {max(notes)}")\n\n# Impact d\'un outlier\navec_outlier = notes + [2.0]\nprint(f"\\nAvec outlier (2.0) :")\nprint(f"  Moyenne : {stats.mean(avec_outlier):.2f}  ← impacté !")\nprint(f"  Médiane : {stats.median(avec_outlier):.2f}  ← stable")\n\n# Mode\ncouleurs = ["rouge", "bleu", "rouge", "vert", "rouge", "bleu"]\nprint(f"\\nCouleur la plus fréquente : {stats.mode(couleurs)}")\n\n# Quantiles\nq = stats.quantiles(notes, n=4)\nprint(f"\\nQ1={q[0]:.1f}  Q2={q[1]:.1f}  Q3={q[2]:.1f}")\nprint(f"Interquartile : {q[2]-q[0]:.1f}")',
+        exercise: {
+          instruction: "Calcule la moyenne, la médiane et le mode de cette liste, puis affiche-les sur 3 lignes.",
+          starterCode: 'import statistics as stats\nvaleurs = [3, 7, 7, 19, 24, 2, 8, 7]\nprint(stats.mean(valeurs))\nprint(stats.median(valeurs))\nprint(stats.mode(valeurs))\n',
+          expectedOutput: "9.625\n7.0\n7",
+          hints: [
+            "stats.mean() calcule la moyenne, stats.median() la médiane, stats.mode() la valeur la plus fréquente.",
+            "Pour [3,7,7,19,24,2,8,7] : moyenne=9.625, médiane=7.0 (milieu), mode=7 (3 fois).",
+            "Le code est déjà complet — clique ▶ pour vérifier.",
+          ],
+        },
+        quiz: {
+          questions: [
+            {
+              question: "Pourquoi préférer la médiane à la moyenne pour les salaires ?",
+              options: [
+                "La médiane est toujours plus grande",
+                "La médiane est moins sensible aux très hauts salaires (outliers)",
+                "La médiane est plus facile à calculer",
+                "La moyenne ne fonctionne pas avec les nombres décimaux",
+              ],
+              correct: 1,
+              explanation: "Un très haut salaire fait monter la moyenne mais ne change pas la médiane — la médiane reflète mieux ce que gagne la personne 'du milieu'.",
+            },
+          ],
+        },
+      },
+      {
+        title: "Tri avancé : sorted, bisect et heapq",
+        description: "Python offre des outils puissants pour trier et rechercher efficacement.\nsorted(data, key=func) trie selon un critère personnalisé — très flexible.\nmin() et max() acceptent aussi key= pour des comparaisons sur critère.\nLe module bisect effectue des recherches binaires en O(log n) sur listes triées.\nLe module heapq implémente un tas-min pour trouver les N plus grands/petits éléments.\nCes outils évitent les boucles manuelles et sont bien plus rapides sur grandes données.",
+        code: 'import bisect\nimport heapq\n\n# sorted avec critère multi-clés\nequipe = [\n    {"nom": "Charlie", "age": 30, "score": 85},\n    {"nom": "Alice",   "age": 25, "score": 92},\n    {"nom": "Bob",     "age": 28, "score": 78},\n    {"nom": "Diana",   "age": 22, "score": 92},\n]\npar_score = sorted(equipe, key=lambda p: (-p["score"], p["nom"]))\nprint("Classement :")\nfor i, p in enumerate(par_score, 1):\n    nom = p["nom"]\n    score = p["score"]\n    age = p["age"]\n    print(f"  {i}. {nom:8} score={score} age={age}")\n\n# min() avec key\neligibles = [p for p in equipe if p["score"] > 80]\nplus_jeune = min(eligibles, key=lambda p: p["age"])\nnom = plus_jeune["nom"]\nage_j = plus_jeune["age"]\nprint(f"\\nPlus jeune avec score>80 : {nom} ({age_j} ans)")\n\n# bisect : recherche binaire O(log n)\nnotes_triees = [9.0, 11.5, 12.5, 13.0, 14.0, 14.5, 15.0, 16.0, 17.5, 18.5]\nidx = bisect.bisect_left(notes_triees, 14.0)\nprint(f"\\n14.0 est à l\'index {idx}")\nnb_sous = bisect.bisect_left(notes_triees, 15.0)\nprint(f"Notes < 15.0 : {nb_sous}/{len(notes_triees)}")\n\n# heapq : top-3 efficace\nscores = [85, 92, 78, 92, 67, 95, 88, 71]\ntop3 = heapq.nlargest(3, scores)\nbottom3 = heapq.nsmallest(3, scores)\nprint(f"\\nTop 3 : {top3}")\nprint(f"Bottom 3 : {bottom3}")',
+        exercise: {
+          instruction: "Utilise bisect pour trouver l'index d'insertion de 14 (bisect_left) et l'index après 14 (bisect_right).",
+          starterCode: 'import bisect\nnotes = [10, 12, 14, 15, 17, 18, 19]\nprint(bisect.bisect_left(notes, 14))\nprint(bisect.bisect_right(notes, 14))\n',
+          expectedOutput: "2\n3",
+          hints: [
+            "bisect_left retourne le premier index où 14 peut s'insérer sans casser l'ordre.",
+            "bisect_right retourne l'index juste après les occurrences de 14.",
+            "Dans [10,12,14,15,...], 14 est à l'index 2 — bisect_left=2, bisect_right=3.",
+          ],
+        },
+        quiz: {
+          questions: [
+            {
+              question: "Quelle est la complexité d'une recherche bisect sur une liste triée de N éléments ?",
+              options: ["O(N)", "O(N²)", "O(log N)", "O(1)"],
+              correct: 2,
+              explanation: "La recherche binaire divise la liste en deux à chaque étape — O(log N) comparaisons au lieu de O(N) pour une recherche linéaire.",
+            },
+          ],
+        },
+      },
+      {
+        title: "Mini-projet : pipeline d'analyse de données",
+        description: "Ce projet combine JSON, CSV, collections et statistics en un pipeline complet.\nUn pipeline de données suit les étapes : chargement → nettoyage → transformation → analyse → export.\nC'est la base de tout projet data science ou ETL (Extract Transform Load).\nOn analyse ici les ventes d'une boutique fictive pour produire un rapport automatique.",
+        code: 'import json\nimport csv\nimport io\nimport statistics as stats\nfrom collections import Counter, defaultdict\n\n# ── 1. Données sources (simulées comme si elles venaient d\'une API) ──\nventes_json = json.dumps([\n    {"id": 1, "produit": "Livre Python",  "categorie": "Livres",    "prix": 29.99, "qte": 3, "ville": "Paris"},\n    {"id": 2, "produit": "Clavier",       "categorie": "Hardware",  "prix": 79.90, "qte": 1, "ville": "Lyon"},\n    {"id": 3, "produit": "Livre Django",  "categorie": "Livres",    "prix": 34.99, "qte": 2, "ville": "Paris"},\n    {"id": 4, "produit": "Souris",        "categorie": "Hardware",  "prix": 35.50, "qte": 4, "ville": "Bordeaux"},\n    {"id": 5, "produit": "Livre Flask",   "categorie": "Livres",    "prix": 27.99, "qte": 1, "ville": "Lyon"},\n    {"id": 6, "produit": "Webcam",        "categorie": "Hardware",  "prix": 59.90, "qte": 2, "ville": "Paris"},\n])\n\n# ── 2. Chargement et nettoyage ──\nventes = json.loads(ventes_json)\ntotaux = [v["prix"] * v["qte"] for v in ventes]\nprint(f"Ventes totales : {sum(totaux):.2f}€")\nprint(f"Panier moyen  : {stats.mean(totaux):.2f}€")\n\n# ── 3. Analyse par catégorie ──\npar_cat = defaultdict(float)\nfor v in ventes:\n    par_cat[v["categorie"]] += v["prix"] * v["qte"]\nprint("\\nCA par catégorie :")\nfor cat in sorted(par_cat):\n    print(f"  {cat:10} : {par_cat[cat]:.2f}€")\n\n# ── 4. Top villes ──\nvilles = Counter(v["ville"] for v in ventes)\nprint("\\nTop villes :")\nfor ville, nb in villes.most_common():\n    print(f"  {ville}: {nb} commande(s)")\n\n# ── 5. Export CSV ──\nsortie = io.StringIO()\nfields = ["produit", "total"]\necrivain = csv.DictWriter(sortie, fieldnames=fields)\necrivain.writeheader()\nfor v in sorted(ventes, key=lambda x: -x["prix"]*x["qte"]):\n    ecrivain.writerow({"produit": v["produit"], "total": round(v["prix"]*v["qte"], 2)})\nprint("\\nTop produits (CSV) :")\nprint(sortie.getvalue().strip())',
+        exercise: {
+          instruction: "Analyse cette liste de ventes : calcule le total des ventes et affiche le produit le plus vendu (quantité).",
+          starterCode: 'from collections import Counter\nventes = [\n    {"produit": "Python Book", "qte": 3},\n    {"produit": "Clavier",     "qte": 5},\n    {"produit": "Python Book", "qte": 2},\n    {"produit": "Souris",      "qte": 4},\n    {"produit": "Clavier",     "qte": 1},\n]\ntotal_qte = sum(v["qte"] for v in ventes)\ncompte = Counter()\nfor v in ventes:\n    compte[v["produit"]] += v["qte"]\nprint(total_qte)\nprint(compte.most_common(1)[0][0])\n',
+          expectedOutput: "15\nClavier",
+          hints: [
+            "sum(v['qte'] for v in ventes) donne le total de toutes les quantités.",
+            "Utilise un Counter pour additionner les quantités par produit, puis most_common(1).",
+            "Total = 3+5+2+4+1 = 15. Clavier = 5+1 = 6, Python Book = 5, Souris = 4.",
+          ],
+        },
+      },
+    ],
+  },
+
+  "13": {
+    id: 13,
+    emoji: "🧮",
+    name: "Algorithmiste",
+    color: "from-slate-600 to-gray-700",
+    lessons: [
+      {
+        title: "Graphes : représentation et parcours BFS",
+        description: "Un graphe est un ensemble de nœuds reliés par des arêtes.\nLa représentation la plus courante : liste d'adjacence (dict de listes).\nBFS (Breadth-First Search) explore les nœuds niveau par niveau depuis une source.\nBFS utilise une file (deque) : on ajoute les voisins non visités à la fin.\nBFS garantit de trouver le chemin le plus court en nombre d'arêtes.\nApplications : réseaux sociaux (degrés de séparation), GPS (chemin minimum), crawlers web.",
+        code: 'from collections import deque\n\n# Graphe non orienté représenté par liste d\'adjacence\ngraphe = {\n    "A": ["B", "C"],\n    "B": ["A", "D", "E"],\n    "C": ["A", "F"],\n    "D": ["B"],\n    "E": ["B", "F"],\n    "F": ["C", "E"],\n}\n\ndef bfs(graphe, depart):\n    """Parcours en largeur — retourne l\'ordre de visite."""\n    vus = {depart}\n    file = deque([depart])\n    ordre = []\n    while file:\n        noeud = file.popleft()\n        ordre.append(noeud)\n        for voisin in sorted(graphe[noeud]):\n            if voisin not in vus:\n                vus.add(voisin)\n                file.append(voisin)\n    return ordre\n\ndef distances_bfs(graphe, depart):\n    """Distance (nb arêtes) depuis depart vers chaque nœud."""\n    dist = {depart: 0}\n    file = deque([depart])\n    while file:\n        noeud = file.popleft()\n        for voisin in graphe[noeud]:\n            if voisin not in dist:\n                dist[voisin] = dist[noeud] + 1\n                file.append(voisin)\n    return dist\n\nprint("BFS depuis A :", bfs(graphe, "A"))\n\ndist = distances_bfs(graphe, "A")\nprint("\\nDistances depuis A :")\nfor noeud in sorted(dist):\n    d = dist[noeud]\n    print(f"  A → {noeud} : {d} arête(s)")',
+        exercise: {
+          instruction: "Effectue un BFS depuis 'A' sur ce graphe et affiche l'ordre de visite des nœuds.",
+          starterCode: 'from collections import deque\n\ngraphe = {\n    "A": ["B", "C"],\n    "B": ["A", "D"],\n    "C": ["A", "D"],\n    "D": ["B", "C"],\n}\n\ndef bfs(g, start):\n    vus = {start}\n    file = deque([start])\n    ordre = []\n    while file:\n        n = file.popleft()\n        ordre.append(n)\n        for v in sorted(g[n]):\n            if v not in vus:\n                vus.add(v)\n                file.append(v)\n    return ordre\n\nprint(bfs(graphe, "A"))\n',
+          expectedOutput: "['A', 'B', 'C', 'D']",
+          hints: [
+            "BFS utilise une file (FIFO) : on traite les nœuds dans l'ordre d'insertion.",
+            "On visite A, puis ses voisins triés [B, C], puis les voisins de B ([D]), puis C (D déjà vu).",
+            "Le code est déjà complet — clique ▶ pour vérifier.",
+          ],
+        },
+        quiz: {
+          questions: [
+            {
+              question: "Quelle structure de données est au cœur du BFS ?",
+              options: ["Une pile (LIFO)", "Une file (FIFO)", "Un arbre binaire", "Un dictionnaire"],
+              correct: 1,
+              explanation: "BFS utilise une file FIFO (First In First Out) — les nœuds sont traités dans l'ordre où ils ont été découverts, ce qui garantit l'exploration niveau par niveau.",
+            },
+            {
+              question: "Quelle propriété garantit BFS ?",
+              options: [
+                "Trouver le chemin le plus court en poids",
+                "Visiter tous les nœuds le plus rapidement",
+                "Trouver le chemin avec le moins d'arêtes",
+                "Détecter les cycles",
+              ],
+              correct: 2,
+              explanation: "BFS explore en largeur, donc le premier chemin trouvé vers un nœud est celui avec le minimum d'arêtes (pas forcément le minimum en poids).",
+            },
+          ],
+        },
+      },
+      {
+        title: "Graphes : DFS et composantes connexes",
+        description: "DFS (Depth-First Search) explore un nœud le plus loin possible avant de revenir en arrière.\nDFS utilise une pile (récursion ou stack explicite).\nAvantage : détecte les cycles, trouve des composantes connexes, ordonnancement topologique.\nDifférence clé : BFS → file (largeur d'abord) ; DFS → pile (profondeur d'abord).\nLes composantes connexes sont des sous-graphes où tous les nœuds sont accessibles entre eux.\nApplications : détection de groupes, compilation, planning de tâches.",
+        code: 'def dfs_recursif(graphe, noeud, vus=None):\n    """DFS récursif — retourne les nœuds visités."""\n    if vus is None:\n        vus = set()\n    vus.add(noeud)\n    for voisin in sorted(graphe.get(noeud, [])):\n        if voisin not in vus:\n            dfs_recursif(graphe, voisin, vus)\n    return vus\n\ndef composantes_connexes(graphe):\n    """Trouve toutes les composantes connexes du graphe."""\n    tous = set(graphe)\n    vus_global = set()\n    composantes = []\n    for noeud in sorted(tous):\n        if noeud not in vus_global:\n            comp = dfs_recursif(graphe, noeud)\n            comp_nouvelle = comp - vus_global\n            composantes.append(sorted(comp_nouvelle))\n            vus_global.update(comp)\n    return composantes\n\n# Graphe avec 2 composantes connexes\ngraphe = {\n    "A": ["B", "C"], "B": ["A"],       "C": ["A"],\n    "D": ["E"],       "E": ["D", "F"], "F": ["E"],\n    "G": [],\n}\n\nprint("DFS depuis A :", sorted(dfs_recursif(graphe, "A")))\nprint("DFS depuis D :", sorted(dfs_recursif(graphe, "D")))\n\ncomps = composantes_connexes(graphe)\nprint(f"\\n{len(comps)} composantes connexes :")\nfor i, c in enumerate(comps, 1):\n    print(f"  {i}. {c}")',
+        exercise: {
+          instruction: "Effectue un DFS depuis 'A' et affiche la liste triée des nœuds visités.",
+          starterCode: 'graphe = {"A": ["B", "C"], "B": ["D"], "C": ["D"], "D": []}\n\ndef dfs(g, noeud, vus=None):\n    if vus is None:\n        vus = set()\n    vus.add(noeud)\n    for v in sorted(g.get(noeud, [])):\n        if v not in vus:\n            dfs(g, v, vus)\n    return sorted(vus)\n\nprint(dfs(graphe, "A"))\n',
+          expectedOutput: "['A', 'B', 'C', 'D']",
+          hints: [
+            "DFS visite récursivement chaque voisin non encore visité.",
+            "Depuis A : visite B (puis D depuis B), puis C (D déjà visité).",
+            "Le code est déjà complet — clique ▶ pour vérifier.",
+          ],
+        },
+        quiz: {
+          questions: [
+            {
+              question: "Quelle est la différence principale entre BFS et DFS ?",
+              options: [
+                "BFS est récursif, DFS utilise une file",
+                "BFS utilise une file (largeur d'abord), DFS utilise une pile (profondeur d'abord)",
+                "DFS ne peut pas trouver tous les nœuds",
+                "BFS est plus rapide que DFS",
+              ],
+              correct: 1,
+              explanation: "BFS explore niveau par niveau avec une file FIFO. DFS plonge en profondeur avec une pile LIFO (ou récursion). Les deux visitent tous les nœuds accessibles.",
+            },
+          ],
+        },
+      },
+      {
+        title: "Programmation dynamique : mémoïsation",
+        description: "La programmation dynamique résout des problèmes en mémorisant les sous-problèmes déjà calculés.\nLa mémoïsation (top-down) : si le résultat est déjà calculé, on le retourne directement depuis un cache.\nSans mémoïsation, fibonacci(40) fait ~2 milliards d'appels — avec mémo, seulement 40 !\nfunctools.lru_cache décore automatiquement une fonction pour mémoïser ses résultats.\nLe principe : décomposer un grand problème en sous-problèmes qui se chevauchent.",
+        code: 'import functools\nimport time\n\n# Sans mémoïsation : exponentiel O(2^n)\ndef fib_lent(n):\n    if n <= 1:\n        return n\n    return fib_lent(n-1) + fib_lent(n-2)\n\n# Avec mémoïsation manuelle\ndef fib_memo(n, cache=None):\n    if cache is None:\n        cache = {}\n    if n in cache:\n        return cache[n]\n    if n <= 1:\n        return n\n    cache[n] = fib_memo(n-1, cache) + fib_memo(n-2, cache)\n    return cache[n]\n\n# Avec lru_cache : le plus propre\n@functools.lru_cache(maxsize=None)\ndef fib(n):\n    if n <= 1:\n        return n\n    return fib(n-1) + fib(n-2)\n\n# Comparaison de vitesse\nt0 = time.perf_counter()\nresult_lent = fib_lent(32)\nt1 = time.perf_counter()\nresult_rapide = fib(32)\nt2 = time.perf_counter()\n\nprint(f"fib(32) = {result_lent}")\nprint(f"Sans mémo : {(t1-t0)*1000:.1f}ms")\nprint(f"Avec lru_cache : {(t2-t1)*1000:.3f}ms")\n\n# Problème coin change avec mémo\n@functools.lru_cache(maxsize=None)\ndef monnaie(montant, pieces):\n    """Nombre minimum de pièces pour atteindre montant."""\n    if montant == 0:\n        return 0\n    if montant < 0:\n        return float("inf")\n    return 1 + min(monnaie(montant - p, pieces) for p in pieces)\n\nproblem_pieces = (1, 5, 10, 25)\nfor m in [11, 30, 41]:\n    nb = monnaie(m, problem_pieces)\n    print(f"  {m}¢ → {nb} pièce(s) minimum")',
+        exercise: {
+          instruction: "Calcule fib(0) à fib(7) avec mémoïsation et affiche chaque valeur sur une ligne.",
+          starterCode: 'def fib(n, cache={}):\n    if n in cache:\n        return cache[n]\n    if n <= 1:\n        return n\n    cache[n] = fib(n-1) + fib(n-2)\n    return cache[n]\n\nfor i in range(8):\n    print(fib(i))\n',
+          expectedOutput: "0\n1\n1\n2\n3\n5\n8\n13",
+          hints: [
+            "La suite de Fibonacci : 0, 1, 1, 2, 3, 5, 8, 13... chaque terme = somme des deux précédents.",
+            "Avec le cache, chaque fib(n) n'est calculé qu'une seule fois.",
+            "Le code est déjà complet — clique ▶ pour vérifier.",
+          ],
+        },
+        quiz: {
+          questions: [
+            {
+              question: "Quelle est la complexité de fib(n) AVEC mémoïsation ?",
+              options: ["O(2^n)", "O(n²)", "O(n)", "O(log n)"],
+              correct: 2,
+              explanation: "Avec mémoïsation, chaque valeur fib(k) n'est calculée qu'une fois — donc n calculs au total : complexité O(n).",
+            },
+            {
+              question: "Que fait @functools.lru_cache(maxsize=None) ?",
+              options: [
+                "Limite la mémoire utilisée à None octets",
+                "Mémoïse automatiquement tous les appels de la fonction décorée",
+                "Vide le cache à chaque appel",
+                "Optimise les boucles for",
+              ],
+              correct: 1,
+              explanation: "lru_cache stocke les résultats des appels précédents dans un cache. maxsize=None signifie que le cache peut grandir sans limite.",
+            },
+          ],
+        },
+      },
+      {
+        title: "Programmation dynamique : tabulation (bottom-up)",
+        description: "La tabulation (bottom-up) construit les solutions des plus petits sous-problèmes vers les plus grands.\nContrairement à la mémoïsation (top-down/récursion), la tabulation utilise une boucle itérative.\nLe sac à dos (knapsack) est le problème classique : maximiser la valeur en respectant un poids max.\nOn construit une table dp[i][c] = meilleure valeur avec i objets et capacité c.\nLa tabulation évite les appels récursifs profonds (pas de RecursionError).",
+        code: 'def sac_a_dos(capacite, poids, valeurs):\n    """Sac à dos 0-1 par tabulation."""\n    n = len(poids)\n    dp = [[0] * (capacite + 1) for _ in range(n + 1)]\n    \n    for i in range(1, n + 1):\n        for c in range(capacite + 1):\n            # Ne pas prendre l\'objet i\n            dp[i][c] = dp[i-1][c]\n            # Prendre l\'objet i si ça rentre\n            if poids[i-1] <= c:\n                avec = dp[i-1][c - poids[i-1]] + valeurs[i-1]\n                if avec > dp[i][c]:\n                    dp[i][c] = avec\n    return dp[n][capacite]\n\n# Exemple : objets avec poids et valeurs\nobjets = [\n    {"nom": "Laptop",    "poids": 3, "valeur": 4},\n    {"nom": "Téléphone", "poids": 1, "valeur": 3},\n    {"nom": "Tablette",  "poids": 2, "valeur": 3},\n    {"nom": "Livres",    "poids": 4, "valeur": 2},\n]\npoids_list  = [o["poids"]  for o in objets]\nvaleur_list = [o["valeur"] for o in objets]\n\nfor cap in [4, 5, 6]:\n    best = sac_a_dos(cap, poids_list, valeur_list)\n    print(f"Capacité {cap}kg → valeur max : {best}")\n\n# Suite de Fibonacci par tabulation\ndef fib_tab(n):\n    if n <= 1:\n        return n\n    dp = [0] * (n + 1)\n    dp[1] = 1\n    for i in range(2, n + 1):\n        dp[i] = dp[i-1] + dp[i-2]\n    return dp[n]\n\nprint("\\nFibonacci tab :", [fib_tab(i) for i in range(10)])',
+        exercise: {
+          instruction: "Résous ce problème de sac à dos : capacité 5, poids=[2,3,4,5], valeurs=[3,4,5,6]. Affiche la valeur maximale.",
+          starterCode: 'def sac_a_dos(capacite, poids, valeurs):\n    n = len(poids)\n    dp = [[0] * (capacite + 1) for _ in range(n + 1)]\n    for i in range(1, n + 1):\n        for c in range(capacite + 1):\n            dp[i][c] = dp[i-1][c]\n            if poids[i-1] <= c:\n                avec = dp[i-1][c - poids[i-1]] + valeurs[i-1]\n                if avec > dp[i][c]:\n                    dp[i][c] = avec\n    return dp[n][capacite]\n\nprint(sac_a_dos(5, [2, 3, 4, 5], [3, 4, 5, 6]))\n',
+          expectedOutput: "7",
+          hints: [
+            "Essaie les combinaisons : objet1(2,3)+objet2(3,4)=5kg, valeur=7. C'est le maximum pour 5kg.",
+            "La table dp construit la solution optimale pour chaque capacité de 0 à 5.",
+            "Le code est déjà complet — clique ▶ pour vérifier.",
+          ],
+        },
+        quiz: {
+          questions: [
+            {
+              question: "Quelle est la différence entre mémoïsation et tabulation ?",
+              options: [
+                "La mémoïsation est toujours plus rapide",
+                "Mémoïsation : top-down (récursif + cache) ; Tabulation : bottom-up (itératif)",
+                "La tabulation ne peut pas résoudre le sac à dos",
+                "Elles sont identiques",
+              ],
+              correct: 1,
+              explanation: "Mémoïsation descend récursivement depuis le problème principal en mémorisant les résultats. Tabulation monte itérativement des petits sous-problèmes vers le grand.",
+            },
+          ],
+        },
+      },
+      {
+        title: "Arbre binaire de recherche (BST)",
+        description: "Un arbre binaire de recherche est une structure hiérarchique avec une règle simple :\npour chaque nœud, les valeurs à gauche sont plus petites, celles à droite sont plus grandes.\nL'insertion est en O(log n) en moyenne, O(n) dans le pire cas (arbre dégénéré).\nLe parcours in-order (gauche → racine → droite) produit les valeurs triées.\nLes BST sont à la base des bases de données, des index, et de nombreuses structures efficaces.",
+        code: 'class Noeud:\n    def __init__(self, val):\n        self.val = val\n        self.gauche = None\n        self.droite = None\n\ndef inserer(noeud, val):\n    if noeud is None:\n        return Noeud(val)\n    if val < noeud.val:\n        noeud.gauche = inserer(noeud.gauche, val)\n    elif val > noeud.val:\n        noeud.droite = inserer(noeud.droite, val)\n    return noeud\n\ndef in_order(noeud):\n    """Parcours in-order → valeurs triées."""\n    if noeud is None:\n        return []\n    return in_order(noeud.gauche) + [noeud.val] + in_order(noeud.droite)\n\ndef rechercher(noeud, val):\n    if noeud is None:\n        return False\n    if val == noeud.val:\n        return True\n    if val < noeud.val:\n        return rechercher(noeud.gauche, val)\n    return rechercher(noeud.droite, val)\n\ndef hauteur(noeud):\n    if noeud is None:\n        return 0\n    return 1 + max(hauteur(noeud.gauche), hauteur(noeud.droite))\n\n# Construction de l\'arbre\nvaleurs = [50, 30, 70, 20, 40, 60, 80]\nracine = None\nfor v in valeurs:\n    racine = inserer(racine, v)\n\nprint("In-order (trié) :", in_order(racine))\nprint(f"Hauteur de l\'arbre : {hauteur(racine)}")\n\nfor v in [40, 55, 80]:\n    trouve = rechercher(racine, v)\n    print(f"Recherche {v} : {trouve}")',
+        exercise: {
+          instruction: "Insère les valeurs [5, 3, 7, 1, 4] dans un BST et affiche le parcours in-order.",
+          starterCode: 'class Noeud:\n    def __init__(self, val):\n        self.val = val\n        self.gauche = None\n        self.droite = None\n\ndef inserer(noeud, val):\n    if noeud is None:\n        return Noeud(val)\n    if val < noeud.val:\n        noeud.gauche = inserer(noeud.gauche, val)\n    elif val > noeud.val:\n        noeud.droite = inserer(noeud.droite, val)\n    return noeud\n\ndef in_order(noeud):\n    if noeud is None:\n        return []\n    return in_order(noeud.gauche) + [noeud.val] + in_order(noeud.droite)\n\nracine = None\nfor v in [5, 3, 7, 1, 4]:\n    racine = inserer(racine, v)\nprint(in_order(racine))\n',
+          expectedOutput: "[1, 3, 4, 5, 7]",
+          hints: [
+            "Un BST in-order produit toujours les valeurs dans l'ordre croissant.",
+            "Après insertion de [5,3,7,1,4], le parcours in-order donne [1,3,4,5,7].",
+            "Le code est déjà complet — clique ▶ pour vérifier.",
+          ],
+        },
+        quiz: {
+          questions: [
+            {
+              question: "Quel parcours d'un BST produit les valeurs dans l'ordre croissant ?",
+              options: ["Pré-order (racine→gauche→droite)", "In-order (gauche→racine→droite)", "Post-order (gauche→droite→racine)", "BFS (niveau par niveau)"],
+              correct: 1,
+              explanation: "Le parcours in-order visite gauche→racine→droite. Dans un BST, cela produit les valeurs du plus petit au plus grand.",
+            },
+          ],
+        },
+      },
+      {
+        title: "Mini-projet : Dijkstra — chemin le plus court",
+        description: "Dijkstra est l'algorithme classique pour le chemin le plus court dans un graphe pondéré.\nIl utilise un tas-min (heapq) pour toujours explorer le nœud le moins coûteux en premier.\nComplexité : O((V + E) log V) avec un tas binaire.\nApplications réelles : GPS navigation, routage réseau, jeux vidéo (pathfinding).\nDifférence avec BFS : BFS minimise le nombre d'arêtes, Dijkstra minimise la somme des poids.",
+        code: 'import heapq\n\ndef dijkstra(graphe, depart):\n    """Retourne les distances minimales depuis depart."""\n    dist = {n: float("inf") for n in graphe}\n    dist[depart] = 0\n    predecesseur = {n: None for n in graphe}\n    tas = [(0, depart)]\n    \n    while tas:\n        d_actuelle, noeud = heapq.heappop(tas)\n        if d_actuelle > dist[noeud]:\n            continue\n        for voisin, poids in graphe[noeud].items():\n            d_nouvelle = d_actuelle + poids\n            if d_nouvelle < dist[voisin]:\n                dist[voisin] = d_nouvelle\n                predecesseur[voisin] = noeud\n                heapq.heappush(tas, (d_nouvelle, voisin))\n    return dist, predecesseur\n\ndef reconstruire_chemin(pred, depart, arrivee):\n    chemin = []\n    noeud = arrivee\n    while noeud is not None:\n        chemin.append(noeud)\n        noeud = pred[noeud]\n    chemin.reverse()\n    return chemin if chemin[0] == depart else []\n\n# Carte routière simplifiée\ncarte = {\n    "Paris":    {"Lyon": 465, "Bordeaux": 585, "Lille": 225},\n    "Lyon":     {"Paris": 465, "Marseille": 315, "Grenoble": 105},\n    "Bordeaux": {"Paris": 585, "Toulouse": 245},\n    "Lille":    {"Paris": 225},\n    "Marseille":{"Lyon": 315},\n    "Grenoble": {"Lyon": 105},\n    "Toulouse": {"Bordeaux": 245},\n}\n\ndist, pred = dijkstra(carte, "Paris")\nprint("Distances depuis Paris :")\nfor ville in sorted(dist):\n    if dist[ville] < float("inf"):\n        chemin = reconstruire_chemin(pred, "Paris", ville)\n        route = " → ".join(chemin)\n        print(f"  {ville:12} : {dist[ville]:5}km  ({route})")',
+        exercise: {
+          instruction: "Applique Dijkstra depuis 'A' et affiche la distance minimale pour atteindre 'D'.",
+          starterCode: 'import heapq\n\ndef dijkstra(graphe, depart):\n    dist = {n: float("inf") for n in graphe}\n    dist[depart] = 0\n    tas = [(0, depart)]\n    while tas:\n        d, n = heapq.heappop(tas)\n        if d > dist[n]:\n            continue\n        for v, p in graphe[n].items():\n            nd = d + p\n            if nd < dist[v]:\n                dist[v] = nd\n                heapq.heappush(tas, (nd, v))\n    return dist\n\ngraphe = {\n    "A": {"B": 4, "C": 2},\n    "B": {"D": 3},\n    "C": {"B": 1, "D": 5},\n    "D": {},\n}\ndist = dijkstra(graphe, "A")\nprint(dist["D"])\n',
+          expectedOutput: "6",
+          hints: [
+            "Depuis A : A→C (2) puis C→B (1) = 3, puis B→D (3) = 6. Chemin direct A→B→D = 4+3 = 7.",
+            "Le chemin A→C→B→D coûte 2+1+3 = 6, qui est optimal.",
+            "Le code est déjà complet — clique ▶ pour vérifier.",
+          ],
+        },
+        quiz: {
+          questions: [
+            {
+              question: "Quelle structure de données rend Dijkstra efficace ?",
+              options: ["Une liste triée", "Un tas-min (priority queue)", "Une pile", "Un arbre AVL"],
+              correct: 1,
+              explanation: "Le tas-min (heapq) permet d'extraire en O(log n) le nœud avec la distance minimale connue — c'est ce qui donne à Dijkstra sa complexité O((V+E) log V).",
+            },
+            {
+              question: "Dans quel cas Dijkstra NE fonctionne PAS ?",
+              options: [
+                "Graphes non orientés",
+                "Graphes avec des poids négatifs",
+                "Graphes avec des cycles",
+                "Graphes non connexes",
+              ],
+              correct: 1,
+              explanation: "Dijkstra suppose que les poids sont positifs. Des arêtes négatives peuvent créer des chemins plus courts non détectés — utilise Bellman-Ford dans ce cas.",
+            },
+          ],
+        },
       },
     ],
   },

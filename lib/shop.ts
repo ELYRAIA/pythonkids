@@ -12,8 +12,9 @@ export interface ShopItem {
   price: number;
   description: string;
   gradient?: string;
-  tagText?: string; // texte affiché dans le badge titre
+  tagText?: string;
   secret?: boolean;
+  battlePass?: boolean;
 }
 
 export const SHOP_SKINS: ShopItem[] = [
@@ -59,6 +60,13 @@ export const SHOP_SKINS: ShopItem[] = [
   { id: "skin_eclipse",   name: "Éclipse",             emoji: "🌑", type: "skin", rarity: "legendary", price: 1000, description: "Soleil et lune fusionnés",      gradient: "from-yellow-300 via-gray-900 to-indigo-900" },
   // Skin secret — uniquement via code promo
   { id: "skin_serpent",   name: "Écailles de Serpent", emoji: "🐍", type: "skin", rarity: "legendary", price: 0, description: "Le skin légendaire des vrais Pythonistes", gradient: "from-green-900 via-emerald-600 to-lime-400", secret: true },
+  // Skins exclusifs Pass de Combat
+  { id: "bp_skin_storm",    name: "Tempête",   emoji: "🌪️", type: "skin", rarity: "rare",      price: 0, description: "Les vents du pass",        gradient: "from-slate-500 to-blue-600",              battlePass: true },
+  { id: "bp_skin_frost",    name: "Givre",     emoji: "❄️", type: "skin", rarity: "rare",      price: 0, description: "Froid du pass premium",    gradient: "from-sky-300 to-blue-500",                battlePass: true },
+  { id: "bp_skin_ember",    name: "Braise",    emoji: "🔥", type: "skin", rarity: "epic",      price: 0, description: "Flammes du pass",          gradient: "from-orange-600 to-red-900",              battlePass: true },
+  { id: "bp_skin_spectral", name: "Spectral",  emoji: "👻", type: "skin", rarity: "epic",      price: 0, description: "Ombre du pass premium",    gradient: "from-violet-400 to-slate-700",            battlePass: true },
+  { id: "bp_skin_absolute", name: "Absolu",    emoji: "⚡", type: "skin", rarity: "legendary", price: 0, description: "La récompense ultime",     gradient: "from-yellow-500 via-purple-500 to-cyan-500", battlePass: true },
+  { id: "bp_skin_eternal",  name: "Éternel",   emoji: "🌌", type: "skin", rarity: "legendary", price: 0, description: "Récompense ultime premium", gradient: "from-indigo-900 via-purple-700 to-pink-600", battlePass: true },
 ];
 
 export const SHOP_STICKERS: ShopItem[] = [
@@ -108,6 +116,12 @@ export const SHOP_STICKERS: ShopItem[] = [
   // Légendaire (suite)
   { id: "sticker_angel",   name: "Ange",         emoji: "👼", type: "sticker", rarity: "legendary", price: 800, description: "Messager céleste"         },
   { id: "sticker_infinity", name: "Infini",      emoji: "♾️", type: "sticker", rarity: "legendary", price: 800, description: "Sans limites"             },
+  // Stickers exclusifs Pass de Combat
+  { id: "bp_sticker_shield",      name: "Bouclier",         emoji: "🛡️", type: "sticker", rarity: "common",    price: 0, description: "Défense du pass",        battlePass: true },
+  { id: "bp_sticker_blade",       name: "Lame",             emoji: "🗡️", type: "sticker", rarity: "rare",      price: 0, description: "Attaque du pass",        battlePass: true },
+  { id: "bp_sticker_star_gold",   name: "Étoile d'or",      emoji: "🌟", type: "sticker", rarity: "epic",      price: 0, description: "Éclat du pass",          battlePass: true },
+  { id: "bp_sticker_champion",    name: "Champion",         emoji: "🏆", type: "sticker", rarity: "legendary", price: 0, description: "Gloire du pass",         battlePass: true },
+  { id: "bp_sticker_thunder_bp",  name: "Foudre de Guerre", emoji: "⚡", type: "sticker", rarity: "epic",      price: 0, description: "Puissance premium",      battlePass: true },
 ];
 
 export const SHOP_TITLES: ShopItem[] = [
@@ -130,6 +144,12 @@ export const SHOP_TITLES: ShopItem[] = [
   // Légendaire
   { id: "title_legend",      name: "Légende Vivante",      emoji: "🌟", type: "title", rarity: "legendary", price: 1200, description: "On raconte des histoires sur toi",      gradient: "from-yellow-400 to-amber-500",      tagText: "Légende Vivante"     },
   { id: "title_god",         name: "Dieu du Code",         emoji: "⚡", type: "title", rarity: "legendary", price: 1200, description: "Python n'a plus aucun secret pour toi", gradient: "from-purple-600 to-pink-600",       tagText: "Dieu du Code"        },
+  // Titres exclusifs Pass de Combat
+  { id: "bp_title_fighter",       name: "Combattant",        emoji: "⚔️",  type: "title", rarity: "common",    price: 0, description: "Guerrier du pass",         gradient: "from-red-400 to-orange-500",       tagText: "Combattant",         battlePass: true },
+  { id: "bp_title_veteran",       name: "Vétéran",           emoji: "🎖️",  type: "title", rarity: "rare",      price: 0, description: "Expérimenté du pass",      gradient: "from-teal-500 to-cyan-600",        tagText: "Vétéran",            battlePass: true },
+  { id: "bp_title_champion_pass", name: "Champion du Pass",  emoji: "🏆",  type: "title", rarity: "epic",      price: 0, description: "Élite des combattants",    gradient: "from-yellow-500 to-amber-600",     tagText: "Champion du Pass",   battlePass: true },
+  { id: "bp_title_conqueror",     name: "Conquérant",        emoji: "👑",  type: "title", rarity: "legendary", price: 0, description: "Maître absolu du pass",    gradient: "from-purple-600 to-pink-700",      tagText: "Conquérant",         battlePass: true },
+  { id: "bp_title_elite",         name: "Élite du Pass",     emoji: "💎",  type: "title", rarity: "legendary", price: 0, description: "Légende premium du pass",  gradient: "from-sky-400 to-indigo-600",       tagText: "Élite du Pass",      battlePass: true },
 ];
 
 const KEY_OWNED    = "pythonkids_shop_owned";

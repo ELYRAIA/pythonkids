@@ -4,7 +4,7 @@ const PAYPAL_API = process.env.PAYPAL_API_URL ?? "https://api-m.sandbox.paypal.c
 
 async function getAccessToken(): Promise<string> {
   const auth = Buffer.from(
-    `${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_CLIENT_SECRET}`
+    `${process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID}:${process.env.PAYPAL_CLIENT_SECRET}`
   ).toString("base64");
   const res = await fetch(`${PAYPAL_API}/v1/oauth2/token`, {
     method: "POST",
@@ -34,9 +34,13 @@ export async function POST(request: Request) {
       return Response.json({ error: "Paiement non complété" }, { status: 400 });
     }
 
-    const packId = order.purchase_units[0]?.custom_id as keyof typeof PACK_CATALOG | undefined;
+    const packId = order.purchase_units[0]?.custom_id;
     const pack = packId ? PACK_CATALOG[packId] : null;
     if (!pack) return Response.json({ error: "Pack introuvable" }, { status: 400 });
+
+    if (pack.isPremium) {
+      return Response.json({ premium: true, status: "COMPLETED" });
+    }
 
     return Response.json({ gems: pack.gems, status: "COMPLETED" });
   } catch {

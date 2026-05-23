@@ -10,8 +10,13 @@ const STEPS = [
   },
   {
     emoji: "📚",
-    title: "6 niveaux t'attendent",
+    title: "12 niveaux t'attendent",
     desc: "Du niveau Premiers pas (8 ans) jusqu'au niveau Maître Python. Chaque niveau te donne un badge et un coffre de récompenses !",
+  },
+  {
+    emoji: "⚔️",
+    title: "Le Pass de Combat",
+    desc: "En apprenant, tu gagnes de l'XP pour monter de niveau dans le Pass de Combat ! À chaque niveau : gemmes 💎, coffres ou objets exclusifs à réclamer.",
   },
   {
     emoji: "🎯",

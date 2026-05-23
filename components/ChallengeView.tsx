@@ -19,6 +19,8 @@ import { updateStreak } from "@/lib/streak";
 import { spendGems } from "@/lib/gems";
 import { recordFailure, clearMistake } from "@/lib/mistakes";
 import { addXP } from "@/lib/xp";
+import { addBattlePassXP } from "@/lib/battlePass";
+import { calculateScore } from "@/lib/score";
 import Confetti from "./Confetti";
 import BadgeCelebration from "./BadgeCelebration";
 
@@ -193,12 +195,23 @@ export default function ChallengeView({
 
         // Effacer des erreurs car réussi
         clearMistake(challenge.id);
-        // Badges
+        // Récompenses
         addXP(30);
+        addBattlePassXP(75);
         const streakBadges = updateStreak();
         trackChallengeWeek();
         refreshWeeklyQuests();
         const challengeBadges = markChallengeComplete(challenge.id);
+        // Mise à jour classement
+        const newScore = calculateScore();
+        const storedUser = localStorage.getItem("pythonkids_username");
+        if (storedUser) {
+          fetch("/api/leaderboard", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username: storedUser, score: newScore }),
+          }).catch(() => {});
+        }
         const allNewBadges = [...streakBadges, ...challengeBadges];
         if (allNewBadges.length > 0) {
           const badge = BADGES.find((b) => b.id === allNewBadges[0]);
@@ -441,10 +454,12 @@ export default function ChallengeView({
                   <div className="text-center">
                     <p className="text-4xl mb-2">🎉</p>
                     <p className="text-xl font-extrabold text-green-700 dark:text-green-400 mb-3">Défi réussi !</p>
-                    <div className="flex justify-center gap-4 text-sm text-green-600 dark:text-green-500 mb-4">
-                      <span className="flex items-center gap-1">⏱ <span className="font-bold tabular-nums">{formatTime(finalTime)}</span></span>
-                      <span className="flex items-center gap-1">🎯 <span className="font-bold">{attempts}</span> tentative{attempts > 1 ? "s" : ""}</span>
+                    <div className="flex justify-center gap-3 text-sm mb-4 flex-wrap">
+                      <span className="flex items-center gap-1 text-green-600 dark:text-green-500">⏱ <span className="font-bold tabular-nums">{formatTime(finalTime)}</span></span>
+                      <span className="flex items-center gap-1 text-green-600 dark:text-green-500">🎯 <span className="font-bold">{attempts}</span> tentative{attempts > 1 ? "s" : ""}</span>
                       <span className="flex items-center gap-1 font-bold text-purple-600 dark:text-purple-300">+200 ⭐</span>
+                      <span className="flex items-center gap-1 font-bold text-blue-500 dark:text-blue-400">+30 XP</span>
+                      <span className="flex items-center gap-1 font-bold text-yellow-600 dark:text-yellow-400">+75 🎖️</span>
                     </div>
                     {nextChallenge && (
                       <button

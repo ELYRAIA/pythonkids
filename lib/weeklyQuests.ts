@@ -1,5 +1,6 @@
 import { addGems } from "./gems";
 import { addQuestChest } from "./chests";
+import { addBattlePassXP } from "./battlePass";
 
 export interface WeeklyQuestDef {
   id: string;
@@ -177,6 +178,7 @@ export function claimWeeklyQuest(questId: string): number {
     return -1; // indique qu'un coffre a été donné
   }
 
+  addBattlePassXP(200);
   const reward = def?.reward ?? 0;
   if (reward > 0) addGems(reward);
   return reward;
