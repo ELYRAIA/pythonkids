@@ -134,6 +134,13 @@ export default function Home() {
               <p className="text-xs text-gray-500 dark:text-slate-400">Affronte un ami en temps réel !</p>
             </div>
           </Link>
+          <Link href="/pet">
+            <div className="bg-white dark:bg-slate-800 border-2 border-cyan-200 dark:border-cyan-900 rounded-2xl p-6 hover:shadow-lg hover:-translate-y-1 transition-all cursor-pointer text-center">
+              <div className="text-4xl mb-2">🤖</div>
+              <h3 className="font-bold text-gray-800 dark:text-white mb-1">Mon Robot</h3>
+              <p className="text-xs text-gray-500 dark:text-slate-400">Contrôle-le avec du Python !</p>
+            </div>
+          </Link>
           <Link href="/certificate">
             <div className="bg-white dark:bg-slate-800 border-2 border-yellow-200 dark:border-yellow-800 rounded-2xl p-6 hover:shadow-lg hover:-translate-y-1 transition-all cursor-pointer text-center">
               <div className="text-4xl mb-2">🎓</div>

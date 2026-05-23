@@ -3,6 +3,9 @@ declare global {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     loadPyodide: (config?: any) => Promise<any>;
     _pythonInputRequest: (msg: string) => Promise<string>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  petAction: (action: string, value: any) => void;
+  petGetStats: () => { faim: number; humeur: number; energie: number };
   }
 }
 
