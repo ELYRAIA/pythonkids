@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { getXPInfo } from "@/lib/xp";
 
 export default function HomeRankWidget() {
+  const t = useTranslations("HomeRankWidget");
   const [info, setInfo] = useState<ReturnType<typeof getXPInfo> | null>(null);
 
   useEffect(() => {
@@ -50,7 +52,7 @@ export default function HomeRankWidget() {
                 </p>
               </>
             ) : (
-              <p className="text-xs text-yellow-500 font-semibold">Rang maximum atteint !</p>
+              <p className="text-xs text-yellow-500 font-semibold">{t("max_rank")}</p>
             )}
           </div>
           <span className="text-gray-300 dark:text-slate-600 text-sm shrink-0">›</span>

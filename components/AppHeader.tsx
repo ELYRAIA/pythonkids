@@ -1,26 +1,29 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Link, usePathname } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { isAudioEnabled, toggleAudio } from "@/lib/sounds";
-const NAV_LINKS = [
-  { href: "/battle-pass", label: "Pass", emoji: "⚔️" },
-  { href: "/challenges", label: "Défis", emoji: "🎯" },
-  { href: "/duel", label: "Duel", emoji: "🥊" },
-  { href: "/detente", label: "Détente", emoji: "🎮" },
-  { href: "/friends", label: "Amis", emoji: "👥" },
-  { href: "/shop", label: "Boutique", emoji: "🛒" },
-  { href: "/leaderboard", label: "Classement", emoji: "🏅" },
-  { href: "/profile", label: "Profil", emoji: "👤" },
-];
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 export default function AppHeader({ right }: { right?: React.ReactNode }) {
+  const t = useTranslations("AppHeader");
   const [open, setOpen] = useState(false);
   const [profileEmoji, setProfileEmoji] = useState<string | null>(null);
   const [streakDanger, setStreakDanger] = useState(false);
   const [audioOn, setAudioOn] = useState(true);
   const pathname = usePathname();
+
+  const NAV_LINKS = [
+    { href: "/battle-pass", label: t("nav_pass"), emoji: "⚔️" },
+    { href: "/challenges", label: t("nav_challenges"), emoji: "🎯" },
+    { href: "/duel", label: t("nav_duel"), emoji: "🥊" },
+    { href: "/detente", label: t("nav_relax"), emoji: "🎮" },
+    { href: "/friends", label: t("nav_friends"), emoji: "👥" },
+    { href: "/shop", label: t("nav_shop"), emoji: "🛒" },
+    { href: "/leaderboard", label: t("nav_leaderboard"), emoji: "🏅" },
+    { href: "/profile", label: t("nav_profile"), emoji: "👤" },
+  ];
 
   useEffect(() => {
     setAudioOn(isAudioEnabled());
@@ -51,8 +54,9 @@ export default function AppHeader({ right }: { right?: React.ReactNode }) {
     pathname === href || pathname.startsWith(href + "/");
 
   const lessonMatch = pathname.match(/^\/levels\/(\d+)\/lessons\//);
-  const breadcrumb = lessonMatch
-    ? { href: `/levels/${lessonMatch[1]}`, label: `← Niveau ${lessonMatch[1]}` }
+  const breadcrumbHref = lessonMatch ? `/levels/${lessonMatch[1]}` : null;
+  const breadcrumb = lessonMatch && breadcrumbHref
+    ? { href: breadcrumbHref, label: t("level_label", { level: lessonMatch[1] }) }
     : null;
 
   return (
@@ -97,22 +101,23 @@ export default function AppHeader({ right }: { right?: React.ReactNode }) {
 
         <div className="ml-auto hidden lg:flex items-center gap-3">
           {right}
+          <LanguageSwitcher />
           <button
             onClick={() => toggleAudio()}
-            title={audioOn ? "Couper le son" : "Activer le son"}
+            title={audioOn ? t("sound_on") : t("sound_off")}
             className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-300 hover:bg-purple-50 dark:hover:bg-slate-800 transition-colors text-base"
           >
             {audioOn ? "🔊" : "🔇"}
           </button>
           {streakDanger && (
             <span className="text-xs font-bold text-orange-500 dark:text-orange-400 animate-pulse bg-orange-50 dark:bg-orange-950/40 border border-orange-300 dark:border-orange-700 rounded-full px-2.5 py-1">
-              🔥 Streak en danger !
+              {t("streak_danger")}
             </span>
           )}
           {profileEmoji && (
             <Link
               href="/profiles"
-              title={streakDanger ? "⚠️ Tu n'as pas encore joué aujourd'hui !" : "Changer de profil"}
+              title={streakDanger ? t("sound_warning") : t("switch_profile")}
               className="relative text-xl w-9 h-9 flex items-center justify-center rounded-full bg-white dark:bg-slate-800 border-2 border-purple-200 dark:border-slate-600 hover:border-purple-400 transition-colors shadow-sm"
             >
               {profileEmoji}
@@ -157,14 +162,17 @@ export default function AppHeader({ right }: { right?: React.ReactNode }) {
             onClick={() => setOpen(false)}
             className={`font-semibold text-sm ${isActive("/profiles") ? "text-purple-600 dark:text-purple-400" : "text-gray-600 dark:text-slate-300"}`}
           >
-            {profileEmoji ?? "👤"} Changer de profil
+            {profileEmoji ?? "👤"} {t("switch_profile")}
           </Link>
           <button
             onClick={() => toggleAudio()}
             className="font-semibold text-sm text-gray-600 dark:text-slate-300 text-left"
           >
-            {audioOn ? "🔊" : "🔇"} {audioOn ? "Couper le son" : "Activer le son"}
+            {audioOn ? "🔊" : "🔇"} {audioOn ? t("sound_on") : t("sound_off")}
           </button>
+          <div className="pt-1 border-t border-gray-100 dark:border-slate-700">
+            <LanguageSwitcher />
+          </div>
         </div>
       )}
     </header>

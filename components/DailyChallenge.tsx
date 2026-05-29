@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { CHALLENGES, getCompletedChallenges } from "@/lib/challenges";
 
 function getDailyChallenge() {
@@ -24,6 +25,7 @@ function timeUntilMidnight() {
 }
 
 export default function DailyChallenge() {
+  const t = useTranslations("DailyChallenge");
   const [isDone, setIsDone] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [timeLeft, setTimeLeft] = useState("");
@@ -64,16 +66,16 @@ export default function DailyChallenge() {
                   : "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-500"
               }`}
             >
-              ☀️ Défi du jour
+              {t("label")}
             </span>
             {isDone ? (
               <span className="text-xs text-green-600 dark:text-green-400 font-bold">
-                +200 pts gagnés ✓
+                {t("completed")}
               </span>
             ) : (
               timeLeft && (
                 <span className="text-xs text-gray-400 dark:text-slate-500">
-                  Change dans {timeLeft}
+                  {t("changes_in", { timeLeft })}
                 </span>
               )
             )}
@@ -108,7 +110,7 @@ export default function DailyChallenge() {
                   href={`/challenges/${challenge.id}`}
                   className="bg-gradient-to-r from-amber-400 to-orange-500 text-white px-4 py-2 rounded-full text-sm font-bold hover:opacity-90 transition-opacity shadow-sm whitespace-nowrap"
                 >
-                  Relever →
+                  {t("take_on")}
                 </Link>
               )}
             </div>

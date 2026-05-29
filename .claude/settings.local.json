@@ -54,7 +54,14 @@
       "Bash(curl *)",
       "Bash(python scripts/add_levels.py)",
       "Bash(grep -n \"^\\\\\"\\\\\"\\\\\"$\" scripts/add_levels.py)",
-      "Bash(python -c ' *)"
+      "Bash(python -c ' *)",
+      "Bash(Get-Content *)",
+      "Bash(mkdir -p \"C:\\\\Users\\\\cyril\\\\OneDrive\\\\02. Clément\\\\Projets\\\\PythonKids\\\\app\\\\[locale]\\\\parent\")",
+      "Bash(mkdir -p \"C:\\\\Users\\\\cyril\\\\OneDrive\\\\02. Clément\\\\Projets\\\\PythonKids\\\\app\\\\[locale]\\\\leaderboard\")",
+      "Bash(mkdir -p \"C:\\\\Users\\\\cyril\\\\OneDrive\\\\02. Clément\\\\Projets\\\\PythonKids\\\\app\\\\[locale]\\\\battle-pass\")",
+      "Bash(mkdir -p \"C:\\\\Users\\\\cyril\\\\OneDrive\\\\02. Clément\\\\Projets\\\\PythonKids\\\\app\\\\[locale]\\\\editor\")",
+      "Bash(mkdir -p \"C:\\\\Users\\\\cyril\\\\OneDrive\\\\02. Clément\\\\Projets\\\\PythonKids\\\\app\\\\[locale]\\\\duel\")",
+      "PowerShell(git add *)"
     ]
   }
 }

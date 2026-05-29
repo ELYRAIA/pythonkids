@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { getPendingChests } from "@/lib/chests";
 
 export default function HomeCoffresWidget() {
+  const t = useTranslations("HomeCoffresWidget");
   const [count, setCount] = useState(0);
 
   useEffect(() => {
@@ -23,9 +25,9 @@ export default function HomeCoffresWidget() {
           <span className="text-3xl" style={{ animation: "avatar-badge-bounce 3s ease-in-out infinite" }}>📦</span>
           <div className="flex-1">
             <p className="text-white font-extrabold text-sm">
-              {count === 1 ? "1 coffre t'attend !" : `${count} coffres t'attendent !`}
+              {count === 1 ? t("singular") : t("plural", { count })}
             </p>
-            <p className="text-amber-100 text-xs">Ouvre-les sur ton profil pour découvrir tes récompenses →</p>
+            <p className="text-amber-100 text-xs">{t("open_hint")}</p>
           </div>
           <span className="bg-white/25 text-white font-extrabold text-sm rounded-full w-8 h-8 flex items-center justify-center shrink-0">
             {count}

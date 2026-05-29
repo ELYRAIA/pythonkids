@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { getMastery, lessonKey } from "@/lib/mastery";
 import { getProgress } from "@/lib/progress";
 import { LEVELS_DATA } from "@/lib/lessons";
@@ -36,6 +37,7 @@ function getRevisionLessons(): RevisionLesson[] {
 }
 
 export default function HomeRevisionWidget() {
+  const t = useTranslations("HomeRevisionWidget");
   const [lessons, setLessons] = useState<RevisionLesson[]>([]);
 
   useEffect(() => {
@@ -52,8 +54,8 @@ export default function HomeRevisionWidget() {
       <div className="max-w-2xl mx-auto bg-amber-50 dark:bg-amber-950/20 rounded-2xl border border-amber-200 dark:border-amber-800 px-5 py-4">
         <div className="flex items-center gap-2 mb-3">
           <span className="text-lg">🔄</span>
-          <span className="font-extrabold text-amber-700 dark:text-amber-400 text-sm">Leçons à réviser</span>
-          <span className="ml-auto text-xs text-amber-500 dark:text-amber-500">{lessons.length} suggérée{lessons.length > 1 ? "s" : ""}</span>
+          <span className="font-extrabold text-amber-700 dark:text-amber-400 text-sm">{t("title")}</span>
+          <span className="ml-auto text-xs text-amber-500 dark:text-amber-500">{lessons.length > 1 ? t("suggested_plural", { count: lessons.length }) : t("suggested", { count: lessons.length })}</span>
         </div>
         <div className="flex flex-col gap-2">
           {lessons.map(({ levelId, lessonIndex, title, stars }) => (

@@ -1,22 +1,26 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { getProgress } from "@/lib/progress";
 import { getStreak } from "@/lib/streak";
 import { getXPInfo } from "@/lib/xp";
 import { LEVELS_DATA } from "@/lib/lessons";
 import { LEVELS } from "@/lib/levels";
 
-function streakMessage(streak: number): { msg: string; emoji: string } {
-  if (streak === 0) return { msg: "Lance ta série — joue aujourd'hui !", emoji: "💤" };
-  if (streak === 1) return { msg: "1er jour ! Continue demain.", emoji: "🌱" };
-  if (streak < 5)  return { msg: `${streak} jours de suite ! Continue !`, emoji: "🔥" };
-  if (streak < 10) return { msg: `${streak} jours — tu es inarrêtable !`, emoji: "⚡" };
-  return { msg: `${streak} jours — LÉGENDAIRE ! 🏆`, emoji: "🌟" };
-}
-
 export default function HomeBanner() {
+  const t = useTranslations("HomeBanner");
+  const tg = useTranslations("GlobalUI");
+
+  const streakMessage = (streak: number): { msg: string; emoji: string } => {
+    if (streak === 0) return { msg: tg("start_series"), emoji: "💤" };
+    if (streak === 1) return { msg: tg("first_day"), emoji: "🌱" };
+    if (streak < 5)  return { msg: tg("streak_continue", { streak }), emoji: "🔥" };
+    if (streak < 10) return { msg: tg("streak_unstoppable", { streak }), emoji: "⚡" };
+    return { msg: tg("streak_legendary", { streak }), emoji: "🌟" };
+  };
+
   const [mounted, setMounted] = useState(false);
   const [username, setUsername] = useState("");
   const [streak, setStreak] = useState(0);
@@ -78,7 +82,7 @@ export default function HomeBanner() {
         <div className="px-5 pt-4 pb-3 flex items-center justify-between gap-3">
           <div className="min-w-0">
             <p className="text-lg font-extrabold text-gray-800 dark:text-white leading-tight truncate">
-              {username ? `Salut ${username} ! 👋` : "Bienvenue ! 👋"}
+              {username ? t("greeting", { name: username }) : t("welcome")}
             </p>
             <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">{xpRank}</p>
           </div>
@@ -95,7 +99,7 @@ export default function HomeBanner() {
               Niveau {levelProgress.levelId} — {levelProgress.levelName}
             </span>
             <span className="text-xs font-semibold text-gray-400 dark:text-slate-500">
-              {levelProgress.done}/{levelProgress.total} leçons · {pct}%
+              {t("level_progress", { done: levelProgress.done, total: levelProgress.total, percent: pct })}
             </span>
           </div>
           <div className="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2">
@@ -117,7 +121,7 @@ export default function HomeBanner() {
                 {nextLesson.levelEmoji}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wide">Prochaine leçon</p>
+                <p className="text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wide">{t("next_lesson")}</p>
                 <p className="text-sm font-bold text-gray-800 dark:text-white truncate">{nextLesson.title}</p>
               </div>
               <span className="text-purple-400 group-hover:translate-x-1 transition-transform shrink-0">→</span>

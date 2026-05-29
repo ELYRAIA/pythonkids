@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { getQuestState, refreshQuests } from "@/lib/quests";
 
 export default function HomeQuestsWidget() {
+  const t = useTranslations("HomeQuestsWidget");
   const [mounted, setMounted] = useState(false);
   const [claimable, setClaimable] = useState(0);
   const [claimed, setClaimed] = useState(0);
@@ -38,9 +40,9 @@ export default function HomeQuestsWidget() {
             <span className="text-2xl">📋</span>
             <div className="flex-1">
               <p className="text-white font-bold text-sm">
-                {claimable} quête{claimable > 1 ? "s" : ""} prête{claimable > 1 ? "s" : ""} à réclamer !
+                {claimable > 1 ? t("ready_plural", { count: claimable }) : t("ready", { count: claimable })}
               </p>
-              <p className="text-orange-100 text-xs">Récupère ta récompense ci-dessous 🎉</p>
+              <p className="text-orange-100 text-xs">{t("claim_hint")}</p>
             </div>
             <span className="text-white font-bold text-xl animate-bounce">↓</span>
           </div>
@@ -49,7 +51,7 @@ export default function HomeQuestsWidget() {
             <span className="text-xl">📋</span>
             <div className="flex-1 min-w-0">
               <p className="text-gray-800 dark:text-white font-bold text-sm">
-                Quêtes du jour : {claimed}/{total} terminées
+                {t("daily", { done: claimed, total })}
               </p>
               <div className="flex gap-1 mt-1.5">
                 {Array.from({ length: total }).map((_, i) => (

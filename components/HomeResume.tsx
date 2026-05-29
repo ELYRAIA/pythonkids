@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { getProgress, BADGES } from "@/lib/progress";
 import { LEVELS } from "@/lib/levels";
 import { LEVELS_DATA } from "@/lib/lessons";
@@ -25,6 +26,7 @@ interface LastBadge {
 }
 
 export default function HomeResume() {
+  const t = useTranslations("HomeResume");
   const [mounted, setMounted] = useState(false);
   const [nextLesson, setNextLesson] = useState<NextLesson | null>(null);
   const [lastBadge, setLastBadge] = useState<LastBadge | null>(null);
@@ -78,7 +80,7 @@ export default function HomeResume() {
       <div className="max-w-2xl mx-auto bg-white dark:bg-slate-800 rounded-2xl border border-purple-100 dark:border-slate-700 p-5 shadow-sm">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-sm font-extrabold text-gray-700 dark:text-slate-300 uppercase tracking-wide">
-            Reprendre où tu en étais
+            {t("resume")}
           </h2>
           {streak > 0 && (
             <span className="flex items-center gap-1 text-orange-500 font-bold text-sm">
@@ -90,7 +92,7 @@ export default function HomeResume() {
         {/* Barre de progression globale */}
         <div className="mb-4">
           <div className="flex items-center justify-between mb-1.5">
-            <span className="text-xs text-gray-500 dark:text-slate-400 font-medium">Progression totale</span>
+            <span className="text-xs text-gray-500 dark:text-slate-400 font-medium">{t("overall")}</span>
             <span className="text-xs font-bold text-purple-600 dark:text-purple-400">
               {doneLessons} / {TOTAL_LESSONS} leçons
             </span>
@@ -130,7 +132,7 @@ export default function HomeResume() {
           <div className="flex sm:flex-col gap-3 shrink-0">
             <div className="flex-1 sm:flex-none bg-purple-50 dark:bg-purple-900/20 rounded-xl px-4 py-3 text-center min-w-[80px]">
               <p className="text-xl font-extrabold text-purple-600 dark:text-purple-400">{doneLessons}</p>
-              <p className="text-xs text-gray-500 dark:text-slate-400">leçon{doneLessons > 1 ? "s" : ""}</p>
+              <p className="text-xs text-gray-500 dark:text-slate-400">{doneLessons > 1 ? t("lesson_plural") : t("lesson_single")}</p>
             </div>
             {lastBadge && (
               <div

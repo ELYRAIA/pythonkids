@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { BADGES, getProgress, type Badge } from "@/lib/progress";
 
 export default function BadgeDisplay() {
+  const t = useTranslations("BadgeDisplay");
   const [earned, setEarned] = useState<Badge[]>([]);
   const [tooltip, setTooltip] = useState<string | null>(null);
 
@@ -18,7 +20,7 @@ export default function BadgeDisplay() {
     <section className="w-full px-6 py-6">
       <div className="max-w-2xl mx-auto bg-white dark:bg-slate-800 rounded-2xl border border-purple-100 dark:border-slate-700 shadow-sm p-5">
         <h2 className="text-base font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
-          🏅 Mes badges{" "}
+          {t("title")}{" "}
           <span className="bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 text-xs px-2 py-0.5 rounded-full font-bold">
             {earned.length}/{BADGES.length}
           </span>
@@ -46,7 +48,7 @@ export default function BadgeDisplay() {
                 {/* Tooltip */}
                 {isOpen && (
                   <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-20 w-44 bg-gray-900 text-white text-xs rounded-xl px-3 py-2.5 shadow-xl pointer-events-none">
-                    <p className="font-bold mb-0.5">{isEarned ? "✓ Badge obtenu !" : "🔒 Pas encore…"}</p>
+                    <p className="font-bold mb-0.5">{isEarned ? t("earned") : t("locked")}</p>
                     <p className="opacity-80 leading-snug">{badge.desc}</p>
                     {/* Flèche */}
                     <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
@@ -57,7 +59,7 @@ export default function BadgeDisplay() {
           })}
         </div>
         <p className="text-xs text-gray-400 dark:text-slate-500 mt-3 text-center">
-          Clique sur un badge pour voir comment l&apos;obtenir
+          {t("click_hint")}
         </p>
       </div>
     </section>

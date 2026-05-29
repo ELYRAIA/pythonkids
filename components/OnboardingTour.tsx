@@ -1,38 +1,23 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 
-const STEPS = [
-  {
-    emoji: "🐍",
-    title: "Bienvenue sur PythonKids !",
-    desc: "Apprends Python pas à pas avec des leçons courtes, des défis rigolos et des badges à débloquer. C'est parti !",
-  },
-  {
-    emoji: "📚",
-    title: "12 niveaux t'attendent",
-    desc: "Du niveau Premiers pas (8 ans) jusqu'au niveau Maître Python. Chaque niveau te donne un badge et un coffre de récompenses !",
-  },
-  {
-    emoji: "⚔️",
-    title: "Le Pass de Combat",
-    desc: "En apprenant, tu gagnes de l'XP pour monter de niveau dans le Pass de Combat ! À chaque niveau : gemmes 💎, coffres ou objets exclusifs à réclamer.",
-  },
-  {
-    emoji: "🎯",
-    title: "Quêtes & Défis",
-    desc: "Des quêtes quotidiennes et hebdomadaires t'attendent sur la page d'accueil. Réussis des défis pour gagner des gemmes 💎 et des badges !",
-  },
-  {
-    emoji: "🔥",
-    title: "Reviens chaque jour !",
-    desc: "Ta progression est sauvegardée automatiquement. Reviens chaque jour pour maintenir ta série de jours consécutifs et gagner des bonus !",
-  },
-];
+const STEP_EMOJIS = ["🐍", "📚", "⚔️", "🎯", "🔥"];
 
 const KEY = "pythonkids_onboarding_v1";
 
 export default function OnboardingTour() {
+  const t = useTranslations("OnboardingTour");
+
+  const STEPS = [
+    { emoji: STEP_EMOJIS[0], title: t("step1_title"), desc: t("step1_desc") },
+    { emoji: STEP_EMOJIS[1], title: t("step2_title"), desc: t("step2_desc") },
+    { emoji: STEP_EMOJIS[2], title: t("step3_title"), desc: t("step3_desc") },
+    { emoji: STEP_EMOJIS[3], title: t("step4_title"), desc: t("step4_desc") },
+    { emoji: STEP_EMOJIS[4], title: t("step5_title"), desc: t("step5_desc") },
+  ];
+
   const [step, setStep] = useState(0);
   const [visible, setVisible] = useState(false);
 
@@ -92,7 +77,7 @@ export default function OnboardingTour() {
           onClick={next}
           className="w-full bg-gradient-to-r from-purple-600 to-pink-500 text-white px-6 py-3 rounded-full font-bold hover:opacity-90 transition-opacity shadow-md"
         >
-          {isLast ? "C'est parti ! 🚀" : "Suivant →"}
+          {isLast ? t("finish") : t("next")}
         </button>
 
         {!isLast && (
@@ -100,7 +85,7 @@ export default function OnboardingTour() {
             onClick={finish}
             className="mt-3 w-full text-xs text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 transition-colors py-1"
           >
-            Passer le tutoriel
+            {t("skip")}
           </button>
         )}
       </div>

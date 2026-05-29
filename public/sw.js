@@ -14,6 +14,15 @@ const PRECACHE_PAGES = [
   "/profile",
   "/leaderboard",
   "/shop",
+  "/projects",
+  "/pet",
+  "/parent",
+  "/stats",
+  "/battle-pass",
+  "/certificate",
+  "/detente",
+  "/quiz",
+  "/duel",
   "/offline.html",
 ];
 
@@ -90,6 +99,39 @@ self.addEventListener("fetch", (e) => {
       }
 
       return new Response("Hors ligne", { status: 503 });
+    })
+  );
+});
+
+// Push notifications
+self.addEventListener("push", (e) => {
+  if (!e.data) return;
+  let payload;
+  try { payload = e.data.json(); } catch { payload = { title: "PythonKids", body: e.data.text() }; }
+  e.waitUntil(
+    self.registration.showNotification(payload.title ?? "PythonKids", {
+      body: payload.body ?? "",
+      icon: "/icons/icon-192.png",
+      badge: "/icons/icon-192.png",
+      data: { url: payload.url ?? "/" },
+      tag: "pythonkids-reminder",
+      renotify: true,
+    })
+  );
+});
+
+self.addEventListener("notificationclick", (e) => {
+  e.notification.close();
+  const url = e.notification.data?.url ?? "/";
+  e.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
+      for (const client of clients) {
+        if (client.url.includes(self.location.origin) && "focus" in client) {
+          client.navigate(url);
+          return client.focus();
+        }
+      }
+      return self.clients.openWindow(url);
     })
   );
 });

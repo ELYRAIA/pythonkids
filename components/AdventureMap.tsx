@@ -1,11 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { LEVELS } from "@/lib/levels";
 import { getProgress } from "@/lib/progress";
 
 export default function AdventureMap() {
+  const t = useTranslations("AdventureMap");
   const [completedLessons, setCompletedLessons] = useState<Record<string, number[]>>({});
   const [earnedBadges, setEarnedBadges] = useState<string[]>([]);
   const [mounted, setMounted] = useState(false);
@@ -93,7 +95,7 @@ export default function AdventureMap() {
                         <span className="text-xs font-semibold text-gray-400 dark:text-slate-500">Niveau {level.id}</span>
                         <span className="text-xs text-gray-400 dark:text-slate-500 ml-2">{level.ages}</span>
                       </div>
-                      {isComplete && <span className="text-xs font-bold text-green-500">Terminé !</span>}
+                      {isComplete && <span className="text-xs font-bold text-green-500">{t("completed")}</span>}
                       {isCurrent && done > 0 && <span className="text-xs font-bold text-purple-500">{pct}%</span>}
                     </div>
                     <h3 className="font-bold text-gray-800 dark:text-white text-sm mb-1">{level.name}</h3>
@@ -138,8 +140,8 @@ export default function AdventureMap() {
       {mounted && earnedBadges.includes("all_levels") && (
         <div className="text-center py-4">
           <p className="text-2xl mb-2">🏆</p>
-          <p className="font-bold text-gray-800 dark:text-white">Tu as tout terminé !</p>
-          <p className="text-sm text-gray-500 dark:text-slate-400">Félicitations, tu es un Grand Maître Python !</p>
+          <p className="font-bold text-gray-800 dark:text-white">{t("all_complete")}</p>
+          <p className="text-sm text-gray-500 dark:text-slate-400">{t("completion_message")}</p>
         </div>
       )}
     </div>

@@ -1,16 +1,19 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { getBattlePassState, getBPXPInfo, BP_MAX_LEVEL, BP_LEVELS, BP_SEASON_END, type BPReward } from "@/lib/battlePass";
 
-function rewardIcon(r: BPReward) {
-  if (r.type === "gems") return `💎 +${r.gems}`;
-  if (r.type === "chest") return ["📦", "📫", "💜", "✨"][r.chestLevel ?? 0] + " Coffre";
-  return `${r.itemEmoji} ${r.itemName}`;
-}
-
 export default function HomeBattlePassWidget() {
+  const t = useTranslations("HomeBattlePassWidget");
+
+  const rewardIcon = (r: BPReward) => {
+    if (r.type === "gems") return `💎 +${r.gems}`;
+    if (r.type === "chest") return ["📦", "📫", "💜", "✨"][r.chestLevel ?? 0] + ` ${t("chest")}`;
+    return `${r.itemEmoji} ${r.itemName}`;
+  };
+
   const [level, setLevel] = useState(0);
   const [xpInfo, setXpInfo] = useState({ levelXP: 0, xpToNext: 200, progress: 0, currentLevel: 0 });
   const [isPremium, setIsPremium] = useState(false);
@@ -50,7 +53,7 @@ export default function HomeBattlePassWidget() {
               <span className="text-xl">⚔️</span>
               <div>
                 <div className="font-bold text-white text-sm">Pass de Combat</div>
-                <div className="text-xs text-gray-500">Saison 1</div>
+                <div className="text-xs text-gray-500">{t("season")}</div>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -88,13 +91,13 @@ export default function HomeBattlePassWidget() {
           {/* Prochaine récompense */}
           {level < BP_MAX_LEVEL && nextFreeReward && (
             <div className="flex items-center gap-2 text-xs text-gray-400">
-              <span>Prochain :</span>
+              <span>{t("next")}</span>
               <span className="font-semibold text-gray-300">{rewardIcon(nextFreeReward)}</span>
-              <span className="text-gray-600">dans {xpInfo.xpToNext} XP</span>
+              <span className="text-gray-600">{t("xp_required", { xp: xpInfo.xpToNext })}</span>
             </div>
           )}
           {level >= BP_MAX_LEVEL && (
-            <div className="text-xs text-yellow-400 font-bold text-center">🏆 Pass terminé !</div>
+            <div className="text-xs text-yellow-400 font-bold text-center">🏆 {t("completed")}</div>
           )}
         </div>
       </Link>

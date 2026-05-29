@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useEffect, useLayoutEffect, useRef } from "react";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { getStreak } from "@/lib/streak";
 import { calculateScore } from "@/lib/score";
 import { getPyodide } from "@/lib/pyodide";
 import { getPlayerRank, type Rank } from "@/lib/ranks";
 import { playToastSound, playRankUpSound, isAudioEnabled, toggleAudio } from "@/lib/sounds";
+import { startSession, endSession } from "@/lib/sessionTime";
 
 interface Toast {
   id: number;
@@ -17,6 +19,7 @@ interface Toast {
 }
 
 export default function GlobalUI() {
+  const t = useTranslations("GlobalUI");
   const [username, setUsername] = useState<string | null>(null);
   const [inputVal, setInputVal] = useState("");
   const [isDark, setIsDark] = useState(false);
@@ -69,6 +72,14 @@ export default function GlobalUI() {
     setMounted(true);
     setAudioOn(isAudioEnabled());
     getPyodide().catch(() => {});
+    startSession();
+    const onUnload = () => endSession();
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") endSession();
+      else startSession();
+    };
+    window.addEventListener("beforeunload", onUnload);
+    document.addEventListener("visibilitychange", onVisibility);
     if ("serviceWorker" in navigator) {
       if (process.env.NODE_ENV === "production") {
         navigator.serviceWorker.register("/sw.js").catch(() => {});
@@ -121,6 +132,9 @@ export default function GlobalUI() {
       window.removeEventListener("storage", refreshStats);
       window.removeEventListener("pythonkids:audio_toggle", onAudioToggle);
       mq.removeEventListener("change", onSystemTheme);
+      window.removeEventListener("beforeunload", onUnload);
+      document.removeEventListener("visibilitychange", onVisibility);
+      endSession();
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -184,17 +198,17 @@ export default function GlobalUI() {
           <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 max-w-sm w-full shadow-2xl text-center">
             <div className="text-6xl mb-4">🐍</div>
             <h2 className="text-2xl font-extrabold text-gray-800 dark:text-white mb-2">
-              Bienvenue sur PythonKids !
+              {t("welcome_title")}
             </h2>
             <p className="text-sm text-gray-500 dark:text-slate-300 mb-6">
-              Comment tu t&apos;appelles ? (ton pseudo de codeur)
+              {t("welcome_question")}
             </p>
             <input
               type="text"
               value={inputVal}
               onChange={(e) => setInputVal(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && saveUsername()}
-              placeholder="Ton pseudo..."
+              placeholder={t("welcome_placeholder")}
               maxLength={20}
               autoFocus
               className="w-full border-2 border-purple-200 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-xl px-4 py-3 text-base outline-none focus:border-purple-500 mb-4"
@@ -204,7 +218,7 @@ export default function GlobalUI() {
               disabled={!inputVal.trim()}
               className="w-full bg-gradient-to-r from-purple-600 to-pink-500 text-white px-6 py-3 rounded-full font-bold text-base hover:opacity-90 disabled:opacity-40 transition-opacity"
             >
-              C&apos;est parti ! 🚀
+              {t("welcome_button")}
             </button>
           </div>
         </div>
@@ -215,7 +229,7 @@ export default function GlobalUI() {
         {/* Toggle dark mode */}
         <button
           onClick={toggleTheme}
-          title={isDark ? "Mode clair" : "Mode sombre"}
+          title={isDark ? t("dark_mode") : t("light_mode")}
           className="w-10 h-10 rounded-full bg-white dark:bg-slate-700 border-2 border-purple-200 dark:border-slate-600 shadow-md flex items-center justify-center text-lg hover:scale-110 transition-transform"
         >
           {isDark ? "☀️" : "🌙"}
@@ -223,7 +237,7 @@ export default function GlobalUI() {
         {/* Toggle sons */}
         <button
           onClick={() => { const next = toggleAudio(); setAudioOn(next); }}
-          title={audioOn ? "Couper les sons" : "Activer les sons"}
+          title={audioOn ? t("sound_on") : t("sound_off")}
           className="w-10 h-10 rounded-full bg-white dark:bg-slate-700 border-2 border-purple-200 dark:border-slate-600 shadow-md flex items-center justify-center text-lg hover:scale-110 transition-transform"
         >
           {audioOn ? "🔊" : "🔇"}
@@ -237,7 +251,7 @@ export default function GlobalUI() {
                 ? "bg-orange-50 dark:bg-orange-950/50 border-orange-400 animate-pulse"
                 : "bg-white dark:bg-slate-700 border-orange-300"
             }`}
-            title={streakAtRisk ? `⚠️ Joue aujourd'hui pour garder ta série de ${streak} jour${streak > 1 ? "s" : ""} !` : `${streak} jour${streak > 1 ? "s" : ""} de suite !`}
+            title={streakAtRisk ? t("streak_continue", { streak }) : streak < 5 ? t("streak_continue", { streak }) : streak < 10 ? t("streak_unstoppable", { streak }) : t("streak_legendary", { streak })}
           >
             <span
               className="text-base"
@@ -270,7 +284,7 @@ export default function GlobalUI() {
           <div className="flex items-center gap-1">
             <Link
               href="/profile"
-              title="Voir mon profil"
+              title={t("profile_link")}
               className="bg-white dark:bg-slate-700 border-2 border-purple-200 dark:border-slate-600 rounded-2xl px-3 py-1.5 shadow-md flex flex-col hover:border-purple-400 dark:hover:border-purple-400 transition-colors"
             >
               <div className="flex items-center gap-2">
@@ -285,7 +299,7 @@ export default function GlobalUI() {
             </Link>
             <button
               onClick={startEditName}
-              title="Modifier le pseudo"
+              title={t("edit_name")}
               className="w-7 h-7 rounded-full bg-white dark:bg-slate-700 border-2 border-purple-200 dark:border-slate-600 shadow-md flex items-center justify-center text-xs hover:border-purple-400 transition-colors"
             >
               ✏️

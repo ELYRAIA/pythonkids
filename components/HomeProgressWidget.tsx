@@ -1,13 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { getProgress } from "@/lib/progress";
 import { LEVELS } from "@/lib/levels";
 
 const TOTAL_LESSONS = LEVELS.reduce((sum, l) => sum + l.lessons, 0);
 
 export default function HomeProgressWidget() {
+  const t = useTranslations("HomeProgressWidget");
   const [mounted, setMounted] = useState(false);
   const [done, setDone] = useState(0);
 
@@ -32,7 +34,7 @@ export default function HomeProgressWidget() {
         <div className="max-w-2xl mx-auto bg-white dark:bg-slate-800 rounded-2xl border border-purple-100 dark:border-slate-700 px-5 py-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-bold text-gray-700 dark:text-slate-300 flex items-center gap-1.5">
-              📊 Progression totale
+              {t("label")}
             </span>
             <span className="text-sm font-extrabold text-purple-600 dark:text-purple-400">
               {done}/{TOTAL_LESSONS} leçons · {pct}%
@@ -46,7 +48,7 @@ export default function HomeProgressWidget() {
           </div>
           {done === TOTAL_LESSONS && (
             <p className="text-xs text-yellow-500 dark:text-yellow-400 font-bold mt-1.5 text-center">
-              🌟 Parcours complet — tu es un Maître Python !
+              {t("completion")}
             </p>
           )}
         </div>

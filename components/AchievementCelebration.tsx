@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import Confetti from "./Confetti";
 import { ACHIEVEMENTS } from "@/lib/achievements";
 
@@ -13,6 +14,7 @@ const MAJOR_IDS = new Set([
 ]);
 
 export default function AchievementCelebration() {
+  const t = useTranslations("AchievementCelebration");
   const [active, setActive] = useState<typeof ACHIEVEMENTS[0] | null>(null);
   const [confetti, setConfetti] = useState(false);
 
@@ -45,7 +47,7 @@ export default function AchievementCelebration() {
           {active.emoji}
         </div>
         <p className="text-xs font-extrabold text-purple-500 dark:text-purple-400 uppercase tracking-widest mb-1">
-          ✨ Succès débloqué !
+          {t("unlocked")}
         </p>
         <h2 className="text-2xl font-extrabold text-gray-800 dark:text-white mb-2">{active.name}</h2>
         <p className="text-sm text-gray-500 dark:text-slate-400">{active.desc}</p>
@@ -53,7 +55,7 @@ export default function AchievementCelebration() {
           onClick={() => setActive(null)}
           className="mt-6 text-xs text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
         >
-          Fermer ×
+          {t("close")}
         </button>
       </div>
     </div>

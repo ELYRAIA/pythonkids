@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import {
   getQuestState, refreshQuests, claimQuest, computeQuestProgress,
   type QuestDef, type QuestProgress,
@@ -15,6 +16,7 @@ interface QuestWithProgress {
 }
 
 export default function DailyQuests() {
+  const t = useTranslations("DailyQuests");
   const [quests, setQuests] = useState<QuestWithProgress[]>([]);
   const [mounted, setMounted] = useState(false);
   const [claimedId, setClaimedId] = useState<string | null>(null);
@@ -76,12 +78,11 @@ export default function DailyQuests() {
       <div className="max-w-2xl mx-auto bg-white dark:bg-slate-800 rounded-2xl border border-purple-100 dark:border-slate-700 overflow-hidden shadow-sm">
         <div className="bg-gradient-to-r from-amber-400 to-orange-500 px-5 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-xl">📋</span>
-            <span className="text-white font-bold text-sm">Quêtes du jour</span>
+            <span className="text-white font-bold text-sm">{t("header")}</span>
           </div>
           {allClaimed && (
             <span className="text-xs bg-white/20 text-white px-2.5 py-1 rounded-full font-bold">
-              Tout récupéré ✓
+              {t("completed")}
             </span>
           )}
         </div>
@@ -127,7 +128,7 @@ export default function DailyQuests() {
                   >
                     {isJustClaimed
                       ? (def.rewardType === "chest" ? "📦 Coffre !" : `+${def.reward} 💎`)
-                      : (def.rewardType === "chest" ? "Réclamer 📦" : `Réclamer ${def.reward} 💎`)}
+                      : (def.rewardType === "chest" ? t("claim_chest") : t("claim", { type: `${def.reward} 💎` }))}
                   </button>
                 ) : (
                   <span className="shrink-0 text-xs text-gray-300 dark:text-slate-600 font-semibold">

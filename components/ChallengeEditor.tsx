@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import { EditorView, keymap, lineNumbers } from "@codemirror/view";
 import { EditorState } from "@codemirror/state";
 import { python } from "@codemirror/lang-python";
@@ -31,6 +32,7 @@ export default function ChallengeEditor({
   hint,
   onSuccess,
 }: ChallengeEditorProps) {
+  const t = useTranslations("ChallengeEditor");
   const [status, setStatus] = useState<Status>("idle");
   const [actualOutput, setActualOutput] = useState("");
   const [showHint, setShowHint] = useState(false);
@@ -42,6 +44,9 @@ export default function ChallengeEditor({
   const [elapsed, setElapsed] = useState(0);
   const [bestTime, setBestTime] = useState<number | null>(null);
   const [isNewRecord, setIsNewRecord] = useState(false);
+  const [aiHint, setAiHint] = useState("");
+  const [aiHintLoading, setAiHintLoading] = useState(false);
+  const [aiHintCount, setAiHintCount] = useState(0);
 
   const codeRef = useRef<string>(starterCode);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -168,6 +173,30 @@ export default function ChallengeEditor({
     }
   };
 
+  const askAiHint = async () => {
+    setAiHintLoading(true);
+    setAiHint("");
+    try {
+      const res = await fetch("/api/hint", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code: codeRef.current,
+          instruction: `Défi ${challengeId}`,
+          expectedOutput,
+          currentOutput: actualOutput || undefined,
+          hintCount: aiHintCount,
+        }),
+      });
+      const data = await res.json() as { hint?: string; error?: string };
+      setAiHint(data.hint ?? data.error ?? t("ai_help"));
+      setAiHintCount((c) => c + 1);
+    } catch {
+      setAiHint(t("ai_help"));
+    }
+    setAiHintLoading(false);
+  };
+
   runRef.current = runTests;
 
   return (
@@ -181,11 +210,11 @@ export default function ChallengeEditor({
                 ❤️
               </span>
             ))}
-            <span className="text-xs text-gray-400 dark:text-slate-500 ml-2">{lives} vie{lives > 1 ? "s" : ""}</span>
+            <span className="text-xs text-gray-400 dark:text-slate-500 ml-2">{lives > 1 ? t("lives", { count: lives }) + "s" : t("lives", { count: lives })}</span>
           </div>
           {cooldown > 0 && (
             <span className="text-xs text-orange-500 font-bold animate-pulse">
-              ⏳ Pause {cooldown}s — lis l&apos;indice !
+              {t("pause_message", { cooldown })}
             </span>
           )}
         </div>
@@ -207,19 +236,19 @@ export default function ChallengeEditor({
                 <span className="text-gray-600 ml-1">· record {formatTime(bestTime)}</span>
               )}
             </span>
-            {!pyodideReady && <span className="text-yellow-400 text-xs animate-pulse">⏳ Chargement...</span>}
+            {!pyodideReady && <span className="text-yellow-400 text-xs animate-pulse">{t("loading")}</span>}
             <button
               onClick={runTests}
               disabled={!pyodideReady || status === "running" || cooldown > 0}
               className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-1.5 rounded-full text-xs font-bold disabled:opacity-50 hover:opacity-90 transition-opacity"
             >
-              {status === "running" ? "⏳ Test..." : cooldown > 0 ? `⏳ ${cooldown}s` : "▶ Tester ma solution"}
+              {status === "running" ? t("loading") : cooldown > 0 ? `⏳ ${cooldown}s` : t("run_button")}
             </button>
           </div>
         </div>
         <div ref={editorContainerRef} style={{ height: "260px" }} className="overflow-auto bg-[#282c34]" />
         <div className="bg-gray-800 px-4 py-1.5 text-xs text-gray-500">
-          Ctrl+Entrée pour tester • Tab pour indenter
+          {t("keyboard_hint")}
         </div>
       </div>
 
@@ -229,18 +258,18 @@ export default function ChallengeEditor({
           {status === "success" && (
             <div className="text-center">
               <p className="text-2xl mb-1">{isNewRecord ? "🏆" : "🎉"}</p>
-              <p className="font-bold text-green-700 dark:text-green-400">Bravo ! Défi réussi !</p>
+              <p className="font-bold text-green-700 dark:text-green-400">{t("success_title")}</p>
               <div className="flex items-center justify-center gap-3 mt-2">
                 <span className="text-sm font-mono font-bold text-green-600 dark:text-green-400">
                   ⏱ {formatTime(elapsed)}
                 </span>
                 {isNewRecord ? (
                   <span className="text-xs bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-400 px-2 py-0.5 rounded-full font-bold">
-                    🏆 Nouveau record !
+                    {t("record")}
                   </span>
                 ) : bestTime !== null && (
                   <span className="text-xs text-gray-500 dark:text-slate-400">
-                    Record : {formatTime(bestTime)}
+                    {t("record_text", { time: formatTime(bestTime) })}
                   </span>
                 )}
               </div>
@@ -248,14 +277,14 @@ export default function ChallengeEditor({
           )}
           {status === "error" && (
             <div>
-              <p className="font-bold text-red-600 dark:text-red-400 text-sm mb-2">❌ Pas tout à fait…</p>
+              <p className="font-bold text-red-600 dark:text-red-400 text-sm mb-2">{t("fail_message")}</p>
               <div className="grid grid-cols-2 gap-3 text-xs font-mono">
                 <div>
-                  <p className="text-gray-500 mb-1">Ta sortie :</p>
+                  <p className="text-gray-500 mb-1">{t("output_yours")}</p>
                   <pre className="bg-gray-100 dark:bg-gray-800 p-2 rounded-lg text-red-700 dark:text-red-400 whitespace-pre-wrap">{actualOutput || "(rien)"}</pre>
                 </div>
                 <div>
-                  <p className="text-gray-500 mb-1">Sortie attendue :</p>
+                  <p className="text-gray-500 mb-1">{t("output_expected")}</p>
                   <pre className="bg-gray-100 dark:bg-gray-800 p-2 rounded-lg text-green-700 dark:text-green-400 whitespace-pre-wrap">{expectedOutput}</pre>
                 </div>
               </div>
@@ -265,19 +294,34 @@ export default function ChallengeEditor({
       )}
 
       {/* Indice */}
-      <div>
+      <div className="flex items-center gap-3 flex-wrap">
         <button
           onClick={() => setShowHint(!showHint)}
           className="text-xs text-purple-500 hover:text-purple-700 font-medium transition-colors"
         >
-          {showHint ? "▾ Cacher l'indice" : "💡 Voir un indice"}
+          {showHint ? t("hide_hint") : t("hint_button")}
         </button>
-        {showHint && (
-          <div className="mt-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-xl p-3 text-xs text-yellow-800 dark:text-yellow-300">
-            💡 {hint}
-          </div>
+        {status === "error" && (
+          <button
+            onClick={askAiHint}
+            disabled={aiHintLoading}
+            className="text-xs text-violet-500 hover:text-violet-700 font-medium transition-colors disabled:opacity-60"
+          >
+            {aiHintLoading ? t("ai_loading") : t("ai_help")}
+          </button>
         )}
       </div>
+      {showHint && (
+        <div className="mt-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-xl p-3 text-xs text-yellow-800 dark:text-yellow-300">
+          💡 {hint}
+        </div>
+      )}
+      {aiHint && (
+        <div className="mt-2 flex gap-2 bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-700 rounded-xl p-3">
+          <span className="text-violet-500 shrink-0">🤖</span>
+          <p className="text-xs text-violet-800 dark:text-violet-300">{aiHint}</p>
+        </div>
+      )}
 
       {/* Confetti */}
       <Confetti active={confetti} />
@@ -288,7 +332,7 @@ export default function ChallengeEditor({
           <div className={`bg-gradient-to-r ${toastBadge.color} text-white rounded-2xl p-4 shadow-2xl flex items-center gap-3`}>
             <span className="text-4xl">{toastBadge.emoji}</span>
             <div>
-              <p className="text-xs font-bold uppercase tracking-wide opacity-80">Nouveau badge !</p>
+              <p className="text-xs font-bold uppercase tracking-wide opacity-80">{t("new_badge")}</p>
               <p className="font-bold text-base">{toastBadge.name}</p>
             </div>
           </div>

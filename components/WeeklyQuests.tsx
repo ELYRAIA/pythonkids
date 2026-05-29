@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import {
   getWeeklyQuestState, refreshWeeklyQuests, claimWeeklyQuest,
   computeWeeklyQuestProgress, getWeekDaysLeft,
@@ -16,6 +17,7 @@ interface QuestWithProgress {
 }
 
 export default function WeeklyQuests() {
+  const t = useTranslations("WeeklyQuests");
   const [quests, setQuests] = useState<QuestWithProgress[]>([]);
   const [mounted, setMounted] = useState(false);
   const [claimedId, setClaimedId] = useState<string | null>(null);
@@ -80,10 +82,9 @@ export default function WeeklyQuests() {
         {/* Header */}
         <div className="bg-gradient-to-r from-indigo-500 to-purple-600 px-5 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-xl">🗓️</span>
             <div>
-              <span className="text-white font-bold text-sm block leading-tight">Missions de la semaine</span>
-              <span className="text-indigo-200 text-[11px]">{daysLeft === 0 ? "Dernier jour !" : `${daysLeft} jour${daysLeft > 1 ? "s" : ""} restant${daysLeft > 1 ? "s" : ""}`}</span>
+              <span className="text-white font-bold text-sm block leading-tight">{t("header")}</span>
+              <span className="text-indigo-200 text-[11px]">{daysLeft === 0 ? t("last_day") : daysLeft > 1 ? t("days_remaining_plural", { days: daysLeft }) : t("days_remaining", { days: daysLeft })}</span>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -135,7 +136,7 @@ export default function WeeklyQuests() {
                   >
                     {isJustClaimed
                       ? (def.rewardType === "chest" ? "📦 Coffre !" : `+${def.reward} 💎`)
-                      : (def.rewardType === "chest" ? "Réclamer 📦" : `Réclamer ${def.reward} 💎`)}
+                      : (def.rewardType === "chest" ? t("claim_chest") : t("claim", { type: `${def.reward} 💎` }))}
                   </button>
                 ) : (
                   <span className="shrink-0 text-xs text-gray-300 dark:text-slate-600 font-semibold">

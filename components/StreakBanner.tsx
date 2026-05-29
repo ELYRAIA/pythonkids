@@ -1,20 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { getStreak } from "@/lib/streak";
 
 const MILESTONES = [3, 7, 14, 30, 60, 100];
-
-function getStreakMessage(streak: number, atRisk: boolean): { title: string; subtitle: string } {
-  if (atRisk) return { title: "Ton streak est en danger !", subtitle: "Fais une leçon aujourd'hui pour ne pas tout perdre !" };
-  if (streak >= 100) return { title: "Légendaire !", subtitle: "100 jours de suite — tu es un vrai Maître Python !" };
-  if (streak >= 60) return { title: "Phénomène !", subtitle: "2 mois de coding quotidien — impressionnant !" };
-  if (streak >= 30) return { title: "Un mois de feu !", subtitle: "30 jours consécutifs — tu es invincible !" };
-  if (streak >= 14) return { title: "Deux semaines !", subtitle: "La régularité, c'est la clé du succès !" };
-  if (streak >= 7) return { title: "Une semaine complète !", subtitle: "7 jours d'affilée — tu déchires !" };
-  if (streak >= 3) return { title: "En feu !", subtitle: `${streak} jours de suite — continue comme ça !` };
-  return { title: `${streak} jour de suite !`, subtitle: "Tu as commencé ta série — ne t'arrête pas !" };
-}
 
 function getFlameSize(streak: number): string {
   if (streak >= 30) return "text-6xl";
@@ -23,6 +13,19 @@ function getFlameSize(streak: number): string {
 }
 
 export default function StreakBanner() {
+  const t = useTranslations("StreakBanner");
+
+  const getStreakMessage = (streak: number, atRisk: boolean): { title: string; subtitle: string } => {
+    if (atRisk) return { title: t("danger"), subtitle: t("danger_desc") };
+    if (streak >= 100) return { title: t("legendary_100"), subtitle: t("legendary_100_desc") };
+    if (streak >= 60) return { title: t("phenomenon_60"), subtitle: t("phenomenon_60_desc") };
+    if (streak >= 30) return { title: t("monthly_30"), subtitle: t("monthly_30_desc") };
+    if (streak >= 14) return { title: t("two_weeks"), subtitle: t("two_weeks_desc") };
+    if (streak >= 7) return { title: t("one_week"), subtitle: t("one_week_desc") };
+    if (streak >= 3) return { title: t("on_fire"), subtitle: t("on_fire_desc", { streak }) };
+    return { title: t("started", { streak }), subtitle: t("started_desc") };
+  };
+
   const [streak, setStreak] = useState(0);
   const [atRisk, setAtRisk] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -79,8 +82,8 @@ export default function StreakBanner() {
             {nextMilestone && (
               <div className="mt-2">
                 <div className="flex justify-between text-[10px] text-orange-200 mb-1">
-                  <span>{streak} jours</span>
-                  <span>Prochain objectif : {nextMilestone} jours</span>
+                  <span>{streak}</span>
+                  <span>{t("milestone", { milestone: nextMilestone })}</span>
                 </div>
                 <div className="h-1.5 rounded-full overflow-hidden bg-black/20">
                   <div
@@ -95,7 +98,7 @@ export default function StreakBanner() {
           {/* Counter */}
           <div className="shrink-0 text-center">
             <div className="text-4xl font-extrabold text-white leading-none">{streak}</div>
-            <div className="text-xs text-orange-200 font-medium">jours</div>
+            <div className="text-xs text-orange-200 font-medium">🔥</div>
           </div>
         </div>
       </div>

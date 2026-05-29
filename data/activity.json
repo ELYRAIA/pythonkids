@@ -382,5 +382,41 @@
     "type": "badge",
     "detail": "level_13",
     "timestamp": "2026-05-22T18:05:03.790Z"
+  },
+  {
+    "username": "Clément Inventeur",
+    "type": "lesson",
+    "detail": "Niveau 0, leçon 1",
+    "timestamp": "2026-05-23T18:07:03.333Z"
+  },
+  {
+    "username": "Clément Inventeur",
+    "type": "lesson",
+    "detail": "Niveau 1, leçon 1",
+    "timestamp": "2026-05-24T06:20:38.863Z"
+  },
+  {
+    "username": "Clément Inventeur",
+    "type": "lesson",
+    "detail": "Niveau 0, leçon 1",
+    "timestamp": "2026-05-25T06:29:42.560Z"
+  },
+  {
+    "username": "Clément Inventeur",
+    "type": "lesson",
+    "detail": "Niveau 0, leçon 1",
+    "timestamp": "2026-05-26T18:24:54.443Z"
+  },
+  {
+    "username": "Clément Inventeur",
+    "type": "lesson",
+    "detail": "Niveau 3, leçon 2",
+    "timestamp": "2026-05-27T06:14:49.369Z"
+  },
+  {
+    "username": "Clément Inventeur",
+    "type": "lesson",
+    "detail": "Niveau 4, leçon 1",
+    "timestamp": "2026-05-29T05:00:34.148Z"
   }
 ]

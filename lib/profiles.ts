@@ -38,6 +38,13 @@ const PROFILE_KEYS = [
   "pythonkids_color_theme",
   "pythonkids_duel_wins",
   "pythonkids_achievements",
+  // Fonctionnalités ajoutées après la v1
+  "pythonkids_battle_pass",
+  "pythonkids_pet",
+  "pythonkids_projects_progress",
+  "pythonkids_equipped_title",
+  "pythonkids_lessons_week",
+  "pythonkids_challenges_week",
 ];
 
 export function getProfiles(): Profile[] {

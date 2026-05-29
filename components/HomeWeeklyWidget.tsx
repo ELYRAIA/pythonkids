@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import { getWeeklyQuestState, refreshWeeklyQuests, computeWeeklyQuestProgress, getWeekDaysLeft } from "@/lib/weeklyQuests";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 
 export default function HomeWeeklyWidget() {
+  const t = useTranslations("HomeWeeklyWidget");
   const [mounted, setMounted]       = useState(false);
   const [claimed, setClaimed]       = useState(0);
   const [claimable, setClaimable]   = useState(0);
@@ -58,9 +60,9 @@ export default function HomeWeeklyWidget() {
               <span className="text-2xl">📅</span>
               <div className="flex-1">
                 <p className="text-white font-bold text-sm">
-                  {claimable} quête{claimable > 1 ? "s" : ""} hebdo à réclamer !
+                  {claimable > 1 ? t("ready_plural", { count: claimable }) : t("ready", { count: claimable })}
                 </p>
-                <p className="text-indigo-100 text-xs">Récupère ta récompense ci-dessous 🎉</p>
+                <p className="text-indigo-100 text-xs">{t("claim_hint")}</p>
               </div>
               <span className="text-white font-bold text-xl animate-bounce">↓</span>
             </div>
@@ -70,10 +72,10 @@ export default function HomeWeeklyWidget() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-1">
                   <p className="text-gray-800 dark:text-white font-bold text-sm">
-                    Quêtes semaine : {done}/{total}
+                    {t("quests", { done, total })}
                   </p>
                   <span className="text-xs text-gray-400 dark:text-slate-500 shrink-0 ml-2">
-                    {daysLeft}j restants
+                    {daysLeft === 0 ? t("last_day") : t("days_left", { days: daysLeft })}
                   </span>
                 </div>
                 <div className="w-full bg-gray-100 dark:bg-slate-700 rounded-full h-1.5">
@@ -84,7 +86,7 @@ export default function HomeWeeklyWidget() {
                 </div>
                 {avgProgress > 0 && done < total && (
                   <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">
-                    Progression moyenne : {avgProgress}%
+                    {t("progress_avg", { percent: avgProgress })}
                   </p>
                 )}
               </div>
