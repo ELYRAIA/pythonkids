@@ -2,11 +2,13 @@
 
 import { notFound } from "next/navigation";
 import { useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { LEVELS_DATA } from "@/lib/lessons";
 import LessonView from "@/components/LessonView";
 
 export default function LessonPage() {
+  const t = useTranslations("LessonPage");
   const params = useParams();
   const id = params.id as string;
   const lesson = params.lesson as string;
@@ -25,11 +27,8 @@ export default function LessonPage() {
     <div className="min-h-screen">
       <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-purple-100 dark:border-slate-700 sticky top-0 z-50">
         <div className="w-full px-6 py-3 flex items-center gap-2 flex-wrap">
-          <Link
-            href="/"
-            className="text-gray-500 dark:text-slate-400 hover:text-purple-600 transition-colors text-sm font-medium"
-          >
-            Accueil
+          <Link href="/" className="text-gray-500 dark:text-slate-400 hover:text-purple-600 transition-colors text-sm font-medium">
+            {t("home")}
           </Link>
           <span className="text-gray-300 dark:text-slate-600">/</span>
           <Link
@@ -37,7 +36,7 @@ export default function LessonPage() {
             className="text-gray-500 dark:text-slate-400 hover:text-purple-600 transition-colors text-sm font-medium flex items-center gap-1"
           >
             <span>{level.emoji}</span>
-            <span>Niveau {level.id}</span>
+            <span>{t("level_label", { id: level.id })}</span>
           </Link>
           <span className="text-gray-300 dark:text-slate-600">/</span>
           <span className="text-sm font-bold text-gray-800 dark:text-white truncate max-w-48">

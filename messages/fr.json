@@ -274,6 +274,9 @@
     "close": "Fermer ×"
   },
   "Challenges": {
+    "difficulty_easy": "Facile",
+    "difficulty_medium": "Moyen",
+    "difficulty_hard": "Difficile",
     "title": "Défis Python 🎯",
     "subtitle": "Résous les défis, gagne des points, débloque des badges !",
     "filter_for_you": "⭐ Pour toi ({count})",
@@ -609,6 +612,22 @@
     "export_button": "💾 Télécharger la sauvegarde",
     "import_button": "📂 Restaurer une sauvegarde",
     "back_home": "← Retour à l'accueil"
+  },
+  "LevelPage": {
+    "title": "Niveau {id} : {name}",
+    "lessons_count": "{count} leçons",
+    "lesson_start_hint": "Clique sur une leçon pour commencer !",
+    "what_you_learn": "📚 Ce que tu vas apprendre",
+    "level_done": "Tu as fini le niveau {id} ? Bravo ! 🎉",
+    "next_level": "Passer au niveau {next} →",
+    "congrats": "Félicitations !",
+    "all_done": "Tu as terminé tous les niveaux de PythonKids — tu es un vrai Maître Python !",
+    "get_certificate": "🎓 Obtenir mon certificat",
+    "see_leaderboard": "Voir le classement 🏅"
+  },
+  "LessonPage": {
+    "home": "Accueil",
+    "level_label": "Niveau {id}"
   },
   "NotFound": {
     "title": "Page introuvable !",

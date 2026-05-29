@@ -40,6 +40,9 @@ export default function ChallengesPage() {
   const doneCount = mounted ? completed.length : 0;
   const percent = Math.round((doneCount / total) * 100);
 
+  const diffLabel = (d: string) =>
+    d === "Facile" ? t("difficulty_easy") : d === "Moyen" ? t("difficulty_medium") : d === "Difficile" ? t("difficulty_hard") : d;
+
   const statsPerDiff: Record<string, { done: number; total: number }> = {};
   for (const c of CHALLENGES) {
     if (!statsPerDiff[c.difficulty]) statsPerDiff[c.difficulty] = { done: 0, total: 0 };
@@ -117,7 +120,7 @@ export default function ChallengesPage() {
               }[diff];
               return (
                 <div key={diff} className={`border rounded-xl px-4 py-2 text-xs font-bold flex items-center gap-2 ${colors}`}>
-                  <span>{diff}</span>
+                  <span>{diffLabel(diff)}</span>
                   <span className="opacity-70">{s.done}/{s.total}</span>
                 </div>
               );
@@ -180,7 +183,7 @@ export default function ChallengesPage() {
                 ? t("filter_for_you", { count: CHALLENGES.filter((c) => isForMe(c.minLevel)).length })
                 : f === "Tous"
                 ? t("filter_all", { count: total })
-                : `${f} (${statsPerDiff[f]?.total ?? 0})`}
+                : `${diffLabel(f)} (${statsPerDiff[f]?.total ?? 0})`}
             </button>
           ))}
         </div>
