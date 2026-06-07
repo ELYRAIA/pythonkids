@@ -14,6 +14,13 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   manifest: "/manifest.json",
+  icons: {
+    icon: [
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
   verification: {
     google: "ULuOkCnKL5cAo90USvzyVXo9IyKiX73xKDA5DEH-04Q",
   },
