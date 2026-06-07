@@ -24,6 +24,7 @@ import {
   SHOP_SKINS, SHOP_STICKERS, SHOP_TITLES,
 } from "@/lib/shop";
 import ChestOpener from "@/components/ChestOpener";
+import AccountSync from "@/components/AccountSync";
 import DailySeries from "@/components/DailySeries";
 import StreakCalendar from "@/components/StreakCalendar";
 import { getXPInfo } from "@/lib/xp";
@@ -354,6 +355,8 @@ export default function ProfilePage() {
             </div>
           </div>
         </div>
+
+        {mounted && <AccountSync username={username} />}
 
         {mounted && <FriendsWidget statuses={friendStatuses} />}
 

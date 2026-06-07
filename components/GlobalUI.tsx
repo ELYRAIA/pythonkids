@@ -9,6 +9,7 @@ import { getPyodide } from "@/lib/pyodide";
 import { getPlayerRank, type Rank } from "@/lib/ranks";
 import { playToastSound, playRankUpSound, isAudioEnabled, toggleAudio } from "@/lib/sounds";
 import { startSession, endSession } from "@/lib/sessionTime";
+import { scheduleSync } from "@/lib/account";
 
 interface Toast {
   id: number;
@@ -122,6 +123,9 @@ export default function GlobalUI() {
 
     // Mise à jour temps réel (même onglet)
     window.addEventListener("pythonkids:progress", refreshStats);
+    // Sauvegarde en ligne (débouncée) à chaque progression si un compte est lié
+    window.addEventListener("pythonkids:progress", scheduleSync);
+    scheduleSync();
     // Mise à jour inter-onglets
     window.addEventListener("storage", refreshStats);
     const onAudioToggle = () => setAudioOn(isAudioEnabled());
@@ -129,6 +133,7 @@ export default function GlobalUI() {
     return () => {
       window.removeEventListener("pythonkids:toast", onToast);
       window.removeEventListener("pythonkids:progress", refreshStats);
+      window.removeEventListener("pythonkids:progress", scheduleSync);
       window.removeEventListener("storage", refreshStats);
       window.removeEventListener("pythonkids:audio_toggle", onAudioToggle);
       mq.removeEventListener("change", onSystemTheme);
