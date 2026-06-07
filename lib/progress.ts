@@ -1,5 +1,6 @@
 import { notifyProgress } from "./events";
 import { postActivity } from "./activity";
+import { LEVELS } from "./levels";
 
 export interface Progress {
   completedLessons: Record<string, number[]>;
@@ -15,6 +16,15 @@ export interface Badge {
   secret?: boolean;
 }
 
+// Un badge par niveau, généré depuis LEVELS : ajouter un niveau crée son badge automatiquement.
+const LEVEL_BADGES: Badge[] = LEVELS.map((level) => ({
+  id: `level_${level.id}`,
+  emoji: level.emoji,
+  name: level.name,
+  desc: `Terminer le niveau ${level.name}`,
+  color: level.color,
+}));
+
 export const BADGES: Badge[] = [
   {
     id: "first_lesson",
@@ -23,52 +33,11 @@ export const BADGES: Badge[] = [
     desc: "Terminer ta première leçon",
     color: "from-blue-400 to-cyan-400",
   },
-  {
-    id: "level_0",
-    emoji: "🌟",
-    name: "Premiers pas",
-    desc: "Terminer le niveau Premiers pas",
-    color: "from-green-400 to-emerald-500",
-  },
-  {
-    id: "level_1",
-    emoji: "⭐",
-    name: "Débutant confirmé",
-    desc: "Terminer le niveau Débutant",
-    color: "from-yellow-400 to-orange-400",
-  },
-  {
-    id: "level_2",
-    emoji: "🚀",
-    name: "Explorateur",
-    desc: "Terminer le niveau Explorateur",
-    color: "from-blue-400 to-cyan-500",
-  },
-  {
-    id: "level_3",
-    emoji: "🔨",
-    name: "Bâtisseur",
-    desc: "Terminer le niveau Bâtisseur",
-    color: "from-purple-500 to-violet-600",
-  },
-  {
-    id: "level_4",
-    emoji: "🏆",
-    name: "Expert Python",
-    desc: "Terminer le niveau Expert",
-    color: "from-pink-500 to-rose-600",
-  },
-  {
-    id: "level_5",
-    emoji: "🌐",
-    name: "Maître Python",
-    desc: "Terminer le niveau Maître",
-    color: "from-cyan-500 to-blue-600",
-  },
+  ...LEVEL_BADGES,
   {
     id: "all_levels",
     emoji: "🐍",
-    name: "Grand Maître",
+    name: "Légende Python",
     desc: "Terminer tous les niveaux !",
     color: "from-purple-600 to-pink-500",
   },
@@ -233,7 +202,7 @@ export function markLevelComplete(levelId: number, totalLessons: number): string
       newBadges.push(levelBadgeId);
     }
 
-    const allLevelsDone = [0, 1, 2, 3, 4, 5].every((id) => {
+    const allLevelsDone = LEVELS.every(({ id }) => {
       if (id === levelId) return true;
       return progress.earnedBadges.includes(`level_${id}`);
     });
@@ -260,15 +229,13 @@ export function getCompletedCount(levelId: number): number {
   return (progress.completedLessons[String(levelId)] ?? []).length;
 }
 
-/** Retourne le niveau actuel du joueur (0–5) basé sur sa progression. */
+/** Retourne le niveau actuel du joueur basé sur sa progression. */
 export function getPlayerLevel(): number {
   const progress = getProgress();
   // Le niveau en cours = le plus haut niveau où il a au moins une leçon faite
-  // ou le prochain niveau non commencé, capped à 5
-  const LESSONS_PER_LEVEL: Record<string, number> = { "0": 4, "1": 8, "2": 6, "3": 6, "4": 6, "5": 6 };
-  for (let id = 5; id >= 0; id--) {
-    const done = (progress.completedLessons[String(id)] ?? []).length;
-    if (done > 0) return id;
+  for (let i = LEVELS.length - 1; i >= 0; i--) {
+    const done = (progress.completedLessons[String(LEVELS[i].id)] ?? []).length;
+    if (done > 0) return LEVELS[i].id;
   }
   return 0;
 }

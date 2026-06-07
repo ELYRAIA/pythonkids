@@ -5,8 +5,9 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { getProgress, BADGES } from "@/lib/progress";
 import { getCompletedChallenges } from "@/lib/challenges";
+import { LEVELS } from "@/lib/levels";
 
-const ALL_LEVEL_BADGES = ["level_0", "level_1", "level_2", "level_3", "level_4", "level_5"];
+const ALL_LEVEL_BADGES = LEVELS.map((l) => `level_${l.id}`);
 
 function downloadCertificatePNG(username: string, badgeCount: number, challengeCount: number, date: string) {
   const W = 1200, H = 848;

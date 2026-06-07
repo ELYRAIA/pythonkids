@@ -9,7 +9,7 @@ const PROFILES_KEY = "pythonkids_profiles";
 const SNAPSHOT_PREFIX = "pythonkids_snapshot_";
 
 // Toutes les clés localStorage spécifiques à un profil (exclut les préférences globales)
-const PROFILE_KEYS = [
+export const PROFILE_KEYS = [
   "pythonkids_progress",
   "pythonkids_challenges",
   "pythonkids_gems",
@@ -45,6 +45,19 @@ const PROFILE_KEYS = [
   "pythonkids_equipped_title",
   "pythonkids_lessons_week",
   "pythonkids_challenges_week",
+  // Données par enfant qui fuyaient entre profils (audit mai 2026)
+  "pythonkids_code_sandbox",
+  "pythonkids_memory_best",
+  "pythonkids_snake_hs",
+  "pythonkids_typing_best",
+  "pythonkids_wordle_history",
+  "pythonkids_used_codes",
+  "pythonkids_summary_shown",
+  "pythonkids_session_time",
+  "pythonkids_session_start",
+  "pythonkids_session_combo",
+  // Compte en ligne lié à ce profil (jamais envoyé dans le snapshot serveur)
+  "pythonkids_account",
 ];
 
 export function getProfiles(): Profile[] {

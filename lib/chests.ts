@@ -1,4 +1,5 @@
 import { addGems } from "./gems";
+import { LEVELS } from "./levels";
 
 export type RewardRarity = "common" | "rare" | "epic" | "legendary";
 
@@ -346,7 +347,7 @@ export function retroactiveChests(
     markLevelGiven(-1);
   }
 
-  for (let lvl = 0; lvl <= 5; lvl++) {
+  for (const { id: lvl } of LEVELS) {
     if (earnedBadges.includes(`level_${lvl}`) && !given.includes(lvl)) {
       addChest(lvl);
     }

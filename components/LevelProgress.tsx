@@ -12,6 +12,8 @@ import {
 import { playBadgeSound, playLessonDoneSound } from "@/lib/sounds";
 import { updateStreak } from "@/lib/streak";
 import { getLessonStars } from "@/lib/mastery";
+import { trackLessonToday, refreshQuests } from "@/lib/quests";
+import { checkAchievements } from "@/lib/achievements";
 import Confetti from "./Confetti";
 
 interface Lesson {
@@ -59,6 +61,7 @@ export default function LevelProgress({ levelId, totalLessons, levelColor, lesso
 
     // Marquer comme terminée
     playLessonDoneSound();
+    trackLessonToday();
     const streakBadges = updateStreak();
     const newBadges = [...streakBadges, ...markLessonComplete(levelId, lessonIndex)];
     const updatedIndexes = [...completedIndexes, lessonIndex];
@@ -69,6 +72,9 @@ export default function LevelProgress({ levelId, totalLessons, levelColor, lesso
       const levelBadges = markLevelComplete(levelId, totalLessons);
       newBadges.push(...levelBadges);
     }
+
+    refreshQuests();
+    checkAchievements();
 
     // Afficher le premier nouveau badge avec son
     if (newBadges.length > 0) {

@@ -1,6 +1,7 @@
 import { getProgress } from "./progress";
 import { getStreak } from "./streak";
-import { getCompletedChallenges } from "./challenges";
+import { LEVELS } from "./levels";
+import { CHALLENGES, getCompletedChallenges } from "./challenges";
 import { getDuelWins } from "./duels";
 import { getOwnedShopItems, getEquippedSkin } from "./shop";
 import { calculateScore } from "./score";
@@ -43,8 +44,9 @@ export const ACHIEVEMENTS: Achievement[] = [
 ];
 
 const KEY = "pythonkids_achievements";
-const TOTAL_LESSONS = 36;
-const TOTAL_CHALLENGES = 13;
+// Totaux dérivés du contenu réel : restent justes quand on ajoute des niveaux ou des défis.
+const TOTAL_LESSONS = LEVELS.reduce((sum, l) => sum + l.lessons, 0);
+const TOTAL_CHALLENGES = CHALLENGES.length;
 
 export function getUnlockedAchievements(): string[] {
   if (typeof window === "undefined") return [];
