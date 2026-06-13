@@ -17,6 +17,8 @@ export default function AppHeader({ right }: { right?: React.ReactNode }) {
   const NAV_LINKS = [
     { href: "/battle-pass", label: t("nav_pass"), emoji: "⚔️" },
     { href: "/challenges", label: t("nav_challenges"), emoji: "🎯" },
+    { href: "/bug-hunt", label: t("nav_bug_hunt"), emoji: "🐛" },
+    { href: "/quick", label: t("nav_quick"), emoji: "⚡" },
     { href: "/duel", label: t("nav_duel"), emoji: "🥊" },
     { href: "/detente", label: t("nav_relax"), emoji: "🎮" },
     { href: "/friends", label: t("nav_friends"), emoji: "👥" },

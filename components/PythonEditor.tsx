@@ -65,6 +65,12 @@ export default function PythonEditor({
   const [pyodideReady, setPyodideReady] = useState(false);
   const [setupError, setSetupError] = useState("");
 
+  // Visualiseur pas-à-pas
+  const [vizSteps, setVizSteps] = useState<{ line: number; vars: Record<string, string> }[]>([]);
+  const [vizIdx, setVizIdx] = useState(0);
+  const [showViz, setShowViz] = useState(false);
+  const [isVizLoading, setIsVizLoading] = useState(false);
+
   const [inputPrompt, setInputPrompt] = useState<string | null>(null);
   const [inputValue, setInputValue] = useState("");
   const inputResolverRef = useRef<((value: string) => void) | null>(null);
@@ -220,6 +226,58 @@ async def _async_input(msg=""):
   // Garde runCodeRef à jour
   runCodeRef.current = runCode;
 
+  const runVisualizer = async () => {
+    if (!pyodideRef.current) return;
+    setIsVizLoading(true);
+    setVizSteps([]);
+    setVizIdx(0);
+    setShowViz(true);
+
+    const traceScript = `
+import sys, json
+
+_trace_steps = []
+
+def _tracer(frame, event, arg):
+    if event == 'line' and frame.f_code.co_filename == '<exec>':
+        local_vars = {}
+        for k, v in frame.f_locals.items():
+            if not k.startswith('_'):
+                try:
+                    r = repr(v)
+                    local_vars[k] = r[:80] + ('…' if len(r) > 80 else '')
+                except Exception:
+                    local_vars[k] = '?'
+        _trace_steps.append({'line': frame.f_lineno, 'vars': local_vars})
+    return _tracer
+
+sys.settrace(_tracer)
+try:
+    exec(compile(${JSON.stringify(codeRef.current)}, '<exec>', 'exec'))
+except Exception as e:
+    pass
+finally:
+    sys.settrace(None)
+
+import js
+js._viz_result = json.dumps(_trace_steps)
+`;
+
+    try {
+      const py = pyodideRef.current;
+      (window as unknown as Record<string, unknown>)._viz_result = "[]";
+      await py.runPythonAsync(traceScript);
+      const raw = (window as unknown as Record<string, string>)._viz_result ?? "[]";
+      const steps: { line: number; vars: Record<string, string> }[] = JSON.parse(raw);
+      setVizSteps(steps);
+      setVizIdx(0);
+    } catch {
+      setVizSteps([]);
+    } finally {
+      setIsVizLoading(false);
+    }
+  };
+
   const hasOutput = lines.length > 0 || inputPrompt !== null;
 
   return (
@@ -259,6 +317,14 @@ async def _async_input(msg=""):
               title={isFullscreen ? "Quitter le plein écran (Échap)" : "Plein écran"}
             >{isFullscreen ? "⊡" : "⛶"}</button>
           </div>
+          <button
+            onClick={runVisualizer}
+            disabled={!pyodideReady || isLoading || isVizLoading || inputPrompt !== null}
+            title="Voir l'exécution pas à pas"
+            className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-4 py-2 rounded-full text-sm font-bold disabled:opacity-50 hover:opacity-90 transition-opacity"
+          >
+            {isVizLoading ? "⏳" : "🔍 Pas à pas"}
+          </button>
           <button
             onClick={runCode}
             disabled={!pyodideReady || isLoading || inputPrompt !== null}
@@ -348,6 +414,50 @@ async def _async_input(msg=""):
               >
                 OK ↵
               </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Visualiseur pas-à-pas */}
+      {showViz && vizSteps.length > 0 && (
+        <div className="bg-gray-950 border-t border-gray-700 p-4 shrink-0">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-cyan-400 text-xs font-bold">🔍 Pas à pas — Étape {vizIdx + 1}/{vizSteps.length}</span>
+            <button onClick={() => setShowViz(false)} className="text-gray-500 hover:text-gray-300 text-xs">✕ Fermer</button>
+          </div>
+          <div className="flex items-center gap-2 mb-3">
+            <button
+              onClick={() => setVizIdx((i) => Math.max(0, i - 1))}
+              disabled={vizIdx === 0}
+              className="px-3 py-1 rounded-lg bg-gray-800 text-gray-300 text-xs font-bold disabled:opacity-40 hover:bg-gray-700 transition-colors"
+            >‹ Préc.</button>
+            <div className="flex-1 bg-gray-800 rounded-lg h-1.5">
+              <div
+                className="h-1.5 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 transition-all"
+                style={{ width: `${((vizIdx + 1) / vizSteps.length) * 100}%` }}
+              />
+            </div>
+            <button
+              onClick={() => setVizIdx((i) => Math.min(vizSteps.length - 1, i + 1))}
+              disabled={vizIdx === vizSteps.length - 1}
+              className="px-3 py-1 rounded-lg bg-gray-800 text-gray-300 text-xs font-bold disabled:opacity-40 hover:bg-gray-700 transition-colors"
+            >Suiv. ›</button>
+          </div>
+          <div className="text-xs text-cyan-300 mb-2 font-mono">
+            Ligne {vizSteps[vizIdx].line}
+          </div>
+          {Object.keys(vizSteps[vizIdx].vars).length === 0 ? (
+            <p className="text-xs text-gray-500 italic">Aucune variable encore définie</p>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {Object.entries(vizSteps[vizIdx].vars).map(([k, v]) => (
+                <div key={k} className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5">
+                  <span className="text-purple-400 text-xs font-mono font-bold">{k}</span>
+                  <span className="text-gray-500 text-xs mx-1">=</span>
+                  <span className="text-green-400 text-xs font-mono">{v}</span>
+                </div>
+              ))}
             </div>
           )}
         </div>

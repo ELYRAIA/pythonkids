@@ -35,6 +35,10 @@ export default function ParentPage() {
   const [streak, setStreak] = useState({ currentStreak: 0, longestStreak: 0, playDates: [] as string[] });
   const [isReadOnly, setIsReadOnly] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
+  const [reportEmail, setReportEmail] = useState("");
+  const [reportSending, setReportSending] = useState(false);
+  const [reportSent, setReportSent] = useState(false);
+  const [reportError, setReportError] = useState("");
   const [bpLevel, setBpLevel] = useState(0);
   const [bpProgress, setBpProgress] = useState(0);
   const [bpPremium, setBpPremium] = useState(false);
@@ -118,6 +122,36 @@ export default function ParentPage() {
       } catch { alert("Fichier de sauvegarde invalide."); }
     };
     reader.readAsText(file);
+  };
+
+  const handleSendReport = async () => {
+    if (!reportEmail.includes("@")) return;
+    setReportSending(true);
+    setReportError("");
+    try {
+      const res = await fetch("/api/send-report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: reportEmail,
+          username,
+          stats: {
+            doneLessons,
+            totalLessons,
+            completedChallenges: completedChallenges.length,
+            currentStreak: streak.currentStreak,
+            longestStreak: streak.longestStreak,
+            earnedBadges: earnedBadges.length,
+            totalBadges: BADGES.length,
+            bpLevel,
+            timeMinutes,
+          },
+        }),
+      });
+      if (res.ok) { setReportSent(true); setTimeout(() => setReportSent(false), 4000); }
+      else setReportError("Erreur lors de l'envoi. Vérifiez votre clé Resend.");
+    } catch { setReportError("Erreur réseau."); }
+    finally { setReportSending(false); }
   };
 
   const handleShare = () => {
@@ -520,6 +554,33 @@ export default function ParentPage() {
             <li>• {t("tip_4")}</li>
           </ul>
         </div>
+
+        {/* Rapport par email */}
+        {!isReadOnly && mounted && (
+          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-5">
+            <h2 className="text-sm font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-3">📧 Rapport par email</h2>
+            <p className="text-xs text-gray-400 dark:text-slate-500 mb-4">
+              Recevez un résumé de la progression de {username} directement dans votre boîte mail.
+            </p>
+            <div className="flex gap-2">
+              <input
+                type="email"
+                value={reportEmail}
+                onChange={(e) => setReportEmail(e.target.value)}
+                placeholder="votre@email.com"
+                className="flex-1 min-w-0 border-2 border-gray-200 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-xl px-3 py-2 text-sm outline-none focus:border-purple-400 dark:focus:border-purple-500 transition-colors"
+              />
+              <button
+                onClick={handleSendReport}
+                disabled={reportSending || !reportEmail.includes("@")}
+                className="shrink-0 bg-gradient-to-r from-purple-600 to-pink-500 text-white px-4 py-2 rounded-xl text-sm font-bold disabled:opacity-50 hover:opacity-90 transition-opacity"
+              >
+                {reportSending ? "⏳" : reportSent ? "✓ Envoyé !" : "Envoyer"}
+              </button>
+            </div>
+            {reportError && <p className="text-xs text-red-500 mt-2">{reportError}</p>}
+          </div>
+        )}
 
         {/* Export / Import */}
         {!isReadOnly && (

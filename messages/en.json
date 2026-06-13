@@ -50,6 +50,8 @@
   "AppHeader": {
     "nav_pass": "Pass",
     "nav_challenges": "Challenges",
+    "nav_bug_hunt": "Bugs",
+    "nav_quick": "Express",
     "nav_duel": "Duel",
     "nav_relax": "Relax",
     "nav_friends": "Friends",
@@ -968,5 +970,22 @@
     "error_name_short": "Choose a username (min 2 characters)",
     "error_pin_format": "PIN code must be 4 to 8 digits",
     "pin_tip": "💡 Choose a PIN code that's easy to remember (and write it down somewhere with a parent!)"
+  },
+  "BugHunt": {
+    "loading_python": "Loading Python...",
+    "run_button": "Test",
+    "success_message": "Bug fixed! Well done!",
+    "wrong_output": "Not quite…",
+    "expected": "Expected",
+    "show_hint": "Hint",
+    "hide_hint": "Hide hint",
+    "show_solution": "Show solution",
+    "explain": "Explanation",
+    "find_the_bug": "Find and fix the bug!",
+    "solved": "solved",
+    "filter_tous": "All",
+    "filter_facile": "Easy",
+    "filter_moyen": "Medium",
+    "filter_difficile": "Hard"
   }
 }

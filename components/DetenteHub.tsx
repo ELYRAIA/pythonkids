@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import SnakeGame from "./SnakeGame";
 import MemoryGame from "./MemoryGame";
@@ -9,6 +9,102 @@ import FlashcardGame from "./FlashcardGame";
 import TypingGame from "./TypingGame";
 import { getGems } from "@/lib/gems";
 import Link from "next/link";
+
+const TIMER_OPTIONS = [5, 10, 15, 20];
+
+function BreakTimer() {
+  const [selected, setSelected] = useState<number | null>(null);
+  const [secondsLeft, setSecondsLeft] = useState(0);
+  const [running, setRunning] = useState(false);
+  const [finished, setFinished] = useState(false);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const start = (minutes: number) => {
+    setSelected(minutes);
+    setSecondsLeft(minutes * 60);
+    setRunning(true);
+    setFinished(false);
+  };
+
+  const stop = () => {
+    clearInterval(intervalRef.current!);
+    setRunning(false);
+    setSelected(null);
+    setFinished(false);
+  };
+
+  useEffect(() => {
+    if (!running) return;
+    intervalRef.current = setInterval(() => {
+      setSecondsLeft((s) => {
+        if (s <= 1) {
+          clearInterval(intervalRef.current!);
+          setRunning(false);
+          setFinished(true);
+          return 0;
+        }
+        return s - 1;
+      });
+    }, 1000);
+    return () => clearInterval(intervalRef.current!);
+  }, [running]);
+
+  const fmt = (s: number) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, "0")}`;
+  const pct = selected ? ((selected * 60 - secondsLeft) / (selected * 60)) * 100 : 0;
+
+  return (
+    <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-4">
+      <div className="flex items-center gap-2 mb-3">
+        <span className="text-lg">⏱️</span>
+        <h3 className="text-sm font-bold text-gray-700 dark:text-slate-300">Minuteur de pause</h3>
+      </div>
+
+      {!running && !finished && (
+        <div className="flex gap-2 flex-wrap">
+          {TIMER_OPTIONS.map((m) => (
+            <button
+              key={m}
+              onClick={() => start(m)}
+              className="text-xs font-bold px-3 py-1.5 rounded-full bg-purple-50 dark:bg-purple-900/30 border border-purple-200 dark:border-purple-700 text-purple-700 dark:text-purple-400 hover:bg-purple-100 dark:hover:bg-purple-900/50 transition-colors"
+            >
+              {m} min
+            </button>
+          ))}
+        </div>
+      )}
+
+      {running && (
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-2xl font-black text-purple-600 dark:text-purple-400 tabular-nums">{fmt(secondsLeft)}</span>
+            <button onClick={stop} className="text-xs text-gray-400 hover:text-red-400 transition-colors font-semibold">Arrêter</button>
+          </div>
+          <div className="w-full bg-gray-100 dark:bg-slate-700 rounded-full h-2">
+            <div
+              className="h-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-1000"
+              style={{ width: `${pct}%` }}
+            />
+          </div>
+          <p className="text-xs text-gray-400 dark:text-slate-500">Profite bien de ta pause ! 🎮</p>
+        </div>
+      )}
+
+      {finished && (
+        <div className="text-center py-2">
+          <p className="text-lg mb-1">🔔</p>
+          <p className="text-sm font-bold text-gray-700 dark:text-slate-300">Pause terminée !</p>
+          <p className="text-xs text-gray-400 dark:text-slate-500 mb-2">C&apos;est l&apos;heure de retourner coder 🚀</p>
+          <button
+            onClick={stop}
+            className="text-xs font-bold px-3 py-1.5 rounded-full bg-purple-50 dark:bg-purple-900/30 border border-purple-200 dark:border-purple-700 text-purple-700 dark:text-purple-400 hover:bg-purple-100 transition-colors"
+          >
+            Nouvelle pause
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
 
 type GameId = "snake" | "memory" | "wordle" | "flashcards" | "typing";
 
@@ -135,6 +231,10 @@ export default function DetenteHub() {
           {activeGame === "flashcards" && <FlashcardGame />}
           {activeGame === "typing"     && <TypingGame />}
         </div>
+      </div>
+
+      <div className="mt-5">
+        <BreakTimer />
       </div>
 
       <div className="mt-5 text-center">
