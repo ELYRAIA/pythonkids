@@ -1,21 +1,22 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import AppHeader from "@/components/AppHeader";
 import { CHALLENGES, getCompletedChallenges } from "@/lib/challenges";
 import { getPlayerLevel } from "@/lib/progress";
 import { LEVELS } from "@/lib/levels";
+import { lf } from "@/lib/localize";
 
 type Filter = "Pour toi" | "Tous" | "Facile" | "Moyen" | "Difficile";
 type Sort = "defaut" | "non_faits";
 
 const LEVEL_EMOJIS = LEVELS.reduce<Record<number, string>>((acc, l) => { acc[l.id] = l.emoji; return acc; }, {});
-const LEVEL_NAMES  = LEVELS.reduce<Record<number, string>>((acc, l) => { acc[l.id] = l.name;  return acc; }, {});
 
 export default function ChallengesPage() {
   const t = useTranslations("Challenges");
+  const locale = useLocale();
   const [completed, setCompleted] = useState<string[]>([]);
   const [filter, setFilter] = useState<Filter>("Pour toi");
   const [search, setSearch] = useState("");
@@ -58,8 +59,8 @@ export default function ChallengesPage() {
       : filter === "Tous" ? true
       : c.difficulty === filter;
     const matchSearch = !searchLower
-      || c.title.toLowerCase().includes(searchLower)
-      || c.description.toLowerCase().includes(searchLower);
+      || lf(c, "title", locale).toLowerCase().includes(searchLower)
+      || lf(c, "description", locale).toLowerCase().includes(searchLower);
     return matchFilter && matchSearch;
   });
   if (sort === "non_faits" && mounted) {
@@ -131,7 +132,7 @@ export default function ChallengesPage() {
             {mounted && (
               <div className="inline-flex items-center gap-2 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700 rounded-full px-4 py-2 text-sm text-purple-700 dark:text-purple-300 font-semibold">
                 <span>{LEVEL_EMOJIS[playerLevel]}</span>
-                <span>{t("player_level", { name: LEVEL_NAMES[playerLevel] })}</span>
+                <span>{t("player_level", { name: lf(LEVELS.find(l => l.id === playerLevel) ?? LEVELS[0], "name", locale) })}</span>
               </div>
             )}
             <Link
@@ -229,7 +230,7 @@ export default function ChallengesPage() {
                 <div className="flex items-start justify-between mb-3">
                   <span className="text-3xl">{challenge.emoji}</span>
                   <span className={`text-xs px-2.5 py-1 rounded-full font-bold text-white bg-gradient-to-r ${challenge.difficultyColor}`}>
-                    {challenge.difficulty}
+                    {diffLabel(challenge.difficulty)}
                   </span>
                 </div>
 
@@ -243,12 +244,12 @@ export default function ChallengesPage() {
                 </div>
 
                 <h2 className={`text-base font-bold mb-2 ${isDone ? "text-green-700 dark:text-green-400" : isLocked ? "text-gray-400 dark:text-slate-500" : "text-gray-800 dark:text-white"}`}>
-                  {challenge.title}
+                  {lf(challenge, "title", locale)}
                 </h2>
                 <p className="text-xs text-gray-500 dark:text-slate-400 leading-relaxed line-clamp-2">
                   {isLocked
-                    ? t("unlocked_message", { level: challenge.minLevel, name: LEVEL_NAMES[challenge.minLevel] })
-                    : challenge.description.split("\n")[0]}
+                    ? t("unlocked_message", { level: challenge.minLevel, name: lf(LEVELS.find(l => l.id === challenge.minLevel) ?? LEVELS[0], "name", locale) })
+                    : lf(challenge, "description", locale).split("\n")[0]}
                 </p>
 
                 {isDone && bestTime && (

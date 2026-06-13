@@ -116,6 +116,7 @@
     "new_badge": "New badge!"
   },
   "AdventureMap": {
+    "level_prefix": "Level",
     "completed": "Completed!",
     "all_complete": "You've completed everything!",
     "completion_message": "Congratulations, you're a Grand Master Python!"
@@ -125,11 +126,13 @@
     "welcome": "Welcome! 👋",
     "next_lesson": "Next lesson",
     "continue": "Continue →",
-    "level_progress": "{done}/{total} lessons · {percent}%"
+    "level_progress": "{done}/{total} lessons · {percent}%",
+    "level_name": "Level {id} — {name}"
   },
   "HomeProgressWidget": {
     "label": "📊 Total progress",
-    "completion": "🌟 Complete course — you're a Python Master!"
+    "completion": "🌟 Complete course — you're a Python Master!",
+    "lessons_pct": "{done}/{total} lessons · {pct}%"
   },
   "HomeRankWidget": {
     "max_rank": "Maximum rank reached!"
@@ -188,6 +191,7 @@
     "completed": "All collected ✓",
     "claim": "Claim {type}",
     "claim_chest": "Claim 📦",
+    "claimed_chest": "📦 Chest!",
     "claimed": "✓",
     "thanks": "Thank you!",
     "comment_thanks": "Your feedback was sent."
@@ -199,6 +203,7 @@
     "days_remaining_plural": "{days} days remaining",
     "claim": "Claim {type}",
     "claim_chest": "Claim 📦",
+    "claimed_chest": "📦 Chest!",
     "claimed": "✓"
   },
   "StreakBanner": {
@@ -245,7 +250,10 @@
     "resume": "Resume where you left off",
     "overall": "Total progress",
     "lesson_single": "lesson",
-    "lesson_plural": "lessons"
+    "lesson_plural": "lessons",
+    "continue": "Continue →",
+    "lessons_count": "{done} / {total} lessons",
+    "level_lesson_badge": "Level {level} · Lesson {lesson}"
   },
   "FeedbackButton": {
     "button": "💬 Feedback",
@@ -402,7 +410,11 @@
     "legend_locked": "Locked",
     "claim_free": "Claim",
     "premium_required": "Premium required",
-    "completed": "Pass completed 🏆"
+    "completed": "Pass completed 🏆",
+    "chest_0": "Common",
+    "chest_1": "Rare",
+    "chest_2": "Epic",
+    "chest_3": "Legendary"
   },
   "Editor": {
     "title": "Your Python Sandbox 🧪",
@@ -434,7 +446,11 @@
     "step_1": "Create a duel and share the code with your friend",
     "step_2": "Your friend joins with the code",
     "step_3": "You code the solution to the same challenge at the same time",
-    "step_4": "First to pass the tests wins! 🏆"
+    "step_4": "First to pass the tests wins! 🏆",
+    "back_to_duels": "← Back to duels",
+    "back": "← Back",
+    "loading": "Loading duel…",
+    "pyodide_loading": "⏳ Loading…"
   },
   "Pet": {
     "title": "🤖 My Robot",
@@ -470,7 +486,10 @@
     "challenges_completed": "challenges completed",
     "date_issued": "date issued",
     "earned_badges": "Badges earned",
-    "signature": "Learning to code is awesome! 🚀"
+    "signature": "Learning to code is awesome! 🚀",
+    "canvas_desc1": "has successfully completed the PythonKids levels and mastered",
+    "canvas_desc2": "the fundamentals of Python programming.",
+    "canvas_signature": "pythonkids.app · Learning to code is awesome! 🚀"
   },
   "Quiz": {
     "title": "📚 Revision Quiz",
@@ -508,7 +527,15 @@
     "record": "Record: {days} days",
     "current_streak": "Streak: {days} days 🔥",
     "less_activity": "Less",
-    "more_activity": "More"
+    "more_activity": "More",
+    "stat_lessons": "Lessons",
+    "stat_challenges": "Challenges",
+    "stat_streak": "Streak",
+    "stat_gems": "Gems",
+    "day_0": "Su", "day_1": "Mo", "day_2": "Tu", "day_3": "We", "day_4": "Th", "day_5": "Fr", "day_6": "Sa",
+    "diff_easy": "Easy",
+    "diff_medium": "Medium",
+    "diff_hard": "Hard"
   },
   "Friends": {
     "title": "My friends 👥",
@@ -557,7 +584,8 @@
     "hint_available": "· {n} before hint 💡",
     "remove_from_list": "Remove from list",
     "retry": "Retry →",
-    "clear_all": "Clear all from list"
+    "clear_all": "Clear all from list",
+    "back": "← Challenges"
   },
   "Avatars": {
     "badge": "AVATAR GALLERY",
@@ -571,7 +599,11 @@
     "subtitle": "One project per level — step by step, you build a real program.",
     "completed": "✓ Completed",
     "steps": "{done}/{total} steps",
-    "back_home": "← Back to home"
+    "back_home": "← Back to home",
+    "level_badge": "Level {id} — {name}",
+    "back": "← Back to projects",
+    "python_loading": "⏳ Loading Python…",
+    "not_found": "Project not found for level {id}."
   },
   "Parent": {
     "share_copied": "Link copied!",
@@ -612,7 +644,8 @@
     "backup_desc": "Back up all progress to a file to avoid losing it if the browser cache is cleared.",
     "export_button": "💾 Download backup",
     "import_button": "📂 Restore backup",
-    "back_home": "← Back to home"
+    "back_home": "← Back to home",
+    "level_heading": "Level {id} — {name}"
   },
   "LevelPage": {
     "title": "Level {id}: {name}",
@@ -638,8 +671,302 @@
     "challenges": "🎯 See challenges",
     "error": "Error 404 — Page not found"
   },
+  "HomeLevelCards": {
+    "level_prefix": "Level",
+    "lessons": "lessons",
+    "start": "Start →",
+    "continue_cta": "Continue →",
+    "review": "Review →"
+  },
+  "LessonQuiz": {
+    "quiz_title": "❓ Quick quiz",
+    "perfect": "Perfect!",
+    "well_done": "Well done!",
+    "keep_going": "Keep it up!",
+    "all_correct": "All answers are correct!",
+    "score": "{correct}/{total} correct answers.",
+    "continue_btn": "Continue →",
+    "validate": "Validate",
+    "next": "Next →",
+    "see_score": "See my score"
+  },
+  "LessonView": {
+    "lesson_position": "Lesson {index}/{total} — {name}",
+    "done_badge": "✓ Done",
+    "attempt_hint": "Try the exercise above to unlock this button.",
+    "mark_done": "Mark as done ✓",
+    "unmark_done": "✓ Done (undo)",
+    "back_to_level": "← Back to level",
+    "finish_level": "Finish level 🎉",
+    "combo_title": "Combo x{combo}!"
+  },
+  "LevelLessonsGrid": {
+    "locked_title": "Level locked",
+    "locked_desc": "Complete level {prev} by finishing all its lessons to unlock this one!",
+    "go_to_level": "Go to level {prev} →",
+    "level_done_title": "Level done! 🎉",
+    "level_done_desc": "Congrats! You've completed all lessons of level {name}! You just earned a badge.",
+    "next_level": "Next level →",
+    "certificate": "🎓 Get my certificate",
+    "stay": "Stay on this level",
+    "progress_label": "Level progress",
+    "lessons_count": "{done}/{total} lessons",
+    "level_done_celebration": "🎉 Level done! You earned a badge!",
+    "search_placeholder": "🔍 Search a lesson...",
+    "project_badge": "Project",
+    "done_badge": "Done",
+    "improve_hint": "{stars} to improve",
+    "review": "Review →",
+    "revisit": "Revisit →",
+    "start": "Start →",
+    "review_btn": "All lessons",
+    "review_btn_filtered": "Review ({count} to improve)"
+  },
+  "ChallengeView": {
+    "timeout": "⏱️ Time exceeded (5s). You might have an infinite loop!",
+    "expected_output": "Expected output:",
+    "hint_free": "See a hint (free)",
+    "hint_precise": "More specific hint (-5 💎)",
+    "hint_last": "Last hint (-10 💎)",
+    "show_solution": "🔓 See a solution (after 5 attempts)",
+    "hide_solution": "▾ Hide solution",
+    "copy_to_editor": "Copy to editor →",
+    "challenge_success": "Challenge completed!",
+    "next_challenge_btn": "Next challenge: {title} →",
+    "see_all_challenges": "See all challenges 🏆",
+    "pyodide_loading": "⏳ Loading…",
+    "pyodide_error": "⚠️ Python unavailable"
+  },
+  "ChestOpener": {
+    "header": "Chest — Level {level}",
+    "mystery": "Mystery",
+    "head_label": "🎭 Head",
+    "all_revealed_title": "All revealed!",
+    "click_to_open": "Click to open!",
+    "all_revealed": "🎉 All revealed!",
+    "clicks_remaining": "{count} click left!",
+    "clicks_remaining_plural": "{count} clicks left!",
+    "claim_all": "Claim all 🎉",
+    "close_without_opening": "Close without opening"
+  },
+  "DailySeries": {
+    "title": "🏆 Daily series",
+    "come_back_tomorrow": "Come back tomorrow for a new series!",
+    "chests_today": "{claimed}/{total} chests collected today",
+    "claim_button": "Claim!",
+    "next_in": "Next in",
+    "all_done": "🎉 Well done! You collected all today's chests!",
+    "chest_claimed": "Chest {n} collected — {rarity}",
+    "chest_available": "Chest {n} available! Click to open",
+    "chest_next": "Chest {n} — available in {time}",
+    "chest_locked": "Chest {n} — still locked"
+  },
+  "SessionSummary": {
+    "streak_fire": "🔥 {streak} days in a row — you're on fire!",
+    "five_lessons": "🚀 Incredible, 5 lessons today!",
+    "three_lessons": "💪 Great session, keep it up!",
+    "two_lessons": "👏 Two lessons, great day!",
+    "one_lesson": "✅ Good session, come back tomorrow!",
+    "lessons_today": "📖 {count} lesson today",
+    "lessons_today_plural": "📖 {count} lessons today",
+    "gems_count": "💎 {count} gems",
+    "close": "Close"
+  },
+  "Profiles": {
+    "back": "← Back",
+    "who_plays": "Who's playing?",
+    "choose_profile": "Continue with your profile",
+    "active": "✓ Active",
+    "add_profile": "Add",
+    "copy_progress": "📋 Copy my progress to all profiles",
+    "copy_done": "✓ Progress copied to all profiles!",
+    "manage": "Manage profiles",
+    "done": "✓ Done",
+    "copy_confirm_title": "Copy my progress?",
+    "copy_confirm_desc": "This will replace the progress of {names} with yours. This action cannot be undone.",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "new_profile_title": "New profile",
+    "choose_emoji": "Choose an emoji",
+    "name_placeholder": "First name or username…",
+    "error_too_short": "Username too short (min 2 characters)",
+    "error_exists": "This username already exists!",
+    "create": "Create profile"
+  },
+  "FlashcardGame": {
+    "pick_level_hint": "Choose your level — 4 options per question, timer running!",
+    "questions_count": "questions",
+    "per_correct": "correct answer",
+    "recap_title": "Recap",
+    "back": "← Back",
+    "correct_answer": "Correct answer",
+    "your_answer": "Your answer",
+    "timed_out": "Time ran out",
+    "play_again": "Play again",
+    "correct_answers": "correct answers",
+    "success_rate": "success rate",
+    "gems_earned": "gems earned",
+    "perfect_score": "Perfect score!",
+    "bonus": "bonus",
+    "see_mistakes": "See mistakes",
+    "change_level": "Change level",
+    "time_up": "Time's up!",
+    "bravo": "Well done!",
+    "see_score": "See score 🏁",
+    "next": "Next →"
+  },
+  "MemoryGame": {
+    "subtitle": "Match each Python keyword to its definition. Earn 💎!",
+    "pairs": "pairs",
+    "record": "Best",
+    "moves": "moves",
+    "adapt_hint": "Choose the level that suits you!",
+    "bravo": "Well done!",
+    "found_all_pairs": "You found all pairs in {moves} moves!",
+    "new_record": "New record!",
+    "play_again": "Play again",
+    "change_level": "Change level",
+    "quit": "Quit"
+  },
+  "SnakeGame": {
+    "label_score": "Score",
+    "label_record": "Record",
+    "label_level": "Level",
+    "label_earned": "Earned",
+    "milestone_toast": "Score {score}! +{gems} 💎 earned!",
+    "idle_hint": "Eat the 🍎, avoid the walls and your body!",
+    "play_button": "Play 🎮",
+    "controls_hint": "Arrows / WASD / swipe",
+    "new_record": "New record!",
+    "game_over": "Game Over!",
+    "play_again": "Play again 🔄",
+    "keyboard_hint": "↑ ↓ ← → or WASD · speed increases with score",
+    "level_legend": "🌟 Legend",
+    "level_master": "🐍 Master",
+    "level_expert": "⚡ Expert",
+    "level_pro": "💻 Pro",
+    "level_player": "📝 Player",
+    "level_novice": "🌱 Novice"
+  },
+  "WordlePython": {
+    "won_in": "Well done in {count} {count, plural, one {try} other {tries}}!",
+    "the_word_was": "The word was",
+    "new_word_tomorrow": "New word tomorrow!",
+    "history_label": "History (last 7 days)",
+    "history_not_played": "Not played",
+    "history_won": "{word} — Won in {attempts}",
+    "history_lost": "{word} — Lost"
+  },
   "LanguageSwitcher": {
     "fr": "🇫🇷 Français",
     "en": "🇬🇧 English"
+  },
+  "Profile": {
+    "level_badge": "Level {id} — {name}",
+    "anonymous": "Anonymous Coder",
+    "level_progress": "{done}/{total} lessons — {pct}%",
+    "level_prev": "Lvl. {n}",
+    "level_next": "Lvl. {n}",
+    "stat_points": "points",
+    "stat_gems": "gems",
+    "stat_streak": "streak",
+    "stat_badges": "badges",
+    "stat_duels": "duels",
+    "cta_code": "Code",
+    "share_card_title": "Download my profile card",
+    "share_profile_title": "My PythonKids Profile",
+    "share_text": "🐍 {username} on PythonKids!\n{rankEmoji} Rank: {rankTitle}\n⭐ {score} points · 🔥 Streak {streak} days\n✏️ {lessons}/{totalLessons} lessons · 🏅 {badges} badges",
+    "share_profile": "Share my profile",
+    "sound_mute": "Mute sounds",
+    "sound_unmute": "Unmute sounds",
+    "heads_title": "🎭 Head Collection",
+    "heads_desc": "Earn chests to unlock heads",
+    "calendar_title": "Calendar",
+    "streak_record": "Record: {days} days",
+    "streak_current": "{days} day 🔥",
+    "streak_current_plural": "{days} days 🔥",
+    "lessons_title": "Lessons",
+    "lessons_out_of": "out of {total} total",
+    "challenges_title": "Challenges",
+    "challenges_out_of": "out of {total} challenges",
+    "level_progress_title": "📊 Progress by level",
+    "level_row": "Lvl. {id} — {name}",
+    "chests_empty_title": "No chests yet",
+    "chests_empty_desc": "Do your first lesson to get your first chest!",
+    "chests_pending": "🎁 Chests to open",
+    "chest_level": "Level {id}",
+    "chest_revealed": "{done}/{total} revealed",
+    "avatar_effects_title": "🎨 Avatar effects",
+    "avatar_effects_desc": "Click on an effect to equip it.",
+    "avatar_equipped": "✓ Equipped",
+    "badges_title": "🏅 My badges",
+    "achievements_title": "✨ Achievements",
+    "stats_link": "View my detailed stats",
+    "quiz_link": "Revision quiz · +5 💎 per correct answer",
+    "shop_link": "Shop",
+    "leaderboard_link": "Leaderboard",
+    "challenges_link": "Challenges",
+    "friends_title": "My friends",
+    "friends_add": "Add →",
+    "friends_no_friends": "You don't have any friends yet.",
+    "friends_find": "Find friends",
+    "friends_online": "{count} online",
+    "friends_see_all": "See all →",
+    "friends_no_activity": "No activity yet",
+    "activity_lesson": "📖 Did a lesson",
+    "activity_badge": "🏅 Badge earned",
+    "activity_challenge": "🎯 Challenge completed",
+    "activity_streak": "🔥 Streak",
+    "time_just_now": "just now",
+    "card_points": "Points",
+    "card_streak": "Streak",
+    "card_lessons": "Lessons",
+    "card_badges": "Badges",
+    "card_duels": "Duels",
+    "card_achievements": "Achievements"
+  },
+  "LevelComplete": {
+    "title": "Level complete!",
+    "summary": "{n} lesson · Badge earned · Chest received!",
+    "summary_plural": "{n} lessons · Badge earned · Chest received!",
+    "next_level": "Level {id} {emoji} →",
+    "get_certificate": "🎓 Get my certificate",
+    "take_challenges": "🎯 Take on challenges",
+    "continue_here": "Continue here"
+  },
+  "DetenteHub": {
+    "back_home": "← Home",
+    "title": "🎮 Relax Zone",
+    "tagline": "Play and earn 💎!",
+    "gems_total": "Total",
+    "wordle_won": "Won ✓",
+    "wordle_lost": "Lost",
+    "wordle_not_played": "Not played yet",
+    "back_lessons": "Back to lessons 📚",
+    "desc_snake": "Score → 💎",
+    "desc_memory": "Pairs → 💎",
+    "desc_wordle": "Word of the day · +💎",
+    "desc_flashcards": "Speed quiz · +💎",
+    "desc_typing": "Speed · +💎"
+  },
+  "AccountSync": {
+    "title": "☁️ Online backup",
+    "linked_pre": "Account ",
+    "linked_post": " linked — your progress is saved automatically.",
+    "last_sync": "Last sync: {date}",
+    "sync_now": "🔄 Sync now",
+    "synced": "✓ Synced!",
+    "unlink": "Unlink",
+    "unlink_title": "Unlink this account from this device (online data is preserved)",
+    "no_account_desc": "Save your progress and access it from any device with a username and PIN code.",
+    "mode_register": "Create account",
+    "mode_login": "I have an account",
+    "placeholder_name": "Username",
+    "placeholder_pin": "PIN code (4-8 digits)",
+    "create": "Create",
+    "login": "Log in",
+    "error_name_short": "Choose a username (min 2 characters)",
+    "error_pin_format": "PIN code must be 4 to 8 digits",
+    "pin_tip": "💡 Choose a PIN code that's easy to remember (and write it down somewhere with a parent!)"
   }
 }

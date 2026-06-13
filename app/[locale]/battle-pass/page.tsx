@@ -22,14 +22,10 @@ import { RARITY_COLORS_SHOP } from "@/lib/shop";
 import { apiFetch } from "@/lib/api";
 import { PAYMENTS_ENABLED } from "@/lib/features";
 
-const RARITY_LABEL: Record<string, string> = {
-  common: "Commun", rare: "Rare", epic: "Épique", legendary: "Légendaire",
-};
-
-const CHEST_NAMES = ["Commun", "Rare", "Épique", "Légendaire"];
 const CHEST_EMOJIS = ["📦", "📫", "💜", "✨"];
 
 function RewardCard({ reward, claimed, locked }: { reward: BPReward; claimed: boolean; locked: boolean }) {
+  const t = useTranslations("BattlePass");
   const rarityGradient = reward.itemRarity ? RARITY_COLORS_SHOP[reward.itemRarity] : null;
 
   const content = () => {
@@ -42,7 +38,7 @@ function RewardCard({ reward, claimed, locked }: { reward: BPReward; claimed: bo
     if (reward.type === "chest") return (
       <div className="flex flex-col items-center gap-0.5">
         <span className="text-2xl">{CHEST_EMOJIS[reward.chestLevel ?? 0]}</span>
-        <span className="text-[10px] font-bold text-gray-400">{CHEST_NAMES[reward.chestLevel ?? 0]}</span>
+        <span className="text-[10px] font-bold text-gray-400">{t(`chest_${reward.chestLevel ?? 0}`)}</span>
       </div>
     );
     return (

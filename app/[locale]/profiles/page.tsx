@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import {
   getProfiles,
@@ -16,6 +17,7 @@ import {
 const EMOJIS = ["🐍", "🦊", "🐼", "🦁", "🐸", "🦉", "🐧", "🐬", "🦄", "🐉", "🤖", "🦸", "🧙", "👾", "🚀", "🎮", "🐯", "🦝"];
 
 export default function ProfilesPage() {
+  const t = useTranslations("Profiles");
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [currentName, setCurrentName] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
@@ -35,11 +37,11 @@ export default function ProfilesPage() {
   function handleAdd() {
     const name = newName.trim();
     if (name.length < 2) {
-      setError("Pseudo trop court (min 2 caractères)");
+      setError(t("error_too_short"));
       return;
     }
     if (!addProfile(name, newEmoji)) {
-      setError("Ce pseudo existe déjà !");
+      setError(t("error_exists"));
       return;
     }
     setProfiles(getProfiles());
@@ -66,13 +68,13 @@ export default function ProfilesPage() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-6 py-12 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
       <Link href="/" className="absolute top-6 left-6 text-sm text-gray-400 dark:text-slate-500 hover:text-purple-600 dark:hover:text-purple-400 transition-colors">
-        ← Retour
+        {t("back")}
       </Link>
 
       <div className="text-5xl mb-4">🐍</div>
-      <h1 className="text-3xl font-extrabold text-gray-800 dark:text-white mb-2">Qui joue ?</h1>
+      <h1 className="text-3xl font-extrabold text-gray-800 dark:text-white mb-2">{t("who_plays")}</h1>
       <p className="text-sm text-gray-500 dark:text-slate-400 mb-10">
-        Choisis ton profil pour continuer
+        {t("choose_profile")}
       </p>
 
       <div className="flex flex-wrap justify-center gap-5 mb-8 max-w-2xl">
@@ -97,7 +99,7 @@ export default function ProfilesPage() {
                   {profile.name}
                 </span>
                 {isActive && (
-                  <span className="text-xs text-purple-500 dark:text-purple-400 font-semibold">✓ Actif</span>
+                  <span className="text-xs text-purple-500 dark:text-purple-400 font-semibold">{t("active")}</span>
                 )}
               </button>
 
@@ -119,7 +121,7 @@ export default function ProfilesPage() {
             className="flex flex-col items-center gap-2 p-5 rounded-2xl w-28 bg-white dark:bg-slate-800 border-2 border-dashed border-purple-200 dark:border-slate-600 hover:border-purple-400 hover:bg-purple-50 dark:hover:bg-slate-700 transition-all shadow-sm cursor-pointer"
           >
             <div className="text-4xl text-purple-300 dark:text-slate-500">+</div>
-            <span className="text-sm font-semibold text-gray-400 dark:text-slate-500">Ajouter</span>
+            <span className="text-sm font-semibold text-gray-400 dark:text-slate-500">{t("add_profile")}</span>
           </button>
         )}
       </div>
@@ -131,19 +133,19 @@ export default function ProfilesPage() {
               onClick={() => setShowCopyConfirm(true)}
               className="text-xs text-purple-500 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors underline"
             >
-              📋 Copier ma progression sur tous les profils
+              {t("copy_progress")}
             </button>
           )}
           {copyDone && (
             <p className="text-xs text-green-600 dark:text-green-400 font-semibold">
-              ✓ Progression copiée sur tous les profils !
+              {t("copy_done")}
             </p>
           )}
           <button
             onClick={() => setEditMode((v) => !v)}
             className="text-xs text-gray-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 transition-colors underline"
           >
-            {editMode ? "✓ Terminé" : "Gérer les profils"}
+            {editMode ? t("done") : t("manage")}
           </button>
         </div>
       )}
@@ -153,21 +155,17 @@ export default function ProfilesPage() {
           <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-sm shadow-2xl">
             <div className="text-4xl text-center mb-3">⚠️</div>
             <h2 className="text-lg font-extrabold text-gray-800 dark:text-white mb-2 text-center">
-              Copier ma progression ?
+              {t("copy_confirm_title")}
             </h2>
             <p className="text-sm text-gray-500 dark:text-slate-400 text-center mb-4">
-              Ceci va remplacer la progression de{" "}
-              <span className="font-bold text-gray-700 dark:text-white">
-                {profiles.filter((p) => p.name !== currentName).map((p) => p.name).join(", ")}
-              </span>{" "}
-              par la tienne. Cette action est irréversible.
+              {t("copy_confirm_desc", { names: profiles.filter((p) => p.name !== currentName).map((p) => p.name).join(", ") })}
             </p>
             <div className="flex gap-2">
               <button
                 onClick={() => setShowCopyConfirm(false)}
                 className="flex-1 py-2.5 rounded-xl border-2 border-gray-200 dark:border-slate-600 text-sm font-bold text-gray-500 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
               >
-                Annuler
+                {t("cancel")}
               </button>
               <button
                 onClick={() => {
@@ -177,7 +175,7 @@ export default function ProfilesPage() {
                 }}
                 className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-pink-500 text-white text-sm font-bold hover:opacity-90 transition-opacity"
               >
-                Confirmer
+                {t("confirm")}
               </button>
             </div>
           </div>
@@ -188,11 +186,11 @@ export default function ProfilesPage() {
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-6">
           <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-sm shadow-2xl">
             <h2 className="text-lg font-extrabold text-gray-800 dark:text-white mb-4 text-center">
-              Nouveau profil
+              {t("new_profile_title")}
             </h2>
 
             <p className="text-xs text-gray-500 dark:text-slate-400 mb-2 font-semibold uppercase tracking-wide text-center">
-              Choisis un emoji
+              {t("choose_emoji")}
             </p>
             <div className="flex flex-wrap gap-2 mb-5 justify-center">
               {EMOJIS.map((e) => (
@@ -218,7 +216,7 @@ export default function ProfilesPage() {
                 setError("");
               }}
               onKeyDown={(e) => e.key === "Enter" && handleAdd()}
-              placeholder="Prénom ou pseudo…"
+              placeholder={t("name_placeholder")}
               maxLength={20}
               autoFocus
               className="w-full border-2 border-purple-200 dark:border-slate-600 rounded-xl px-4 py-2.5 text-sm font-semibold focus:outline-none focus:border-purple-400 dark:bg-slate-700 dark:text-white mb-1"
@@ -234,14 +232,14 @@ export default function ProfilesPage() {
                 }}
                 className="flex-1 py-2.5 rounded-xl border-2 border-gray-200 dark:border-slate-600 text-sm font-bold text-gray-500 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
               >
-                Annuler
+                {t("cancel")}
               </button>
               <button
                 onClick={handleAdd}
                 disabled={newName.trim().length < 2}
                 className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-pink-500 text-white text-sm font-bold hover:opacity-90 disabled:opacity-40 transition-opacity"
               >
-                Créer le profil
+                {t("create")}
               </button>
             </div>
           </div>

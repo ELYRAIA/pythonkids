@@ -46,8 +46,8 @@ export default function ProjectPage() {
   if (!project) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center">
-        <p className="text-gray-500">Projet introuvable pour le niveau {levelId}.</p>
-        <Link href="/projects" className="mt-4 text-purple-600 hover:underline text-sm">← Retour aux projets</Link>
+        <p className="text-gray-500">{t("not_found", { id: levelId })}</p>
+        <Link href="/projects" className="mt-4 text-purple-600 hover:underline text-sm">{t("back")}</Link>
       </div>
     );
   }
@@ -155,7 +155,7 @@ export default function ProjectPage() {
           <div className="bg-gray-800 px-4 py-2 flex items-center justify-between">
             <span className="text-gray-400 text-xs font-mono">projet.py</span>
             <div className="flex items-center gap-3">
-              {!pyodideReady && <span className="text-yellow-400 text-xs animate-pulse">⏳ Chargement Python…</span>}
+              {!pyodideReady && <span className="text-yellow-400 text-xs animate-pulse">{t("python_loading")}</span>}
               <button
                 onClick={run}
                 disabled={!pyodideReady || status === "running"}

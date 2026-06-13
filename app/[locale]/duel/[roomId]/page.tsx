@@ -208,13 +208,13 @@ export default function DuelRoomPage() {
     <div className="min-h-screen flex flex-col items-center justify-center text-center px-6">
       <p className="text-4xl mb-4">😕</p>
       <p className="text-gray-600 dark:text-slate-400 mb-6">{error}</p>
-      <Link href="/duel" className="text-purple-600 font-bold hover:underline">← Retour aux duels</Link>
+      <Link href="/duel" className="text-purple-600 font-bold hover:underline">{t("back_to_duels")}</Link>
     </div>
   );
 
   if (!room || !challenge) return (
     <div className="min-h-screen flex items-center justify-center">
-      <p className="text-gray-400 animate-pulse">Chargement du duel…</p>
+      <p className="text-gray-400 animate-pulse">{t("loading")}</p>
     </div>
   );
 
@@ -283,7 +283,7 @@ export default function DuelRoomPage() {
                 href="/duel"
                 className="px-5 py-2 rounded-full border-2 border-gray-200 dark:border-slate-600 text-sm font-bold text-gray-500 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
               >
-                ← Retour
+                {t("back")}
               </Link>
               <Link
                 href="/duel"
@@ -341,7 +341,7 @@ export default function DuelRoomPage() {
             </div>
             <span className="text-gray-400 text-xs font-mono">solution.py</span>
             <div className="flex items-center gap-3">
-              {!pyodideReady && <span className="text-yellow-400 text-xs animate-pulse">⏳ Chargement…</span>}
+              {!pyodideReady && <span className="text-yellow-400 text-xs animate-pulse">{t("pyodide_loading")}</span>}
               <button
                 onClick={runTests}
                 disabled={!pyodideReady || status === "running" || iSolved}

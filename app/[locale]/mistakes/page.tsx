@@ -35,7 +35,7 @@ export default function MistakesPage() {
 
         <div className="flex items-center gap-3 mb-6">
           <Link href="/challenges" className="text-gray-400 dark:text-slate-500 hover:text-purple-600 dark:hover:text-purple-300 text-sm">
-            ← Défis
+            {t("back")}
           </Link>
         </div>
 

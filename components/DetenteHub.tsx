@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import SnakeGame from "./SnakeGame";
 import MemoryGame from "./MemoryGame";
 import WordlePython from "./WordlePython";
@@ -33,6 +34,7 @@ function getWordleStatus(): { played: boolean; won: boolean } {
 const STORAGE_KEY = "pythonkids_detente_tab";
 
 export default function DetenteHub() {
+  const t = useTranslations("DetenteHub");
   const [activeGame, setActiveGame] = useState<GameId>("snake");
   const [gems, setGems]             = useState(0);
   const [wordle, setWordle]         = useState<{ played: boolean; won: boolean }>({ played: false, won: false });
@@ -62,7 +64,7 @@ export default function DetenteHub() {
       {/* Back link */}
       <div className="mb-5">
         <Link href="/" className="text-sm text-gray-400 dark:text-slate-500 hover:text-purple-600 dark:hover:text-purple-300 transition-colors">
-          ← Accueil
+          {t("back_home")}
         </Link>
       </div>
 
@@ -70,12 +72,12 @@ export default function DetenteHub() {
       <div className="mb-6">
         <div className="flex items-center justify-between mb-3">
           <div>
-            <h1 className="text-2xl font-extrabold text-gray-800 dark:text-white">🎮 Espace Détente</h1>
-            <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">Joue et gagne des 💎 !</p>
+            <h1 className="text-2xl font-extrabold text-gray-800 dark:text-white">{t("title")}</h1>
+            <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">{t("tagline")}</p>
           </div>
           <div className="text-right">
             <div className="text-lg font-extrabold text-yellow-500">{mounted ? gems : "—"} 💎</div>
-            <div className="text-xs text-gray-400 dark:text-slate-500">Total</div>
+            <div className="text-xs text-gray-400 dark:text-slate-500">{t("gems_total")}</div>
           </div>
         </div>
 
@@ -90,7 +92,7 @@ export default function DetenteHub() {
                 : "bg-gray-50 dark:bg-slate-800 border-gray-200 dark:border-slate-700 text-gray-500 dark:text-slate-400"
             }`}>
               <span>🟩</span>
-              <span>Wordle : {wordle.played ? (wordle.won ? "Gagné ✓" : "Perdu") : "Pas encore joué"}</span>
+              <span>Wordle — {wordle.played ? (wordle.won ? t("wordle_won") : t("wordle_lost")) : t("wordle_not_played")}</span>
             </div>
           </div>
         )}
@@ -121,7 +123,7 @@ export default function DetenteHub() {
           <span className="text-xl">{current.emoji}</span>
           <div>
             <h2 className="font-extrabold text-white text-sm">{current.label}</h2>
-            <p className="text-xs text-white/80">{current.desc}</p>
+            <p className="text-xs text-white/80">{t(`desc_${current.id}` as `desc_${GameId}`)}</p>
           </div>
         </div>
 
@@ -140,7 +142,7 @@ export default function DetenteHub() {
           href="/levels/0"
           className="text-sm text-gray-400 dark:text-slate-500 hover:text-purple-600 dark:hover:text-purple-300 transition-colors"
         >
-          Retour aux leçons 📚
+          {t("back_lessons")}
         </Link>
       </div>
     </div>

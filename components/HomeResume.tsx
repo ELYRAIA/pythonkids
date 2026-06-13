@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { lf } from "@/lib/localize";
 import { Link } from "@/i18n/navigation";
 import { getProgress, BADGES } from "@/lib/progress";
 import { LEVELS } from "@/lib/levels";
@@ -27,6 +28,7 @@ interface LastBadge {
 
 export default function HomeResume() {
   const t = useTranslations("HomeResume");
+  const locale = useLocale();
   const [mounted, setMounted] = useState(false);
   const [nextLesson, setNextLesson] = useState<NextLesson | null>(null);
   const [lastBadge, setLastBadge] = useState<LastBadge | null>(null);
@@ -50,9 +52,9 @@ export default function HomeResume() {
                 levelId: level.id,
                 lessonIndex: i,
                 levelEmoji: level.emoji,
-                levelName: level.name,
+                levelName: lf(level, "name", locale),
                 levelColor: level.color,
-                lessonTitle: LEVELS_DATA[String(level.id)]?.lessons[i]?.title ?? `Leçon ${i + 1}`,
+                lessonTitle: lf(LEVELS_DATA[String(level.id)]?.lessons[i] ?? { title: `${i + 1}` }, "title", locale),
               };
               break;
             }
@@ -94,7 +96,7 @@ export default function HomeResume() {
           <div className="flex items-center justify-between mb-1.5">
             <span className="text-xs text-gray-500 dark:text-slate-400 font-medium">{t("overall")}</span>
             <span className="text-xs font-bold text-purple-600 dark:text-purple-400">
-              {doneLessons} / {TOTAL_LESSONS} leçons
+              {t("lessons_count", { done: doneLessons, total: TOTAL_LESSONS })}
             </span>
           </div>
           <div className="w-full bg-gray-100 dark:bg-slate-700 rounded-full h-2.5">
@@ -116,13 +118,13 @@ export default function HomeResume() {
                 </div>
                 <div>
                   <p className="text-xs text-gray-500 dark:text-slate-400 font-medium">
-                    Niveau {nextLesson.levelId} · Leçon {nextLesson.lessonIndex + 1}
+                    {t("level_lesson_badge", { level: nextLesson.levelId, lesson: nextLesson.lessonIndex + 1 })}
                   </p>
                   <p className="text-sm font-bold text-gray-800 dark:text-white leading-snug">
                     {nextLesson.lessonTitle}
                   </p>
                   <p className="text-xs text-purple-600 dark:text-purple-400 font-semibold mt-0.5">
-                    {nextLesson.levelName} · Continuer →
+                    {nextLesson.levelName} · {t("continue")}
                   </p>
                 </div>
               </div>

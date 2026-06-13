@@ -2,7 +2,9 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
+import { lf } from "@/lib/localize";
 import PythonEditor from "./PythonEditor";
 import LessonExercise from "./LessonExercise";
 import {
@@ -56,6 +58,8 @@ export default function LessonView({
   nextLesson,
 }: LessonViewProps) {
   const router = useRouter();
+  const locale = useLocale();
+  const t = useTranslations("LessonView");
   const [done, setDone] = useState(false);
   const [toastBadge, setToastBadge] = useState<Badge | null>(null);
   const [confetti, setConfetti] = useState(false);
@@ -178,7 +182,7 @@ export default function LessonView({
           <div className="bg-gradient-to-r from-orange-400 to-pink-500 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 font-bold text-sm">
             <span className="text-2xl">🔥</span>
             <div>
-              <div>Combo x{comboResult.combo} !</div>
+              <div>{t("combo_title", { combo: comboResult.combo })}</div>
               <div className="text-xs font-normal opacity-90">+{comboResult.bonusGems} 💎 bonus</div>
             </div>
           </div>
@@ -188,11 +192,11 @@ export default function LessonView({
       {/* Indicateur de position */}
       <div className="flex items-center justify-between mb-6">
         <span className="text-xs font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-wide">
-          Leçon {lessonIndex + 1} / {totalLessons} — {levelName}
+          {t("lesson_position", { index: lessonIndex + 1, total: totalLessons, name: levelName })}
         </span>
         {mounted && done && (
           <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 px-3 py-1 rounded-full font-bold">
-            ✓ Terminée
+            {t("done_badge")}
           </span>
         )}
       </div>
@@ -203,21 +207,21 @@ export default function LessonView({
           <span className={`w-9 h-9 rounded-full bg-white/20 flex items-center justify-center font-bold text-sm`}>
             {lessonIndex + 1}
           </span>
-          <h1 className="text-xl font-extrabold">{lesson.title}</h1>
+          <h1 className="text-xl font-extrabold">{lf(lesson, 'title', locale)}</h1>
         </div>
         <p className="text-sm leading-relaxed opacity-90 whitespace-pre-line">
-          {lesson.description}
+          {lf(lesson, 'description', locale)}
         </p>
       </div>
 
       {/* Cartes de théorie */}
       {lesson.concepts && lesson.concepts.length > 0 && (
-        <LessonConceptCards concepts={lesson.concepts} levelColor={levelColor} />
+        <LessonConceptCards concepts={lesson.concepts} levelColor={levelColor} locale={locale} />
       )}
 
       {/* Éditeur */}
       <PythonEditor
-        defaultCode={lesson.code}
+        defaultCode={lf(lesson, 'code', locale) || lesson.code}
         height="380px"
         storageKey={`lesson_${levelId}_${lessonIndex}`}
       />
@@ -236,7 +240,7 @@ export default function LessonView({
       <div className="mt-6 flex flex-col items-end gap-2">
         {hasExercise && !exerciseAttempted && !done && (
           <p className="text-xs text-gray-400 dark:text-slate-500">
-            Tente l&apos;exercice ci-dessus pour débloquer ce bouton.
+            {t("attempt_hint")}
           </p>
         )}
         <button
@@ -248,7 +252,7 @@ export default function LessonView({
               : `bg-gradient-to-r ${levelColor} text-white hover:opacity-90 shadow-md`
           }`}
         >
-          {done ? "✓ Terminée (annuler)" : "Marquer comme terminée ✓"}
+          {done ? t("unmark_done") : t("mark_done")}
         </button>
       </div>
 
@@ -259,14 +263,14 @@ export default function LessonView({
             href={`/levels/${levelId}/lessons/${lessonIndex - 1}`}
             className="flex items-center gap-2 text-sm font-semibold text-gray-500 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-300 transition-colors"
           >
-            ← {prevLesson.title}
+            ← {lf(prevLesson, 'title', locale)}
           </Link>
         ) : (
           <Link
             href={`/levels/${levelId}`}
             className="flex items-center gap-2 text-sm font-semibold text-gray-500 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-300 transition-colors"
           >
-            ← Retour au niveau
+            {t("back_to_level")}
           </Link>
         )}
 
@@ -275,14 +279,14 @@ export default function LessonView({
             onClick={goNext}
             className={`bg-gradient-to-r ${levelColor} text-white px-5 py-2.5 rounded-full text-sm font-bold hover:opacity-90 transition-opacity shadow-md`}
           >
-            {nextLesson.title} →
+            {lf(nextLesson, 'title', locale)} →
           </button>
         ) : (
           <button
             onClick={goNext}
             className={`bg-gradient-to-r ${levelColor} text-white px-5 py-2.5 rounded-full text-sm font-bold hover:opacity-90 transition-opacity shadow-md`}
           >
-            Terminer le niveau 🎉
+            {t("finish_level")}
           </button>
         )}
       </div>

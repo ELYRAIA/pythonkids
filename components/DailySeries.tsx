@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import {
   getDailySeries, canClaimNext, msUntilNext, claimSeriesChest,
   SERIES_MAX, SLOT_LEVELS,
@@ -23,6 +24,7 @@ function formatMs(ms: number): string {
 }
 
 export default function DailySeries({ onChestReady }: Props) {
+  const t = useTranslations("DailySeries");
   const [claimed, setClaimed] = useState(0);
   const [canClaim, setCanClaim] = useState(false);
   const [msLeft, setMsLeft] = useState(0);
@@ -65,12 +67,12 @@ export default function DailySeries({ onChestReady }: Props) {
       <div className="flex items-center justify-between mb-4 gap-3">
         <div className="min-w-0">
           <p className="text-base font-extrabold text-gray-800 dark:text-white flex items-center gap-2">
-            🏆 Série quotidienne
+            {t("title")}
           </p>
           <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">
             {allDone
-              ? "Reviens demain pour une nouvelle série !"
-              : `${claimed} / ${SERIES_MAX} coffres récupérés aujourd'hui`}
+              ? t("come_back_tomorrow")
+              : t("chests_today", { claimed, total: SERIES_MAX })}
           </p>
         </div>
 
@@ -79,13 +81,13 @@ export default function DailySeries({ onChestReady }: Props) {
             onClick={handleClaim}
             className="shrink-0 px-4 py-2 rounded-full text-sm font-extrabold bg-gradient-to-r from-yellow-400 to-orange-500 text-white hover:opacity-90 transition-opacity shadow-md daily-claim-pulse"
           >
-            Récupérer !
+            {t("claim_button")}
           </button>
         )}
 
         {!allDone && !canClaim && msLeft > 0 && (
           <div className="shrink-0 text-right">
-            <p className="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-wide font-semibold">Prochain dans</p>
+            <p className="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-wide font-semibold">{t("next_in")}</p>
             <p className="text-xl font-extrabold text-orange-500 tabular-nums leading-none">{formatMs(msLeft)}</p>
           </div>
         )}
@@ -107,12 +109,12 @@ export default function DailySeries({ onChestReady }: Props) {
               onClick={isAvailable ? handleClaim : undefined}
               title={
                 isClaimed
-                  ? `Coffre ${i + 1} récupéré — ${RARITY_LABELS[rarity]}`
+                  ? t("chest_claimed", { n: i + 1, rarity: RARITY_LABELS[rarity] })
                   : isAvailable
-                    ? `Coffre ${i + 1} disponible ! Clique pour l'ouvrir`
+                    ? t("chest_available", { n: i + 1 })
                     : isNext
-                      ? `Coffre ${i + 1} — disponible dans ${formatMs(msLeft)}`
-                      : `Coffre ${i + 1} — encore verrouillé`
+                      ? t("chest_next", { n: i + 1, time: formatMs(msLeft) })
+                      : t("chest_locked", { n: i + 1 })
               }
               className={`flex-1 flex flex-col items-center gap-0.5 py-2 rounded-xl border-2 transition-all ${
                 isClaimed
@@ -139,7 +141,7 @@ export default function DailySeries({ onChestReady }: Props) {
 
       {allDone && (
         <p className="text-center text-sm font-bold text-yellow-600 dark:text-yellow-400 mt-3">
-          🎉 Bravo ! Tu as récupéré tous les coffres du jour !
+          {t("all_done")}
         </p>
       )}
     </div>

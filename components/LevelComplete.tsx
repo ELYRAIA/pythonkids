@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useEffect } from "react";
+import { useTranslations, useLocale } from "next-intl";
+import { lf } from "@/lib/localize";
 import { LEVELS } from "@/lib/levels";
 import Confetti from "./Confetti";
 
@@ -12,6 +14,8 @@ interface LevelCompleteProps {
 }
 
 export default function LevelComplete({ levelId, totalLessons, onClose }: LevelCompleteProps) {
+  const t = useTranslations("LevelComplete");
+  const locale = useLocale();
   const level = LEVELS.find((l) => l.id === levelId);
   const nextLevel = LEVELS.find((l) => l.id === levelId + 1);
   const isLast = !nextLevel;
@@ -61,11 +65,11 @@ export default function LevelComplete({ levelId, totalLessons, onClose }: LevelC
 
           <h1 className="text-3xl font-extrabold text-white mb-1"
               style={{ textShadow: "0 2px 20px rgba(167,139,250,0.6)" }}>
-            Niveau terminé !
+            {t("title")}
           </h1>
-          <p className="text-purple-300 text-base font-semibold mb-1">{level?.name}</p>
+          <p className="text-purple-300 text-base font-semibold mb-1">{level ? lf(level, "name", locale) : ""}</p>
           <p className="text-purple-400 text-sm mb-4">
-            {totalLessons} leçon{totalLessons > 1 ? "s" : ""} · Badge gagné · Coffre reçu !
+            {totalLessons > 1 ? t("summary_plural", { n: totalLessons }) : t("summary", { n: totalLessons })}
           </p>
 
           {/* Étoiles */}
@@ -84,7 +88,7 @@ export default function LevelComplete({ levelId, totalLessons, onClose }: LevelC
                 className="block w-full text-white px-6 py-3 rounded-full font-extrabold hover:opacity-90 transition-opacity shadow-lg text-base"
                 style={{ background: "linear-gradient(to right, #a78bfa, #f472b6)" }}
               >
-                Niveau {levelId + 1} {nextLevel?.emoji} →
+                {t("next_level", { id: levelId + 1, emoji: nextLevel?.emoji ?? "" })}
               </Link>
             ) : (
               <Link
@@ -92,7 +96,7 @@ export default function LevelComplete({ levelId, totalLessons, onClose }: LevelC
                 onClick={onClose}
                 className="block w-full bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-6 py-3 rounded-full font-extrabold hover:opacity-90 transition-opacity shadow-lg"
               >
-                🎓 Obtenir mon certificat
+                {t("get_certificate")}
               </Link>
             )}
             <Link
@@ -101,10 +105,10 @@ export default function LevelComplete({ levelId, totalLessons, onClose }: LevelC
               className="block w-full px-6 py-3 rounded-full font-bold transition-colors text-purple-200 hover:text-white"
               style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)" }}
             >
-              🎯 Relever des défis
+              {t("take_challenges")}
             </Link>
             <button onClick={onClose} className="text-purple-400 text-sm hover:text-purple-200 transition-colors w-full py-1">
-              Continuer ici
+              {t("continue_here")}
             </button>
           </div>
         </div>

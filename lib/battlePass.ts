@@ -59,6 +59,11 @@ function saveBattlePassState(state: BattlePassState): void {
   window.dispatchEvent(new Event("pythonkids:battlepass"));
 }
 
+function getCurrentLocale(): string {
+  if (typeof window === "undefined") return "fr";
+  return window.location.pathname.split("/")[1] === "en" ? "en" : "fr";
+}
+
 export function addBattlePassXP(amount: number): number {
   if (typeof window === "undefined") return 0;
   const state = getBattlePassState();
@@ -70,8 +75,12 @@ export function addBattlePassXP(amount: number): number {
   saveBattlePassState(state);
   const levelsGained = newLevel - prevLevel;
   if (levelsGained > 0) {
+    const locale = getCurrentLocale();
+    const msg = locale === "en"
+      ? `Battle Pass: Level ${newLevel} reached!`
+      : `Pass de Combat : Niveau ${newLevel} atteint !`;
     window.dispatchEvent(new CustomEvent("pythonkids:toast", {
-      detail: { msg: `Pass de Combat : Niveau ${newLevel} atteint !`, emoji: "🎖️", type: "normal" },
+      detail: { msg, emoji: "🎖️", type: "normal" },
     }));
   }
   return levelsGained;
@@ -120,8 +129,12 @@ function grantBPReward(reward: BPReward): void {
     addQuestChest(reward.chestLevel ?? 0);
   } else if (reward.type === "item" && reward.itemId) {
     grantItem(reward.itemId);
+    const locale = getCurrentLocale();
+    const msg = locale === "en"
+      ? `${reward.itemName} unlocked!`
+      : `${reward.itemName} débloqué !`;
     window.dispatchEvent(new CustomEvent("pythonkids:toast", {
-      detail: { msg: `${reward.itemName} débloqué !`, emoji: reward.itemEmoji ?? "🎁", type: "normal" },
+      detail: { msg, emoji: reward.itemEmoji ?? "🎁", type: "normal" },
     }));
   }
 }

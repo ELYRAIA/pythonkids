@@ -1,37 +1,38 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { addGems } from "@/lib/gems";
 
 const WORD_LIST = [
-  { word: "print", hint: "Affiche du texte à l'écran" },
-  { word: "while", hint: "Boucle qui répète tant qu'une condition est vraie" },
-  { word: "break", hint: "Sort immédiatement d'une boucle" },
-  { word: "class", hint: "Crée un nouveau type d'objet (POO)" },
-  { word: "raise", hint: "Lance une exception / erreur" },
-  { word: "yield", hint: "Transforme une fonction en générateur" },
-  { word: "input", hint: "Lit une saisie de l'utilisateur" },
-  { word: "range", hint: "Génère une suite de nombres" },
-  { word: "false", hint: "Valeur booléenne « faux » (False)" },
-  { word: "bytes", hint: "Séquence d'octets immuable" },
-  { word: "slice", hint: "Objet qui découpe une séquence" },
-  { word: "float", hint: "Nombre décimal (ex : 3.14)" },
-  { word: "tuple", hint: "Liste immuable de valeurs" },
-  { word: "super", hint: "Accède à la classe parente" },
-  { word: "round", hint: "Arrondit un nombre décimal" },
-  { word: "upper", hint: "Méthode : met une chaîne en majuscules" },
-  { word: "lower", hint: "Méthode : met une chaîne en minuscules" },
-  { word: "strip", hint: "Supprime les espaces en début et fin" },
-  { word: "split", hint: "Découpe une chaîne en liste" },
-  { word: "count", hint: "Compte les occurrences dans une séquence" },
-  { word: "index", hint: "Retourne la position d'un élément" },
-  { word: "items", hint: "Méthode de dict : retourne les paires clé-valeur" },
-  { word: "await", hint: "Attend la fin d'une coroutine (async)" },
-  { word: "async", hint: "Définit une fonction asynchrone" },
-  { word: "match", hint: "Structure de correspondance (Python 3.10+)" },
-  { word: "error", hint: "Classe de base des erreurs Python" },
-  { word: "ascii", hint: "Retourne la représentation ASCII d'un objet" },
-  { word: "local", hint: "Variable définie dans une fonction" },
+  { word: "print", hint: "Affiche du texte à l'écran", hint_en: "Displays text on the screen" },
+  { word: "while", hint: "Boucle qui répète tant qu'une condition est vraie", hint_en: "Loop that repeats while a condition is true" },
+  { word: "break", hint: "Sort immédiatement d'une boucle", hint_en: "Exits a loop immediately" },
+  { word: "class", hint: "Crée un nouveau type d'objet (POO)", hint_en: "Creates a new object type (OOP)" },
+  { word: "raise", hint: "Lance une exception / erreur", hint_en: "Raises an exception / error" },
+  { word: "yield", hint: "Transforme une fonction en générateur", hint_en: "Turns a function into a generator" },
+  { word: "input", hint: "Lit une saisie de l'utilisateur", hint_en: "Reads user input" },
+  { word: "range", hint: "Génère une suite de nombres", hint_en: "Generates a sequence of numbers" },
+  { word: "false", hint: "Valeur booléenne « faux » (False)", hint_en: "Boolean value for false (False)" },
+  { word: "bytes", hint: "Séquence d'octets immuable", hint_en: "Immutable sequence of bytes" },
+  { word: "slice", hint: "Objet qui découpe une séquence", hint_en: "Object that slices a sequence" },
+  { word: "float", hint: "Nombre décimal (ex : 3.14)", hint_en: "Decimal number (e.g. 3.14)" },
+  { word: "tuple", hint: "Liste immuable de valeurs", hint_en: "Immutable list of values" },
+  { word: "super", hint: "Accède à la classe parente", hint_en: "Accesses the parent class" },
+  { word: "round", hint: "Arrondit un nombre décimal", hint_en: "Rounds a decimal number" },
+  { word: "upper", hint: "Méthode : met une chaîne en majuscules", hint_en: "Method: converts a string to uppercase" },
+  { word: "lower", hint: "Méthode : met une chaîne en minuscules", hint_en: "Method: converts a string to lowercase" },
+  { word: "strip", hint: "Supprime les espaces en début et fin", hint_en: "Removes leading and trailing whitespace" },
+  { word: "split", hint: "Découpe une chaîne en liste", hint_en: "Splits a string into a list" },
+  { word: "count", hint: "Compte les occurrences dans une séquence", hint_en: "Counts occurrences in a sequence" },
+  { word: "index", hint: "Retourne la position d'un élément", hint_en: "Returns the position of an element" },
+  { word: "items", hint: "Méthode de dict : retourne les paires clé-valeur", hint_en: "Dict method: returns key-value pairs" },
+  { word: "await", hint: "Attend la fin d'une coroutine (async)", hint_en: "Waits for a coroutine to finish (async)" },
+  { word: "async", hint: "Définit une fonction asynchrone", hint_en: "Defines an asynchronous function" },
+  { word: "match", hint: "Structure de correspondance (Python 3.10+)", hint_en: "Pattern matching structure (Python 3.10+)" },
+  { word: "error", hint: "Classe de base des erreurs Python", hint_en: "Base class for Python errors" },
+  { word: "ascii", hint: "Retourne la représentation ASCII d'un objet", hint_en: "Returns the ASCII representation of an object" },
+  { word: "local", hint: "Variable définie dans une fonction", hint_en: "Variable defined inside a function" },
 ];
 
 const MAX_GUESSES = 6;
@@ -110,7 +111,10 @@ function saveToHistory(date: string, won: boolean, attempts: number, word: strin
 }
 
 export default function WordlePython() {
-  const { word: target, hint } = getDailyWord();
+  const t = useTranslations("WordlePython");
+  const locale = useLocale();
+  const { word: target, hint: hintFr, hint_en: hintEn } = getDailyWord();
+  const hint = locale === "en" ? (hintEn ?? hintFr) : hintFr;
   const storageKey = `pythonkids_wordle_${target}`;
 
   const [guesses, setGuesses] = useState<string[]>([]);
@@ -275,7 +279,7 @@ export default function WordlePython() {
             <>
               <p className="text-2xl mb-1">🎉</p>
               <p className="font-extrabold text-green-700 dark:text-green-400">
-                Bravo en {guesses.length} coup{guesses.length > 1 ? "s" : ""} !
+                {t("won_in", { count: guesses.length })}
               </p>
               {gemsEarned > 0 && (
                 <p className="text-sm text-green-600 dark:text-green-500 mt-1">+{gemsEarned} 💎</p>
@@ -285,7 +289,7 @@ export default function WordlePython() {
             <>
               <p className="text-2xl mb-1">😅</p>
               <p className="font-extrabold text-red-700 dark:text-red-400">
-                Le mot était <span className="uppercase">{target}</span>
+                {t("the_word_was")} <span className="uppercase">{target}</span>
               </p>
             </>
           )}
@@ -293,7 +297,7 @@ export default function WordlePython() {
             💡 {hint}
           </p>
           <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">
-            Nouveau mot demain !
+            {t("new_word_tomorrow")}
           </p>
         </div>
       )}
@@ -301,7 +305,7 @@ export default function WordlePython() {
       {/* History — last 7 days */}
       {history.length > 0 && (
         <div className="w-full max-w-xs">
-          <p className="text-xs text-gray-400 dark:text-slate-500 text-center mb-2">Historique (7 derniers jours)</p>
+          <p className="text-xs text-gray-400 dark:text-slate-500 text-center mb-2">{t("history_label")}</p>
           <div className="flex justify-center gap-1.5 flex-wrap">
             {(() => {
               const days: string[] = [];
@@ -313,10 +317,12 @@ export default function WordlePython() {
               return days.map((day) => {
                 const entry = history.find((h) => h.date === day);
                 let emoji = "⬜";
-                let title = "Pas joué";
+                let title = t("history_not_played");
                 if (entry) {
                   emoji = entry.won ? "🟩" : "🟥";
-                  title = entry.won ? `${entry.word.toUpperCase()} — Gagné en ${entry.attempts}` : `${entry.word.toUpperCase()} — Perdu`;
+                  title = entry.won
+                    ? t("history_won", { word: entry.word.toUpperCase(), attempts: entry.attempts })
+                    : t("history_lost", { word: entry.word.toUpperCase() });
                 }
                 return (
                   <span key={day} title={`${day} · ${title}`} className="text-lg cursor-default select-none">{emoji}</span>

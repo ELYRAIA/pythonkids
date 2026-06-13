@@ -1,14 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import AppHeader from "@/components/AppHeader";
 import { GUIDED_PROJECTS, getProjectStepsDone } from "@/lib/projects";
 import { LEVELS } from "@/lib/levels";
+import { lf } from "@/lib/localize";
 
 export default function ProjectsPage() {
   const t = useTranslations("Projects");
+  const locale = useLocale();
   const [progress, setProgress] = useState<Record<string, number>>({});
   const [mounted, setMounted] = useState(false);
 
@@ -54,7 +56,7 @@ export default function ProjectsPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
                       <span className="text-xs text-gray-400 dark:text-slate-500">
-                        {level?.emoji} Niveau {project.levelId} — {level?.name}
+                        {level?.emoji} {t("level_badge", { id: project.levelId, name: level ? lf(level, "name", locale) : project.levelId })}
                       </span>
                       {isComplete && (
                         <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full font-bold">{t("completed")}</span>

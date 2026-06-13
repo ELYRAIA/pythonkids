@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { lf } from "@/lib/localize";
 import {
   getWeeklyQuestState, refreshWeeklyQuests, claimWeeklyQuest,
   computeWeeklyQuestProgress, getWeekDaysLeft,
@@ -18,6 +19,7 @@ interface QuestWithProgress {
 
 export default function WeeklyQuests() {
   const t = useTranslations("WeeklyQuests");
+  const locale = useLocale();
   const [quests, setQuests] = useState<QuestWithProgress[]>([]);
   const [mounted, setMounted] = useState(false);
   const [claimedId, setClaimedId] = useState<string | null>(null);
@@ -105,12 +107,12 @@ export default function WeeklyQuests() {
                 <span className="text-2xl shrink-0">{def.emoji}</span>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm font-bold text-gray-800 dark:text-white truncate">{def.title}</span>
+                    <span className="text-sm font-bold text-gray-800 dark:text-white truncate">{lf(def, "title", locale)}</span>
                     <span className="text-xs text-gray-400 dark:text-slate-500 shrink-0 ml-2">
                       {current}/{def.target}
                     </span>
                   </div>
-                  <p className="text-xs text-gray-500 dark:text-slate-400 mb-1.5 truncate">{def.desc}</p>
+                  <p className="text-xs text-gray-500 dark:text-slate-400 mb-1.5 truncate">{lf(def, "desc", locale)}</p>
                   <div className="w-full bg-gray-100 dark:bg-slate-700 rounded-full h-1.5">
                     <div
                       className={`h-1.5 rounded-full transition-all duration-500 ${
@@ -135,7 +137,7 @@ export default function WeeklyQuests() {
                     }`}
                   >
                     {isJustClaimed
-                      ? (def.rewardType === "chest" ? "📦 Coffre !" : `+${def.reward} 💎`)
+                      ? (def.rewardType === "chest" ? t("claimed_chest") : `+${def.reward} 💎`)
                       : (def.rewardType === "chest" ? t("claim_chest") : t("claim", { type: `${def.reward} 💎` }))}
                   </button>
                 ) : (

@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import Confetti from "./Confetti";
 import { ACHIEVEMENTS } from "@/lib/achievements";
+import { lf } from "@/lib/localize";
 
 const MAJOR_IDS = new Set([
   "first_lesson", "lessons_all",
@@ -15,6 +16,7 @@ const MAJOR_IDS = new Set([
 
 export default function AchievementCelebration() {
   const t = useTranslations("AchievementCelebration");
+  const locale = useLocale();
   const [active, setActive] = useState<typeof ACHIEVEMENTS[0] | null>(null);
   const [confetti, setConfetti] = useState(false);
 
@@ -49,8 +51,8 @@ export default function AchievementCelebration() {
         <p className="text-xs font-extrabold text-purple-500 dark:text-purple-400 uppercase tracking-widest mb-1">
           {t("unlocked")}
         </p>
-        <h2 className="text-2xl font-extrabold text-gray-800 dark:text-white mb-2">{active.name}</h2>
-        <p className="text-sm text-gray-500 dark:text-slate-400">{active.desc}</p>
+        <h2 className="text-2xl font-extrabold text-gray-800 dark:text-white mb-2">{lf(active, "name", locale)}</h2>
+        <p className="text-sm text-gray-500 dark:text-slate-400">{lf(active, "desc", locale)}</p>
         <button
           onClick={() => setActive(null)}
           className="mt-6 text-xs text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"

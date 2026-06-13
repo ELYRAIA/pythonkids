@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import AppHeader from "@/components/AppHeader";
 import { getProgress } from "@/lib/progress";
@@ -15,6 +15,7 @@ import { getXPInfo, getWeeklyXP } from "@/lib/xp";
 
 export default function StatsPage() {
   const t = useTranslations("Stats");
+  const locale = useLocale();
   const [mounted, setMounted] = useState(false);
   const [progress, setProgress] = useState({ earnedBadges: [] as string[], completedLessons: {} as Record<string, number[]> });
   const [streak, setStreak] = useState({ currentStreak: 0, longestStreak: 0, playDates: [] as string[] });
@@ -58,10 +59,10 @@ export default function StatsPage() {
   const monthLabels = heatmapWeeks.map((week) => {
     const firstDay = new Date(week[0].date);
     return firstDay.getDate() <= 7
-      ? firstDay.toLocaleDateString("fr-FR", { month: "short" })
+      ? firstDay.toLocaleDateString(locale, { month: "short" })
       : "";
   });
-  const DAY_LABELS = ["D", "L", "M", "M", "J", "V", "S"];
+  const DAY_LABELS = Array.from({ length: 7 }, (_, i) => t(`day_${i}` as `day_${0 | 1 | 2 | 3 | 4 | 5 | 6}`));
 
   // Challenge breakdown by difficulty
   const diffStats = {
@@ -98,10 +99,10 @@ export default function StatsPage() {
         {/* Chiffres clés */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
-            { emoji: "📖", value: `${doneLessons}/${totalLessons}`, label: "Leçons" },
-            { emoji: "🎯", value: `${completedChallenges.length}/${totalChallenges}`, label: "Défis" },
-            { emoji: "🔥", value: `${streak.currentStreak}j`, label: "Streak" },
-            { emoji: "💎", value: `${gems}`, label: "Gemmes" },
+            { emoji: "📖", value: `${doneLessons}/${totalLessons}`, label: t("stat_lessons") },
+            { emoji: "🎯", value: `${completedChallenges.length}/${totalChallenges}`, label: t("stat_challenges") },
+            { emoji: "🔥", value: `${streak.currentStreak}`, label: t("stat_streak") },
+            { emoji: "💎", value: `${gems}`, label: t("stat_gems") },
           ].map((s) => (
             <div key={s.label} className="bg-white dark:bg-slate-800 rounded-2xl p-4 text-center border border-gray-100 dark:border-slate-700 shadow-sm">
               <p className="text-2xl mb-1">{s.emoji}</p>
@@ -253,16 +254,16 @@ export default function StatsPage() {
           <h2 className="text-sm font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-4">{t("challenges_title")}</h2>
           <div className="space-y-3">
             {([
-              { diff: "Facile", color: "from-green-400 to-emerald-500", textColor: "text-green-600 dark:text-green-400" },
-              { diff: "Moyen", color: "from-yellow-400 to-orange-500", textColor: "text-yellow-600 dark:text-yellow-400" },
-              { diff: "Difficile", color: "from-purple-500 to-violet-600", textColor: "text-purple-600 dark:text-purple-400" },
-            ] as const).map(({ diff, color, textColor }) => {
+              { diff: "Facile",    labelKey: "diff_easy",   color: "from-green-400 to-emerald-500", textColor: "text-green-600 dark:text-green-400" },
+              { diff: "Moyen",     labelKey: "diff_medium", color: "from-yellow-400 to-orange-500", textColor: "text-yellow-600 dark:text-yellow-400" },
+              { diff: "Difficile", labelKey: "diff_hard",   color: "from-purple-500 to-violet-600", textColor: "text-purple-600 dark:text-purple-400" },
+            ] as const).map(({ diff, labelKey, color, textColor }) => {
               const s = diffStats[diff];
               const pct = s.total > 0 ? Math.round((s.done / s.total) * 100) : 0;
               return (
                 <div key={diff}>
                   <div className="flex items-center justify-between mb-1">
-                    <span className={`text-xs font-semibold ${textColor}`}>{diff}</span>
+                    <span className={`text-xs font-semibold ${textColor}`}>{t(labelKey)}</span>
                     <span className="text-xs text-gray-400 dark:text-slate-500">{s.done}/{s.total} ({pct}%)</span>
                   </div>
                   <div className="w-full bg-gray-100 dark:bg-slate-700 rounded-full h-2">

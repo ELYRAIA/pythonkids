@@ -1,17 +1,21 @@
 "use client";
 
 import { useState } from "react";
+import { useLocale } from "next-intl";
 import type { StreakData } from "@/lib/streak";
 
 interface Props {
   streakData: StreakData;
 }
 
-const DAY_LABELS = ["L", "M", "M", "J", "V", "S", "D"];
-
 export default function StreakCalendar({ streakData }: Props) {
+  const locale = useLocale();
   const today = new Date();
   const [view, setView] = useState({ year: today.getFullYear(), month: today.getMonth() });
+  // Mon=0..Sun=6, derived from locale for correct abbreviations
+  const DAY_LABELS = Array.from({ length: 7 }, (_, i) =>
+    new Date(2024, 0, i + 1).toLocaleDateString(locale, { weekday: "narrow" })
+  );
 
   const { year, month } = view;
   const firstDay = new Date(year, month, 1);
@@ -23,7 +27,7 @@ export default function StreakCalendar({ streakData }: Props) {
 
   const playDates = streakData.playDates ?? [];
   const todayStr = today.toISOString().split("T")[0];
-  const monthLabel = firstDay.toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
+  const monthLabel = firstDay.toLocaleDateString(locale, { month: "long", year: "numeric" });
 
   const cells: (number | null)[] = Array(startDow).fill(null);
   for (let d = 1; d <= lastDay.getDate(); d++) cells.push(d);

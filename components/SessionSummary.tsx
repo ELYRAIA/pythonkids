@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { getStreak } from "@/lib/streak";
 import { getGems } from "@/lib/gems";
 
@@ -30,15 +31,16 @@ function readSummary(): SummaryData | null {
   }
 }
 
-function getMessage(lessons: number, streak: number): string {
-  if (streak >= 7) return `🔥 ${streak} jours de suite — tu es en feu !`;
-  if (lessons >= 5) return "🚀 Incroyable, 5 leçons aujourd'hui !";
-  if (lessons >= 3) return "💪 Super session, continue comme ça !";
-  if (lessons === 2) return "👏 Deux leçons, belle journée !";
-  return "✅ Bonne session, reviens demain !";
+function getMessage(lessons: number, streak: number, t: ReturnType<typeof useTranslations>): string {
+  if (streak >= 7) return t("streak_fire", { streak });
+  if (lessons >= 5) return t("five_lessons");
+  if (lessons >= 3) return t("three_lessons");
+  if (lessons === 2) return t("two_lessons");
+  return t("one_lesson");
 }
 
 export default function SessionSummary() {
+  const t = useTranslations("SessionSummary");
   const [data, setData] = useState<SummaryData | null>(null);
   const [visible, setVisible] = useState(false);
 
@@ -71,18 +73,22 @@ export default function SessionSummary() {
           <div className="text-3xl select-none">🎉</div>
           <div className="flex-1 min-w-0">
             <p className="text-white font-extrabold text-sm leading-tight">
-              {getMessage(data.lessonsToday, data.streak)}
+              {getMessage(data.lessonsToday, data.streak, t)}
             </p>
             <div className="flex items-center gap-3 mt-1.5 flex-wrap">
-              <span className="text-green-100 text-xs">📖 {data.lessonsToday} leçon{data.lessonsToday > 1 ? "s" : ""} aujourd&apos;hui</span>
-              {data.streak > 0 && <span className="text-green-100 text-xs">🔥 Streak {data.streak}j</span>}
-              <span className="text-green-100 text-xs">💎 {data.gems} gemmes</span>
+              <span className="text-green-100 text-xs">
+                {data.lessonsToday > 1
+                  ? t("lessons_today_plural", { count: data.lessonsToday })
+                  : t("lessons_today", { count: data.lessonsToday })}
+              </span>
+              {data.streak > 0 && <span className="text-green-100 text-xs">🔥 Streak {data.streak}</span>}
+              <span className="text-green-100 text-xs">{t("gems_count", { count: data.gems })}</span>
             </div>
           </div>
           <button
             onClick={() => setVisible(false)}
             className="text-green-200 hover:text-white transition-colors text-lg shrink-0"
-            aria-label="Fermer"
+            aria-label={t("close")}
           >
             ✕
           </button>

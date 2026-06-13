@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { getPyodide } from "@/lib/pyodide";
 import { parsePythonError } from "@/lib/pythonErrors";
 import type { LessonExercise as ExerciseData } from "@/lib/lessons";
 import { apiFetch } from "@/lib/api";
+import { lf, lfa } from "@/lib/localize";
 
 interface Props {
   exercise: ExerciseData;
@@ -17,7 +18,9 @@ interface Props {
 
 export default function LessonExercise({ exercise, levelColor, levelName, onAttempted, onFirstFailure }: Props) {
   const t = useTranslations("LessonExercise");
-  const [code, setCode] = useState(exercise.starterCode);
+  const locale = useLocale();
+  const hints = lfa(exercise, 'hints', locale);
+  const [code, setCode] = useState(() => lf(exercise, 'starterCode', locale) || exercise.starterCode);
   const [output, setOutput] = useState("");
   const [status, setStatus] = useState<"idle" | "running" | "success" | "error">("idle");
   const [pyodideReady, setPyodideReady] = useState(false);
@@ -73,7 +76,7 @@ export default function LessonExercise({ exercise, levelColor, levelName, onAtte
       );
       await Promise.race([py.runPythonAsync(code), timeout]);
       const normalise = (s: string) => s.replace(/\r\n/g, "\n").trim();
-      const pass = normalise(out) === normalise(exercise.expectedOutput);
+      const pass = normalise(out) === normalise(lf(exercise, 'expectedOutput', locale) || exercise.expectedOutput);
       setOutput(out);
       setStatus(pass ? "success" : "error");
       if (!pass && !attemptedRef.current) onFirstFailure?.();
@@ -103,7 +106,7 @@ export default function LessonExercise({ exercise, levelColor, levelName, onAtte
       <div className="bg-white dark:bg-slate-800 p-5">
         {/* Instruction */}
         <p className="text-sm text-gray-700 dark:text-slate-300 whitespace-pre-line mb-4 leading-relaxed">
-          {exercise.instruction}
+          {lf(exercise, 'instruction', locale)}
         </p>
 
         {/* Mini éditeur */}
@@ -136,13 +139,13 @@ export default function LessonExercise({ exercise, levelColor, levelName, onAtte
           {!pyodideReady && (
             <span className="text-xs text-gray-400 animate-pulse">{t("loading")}</span>
           )}
-          {exercise.hints && status !== "success" && (
+          {hints.length > 0 && status !== "success" && (
             <button
-              onClick={() => setHintLevel((h) => Math.min(h + 1, exercise.hints!.length))}
-              disabled={hintLevel >= (exercise.hints?.length ?? 0)}
+              onClick={() => setHintLevel((h) => Math.min(h + 1, hints.length))}
+              disabled={hintLevel >= hints.length}
               className="px-3 py-1.5 rounded-full text-xs font-semibold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              {hintLevel === 0 ? t("hint_button") : hintLevel >= (exercise.hints?.length ?? 0) ? t("no_hint") : t("next_hint")}
+              {hintLevel === 0 ? t("hint_button") : hintLevel >= hints.length ? t("no_hint") : t("next_hint")}
             </button>
           )}
           {status === "error" && (
@@ -165,9 +168,9 @@ export default function LessonExercise({ exercise, levelColor, levelName, onAtte
         )}
 
         {/* Indices progressifs */}
-        {hintLevel > 0 && exercise.hints && (
+        {hintLevel > 0 && hints.length > 0 && (
           <div className="mt-3 space-y-2">
-            {exercise.hints.slice(0, hintLevel).map((h, i) => (
+            {hints.slice(0, hintLevel).map((h, i) => (
               <div key={i} className="flex gap-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-xl px-3 py-2">
                 <span className="text-amber-500 shrink-0">💡</span>
                 <p className="text-xs text-amber-800 dark:text-amber-300">{h}</p>
@@ -188,7 +191,7 @@ export default function LessonExercise({ exercise, levelColor, levelName, onAtte
               {output || "(rien)"}
             </div>
             <p className="text-xs text-gray-400 dark:text-slate-500">
-              {t("expected")} <span className="font-mono text-green-600 dark:text-green-400">{exercise.expectedOutput}</span>
+              {t("expected")} <span className="font-mono text-green-600 dark:text-green-400">{lf(exercise, 'expectedOutput', locale) || exercise.expectedOutput}</span>
             </p>
           </div>
         )}

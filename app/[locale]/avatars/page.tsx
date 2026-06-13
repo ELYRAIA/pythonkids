@@ -1,19 +1,21 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { lf } from "@/lib/localize";
 import PlayerAvatar from "@/components/PlayerAvatar";
 
 const LEVELS = [
-  { level: 0, title: "Débutant",   color: "#7dd3fc", desc: "Niveau 0 — Les bases" },
-  { level: 1, title: "Apprenti",   color: "#6ee7b7", desc: "Niveau 1 — En route" },
-  { level: 2, title: "Codeur",     color: "#c4b5fd", desc: "Niveau 2 — Maîtrise" },
-  { level: 3, title: "Expert",     color: "#fdba74", desc: "Niveau 3 — Puissance" },
-  { level: 4, title: "Maître",     color: "#fda4af", desc: "Niveau 4 — Domination" },
-  { level: 5, title: "Légendaire", color: "#fde68a", desc: "Niveau 5 — Mythique" },
+  { level: 0, title: "Débutant",   title_en: "Beginner",   color: "#7dd3fc", desc: "Niveau 0 — Les bases",    desc_en: "Level 0 — The basics" },
+  { level: 1, title: "Apprenti",   title_en: "Apprentice",  color: "#6ee7b7", desc: "Niveau 1 — En route",    desc_en: "Level 1 — On track" },
+  { level: 2, title: "Codeur",     title_en: "Coder",       color: "#c4b5fd", desc: "Niveau 2 — Maîtrise",    desc_en: "Level 2 — Mastery" },
+  { level: 3, title: "Expert",     title_en: "Expert",      color: "#fdba74", desc: "Niveau 3 — Puissance",   desc_en: "Level 3 — Power" },
+  { level: 4, title: "Maître",     title_en: "Master",      color: "#fda4af", desc: "Niveau 4 — Domination",  desc_en: "Level 4 — Domination" },
+  { level: 5, title: "Légendaire", title_en: "Legendary",   color: "#fde68a", desc: "Niveau 5 — Mythique",    desc_en: "Level 5 — Mythical" },
 ];
 
 export default function AvatarsPage() {
   const t = useTranslations("Avatars");
+  const locale = useLocale();
 
   return (
     <div className="min-h-screen py-16 px-4"
@@ -34,7 +36,11 @@ export default function AvatarsPage() {
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-          {LEVELS.map(({ level, title, color, desc }) => (
+          {LEVELS.map((av) => {
+            const { level, color } = av;
+            const title = lf(av, "title", locale);
+            const desc = lf(av, "desc", locale);
+            return (
             <div key={level}
                  className="flex flex-col items-center gap-3 rounded-2xl pt-6 pb-5 px-2 transition-transform hover:scale-105"
                  style={{
@@ -48,7 +54,8 @@ export default function AvatarsPage() {
                 <div className="text-gray-500 text-xs mt-0.5">{desc}</div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
 
         <div className="mt-12 text-center">

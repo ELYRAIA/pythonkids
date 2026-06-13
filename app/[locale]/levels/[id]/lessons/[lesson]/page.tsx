@@ -2,19 +2,23 @@
 
 import { notFound } from "next/navigation";
 import { useParams } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { LEVELS_DATA } from "@/lib/lessons";
+import { LEVELS } from "@/lib/levels";
 import LessonView from "@/components/LessonView";
+import { lf } from "@/lib/localize";
 
 export default function LessonPage() {
   const t = useTranslations("LessonPage");
+  const locale = useLocale();
   const params = useParams();
   const id = params.id as string;
   const lesson = params.lesson as string;
 
   const level = LEVELS_DATA[id];
   if (!level) notFound();
+  const levelMeta = LEVELS.find((l) => l.id === level.id);
 
   const lessonIndex = parseInt(lesson, 10);
   if (isNaN(lessonIndex) || lessonIndex < 0 || lessonIndex >= level.lessons.length) notFound();
@@ -40,7 +44,7 @@ export default function LessonPage() {
           </Link>
           <span className="text-gray-300 dark:text-slate-600">/</span>
           <span className="text-sm font-bold text-gray-800 dark:text-white truncate max-w-48">
-            {currentLesson.title}
+            {lf(currentLesson, "title", locale)}
           </span>
         </div>
       </header>
@@ -48,7 +52,7 @@ export default function LessonPage() {
       <LessonView
         levelId={level.id}
         levelColor={level.color}
-        levelName={level.name}
+        levelName={levelMeta ? lf(levelMeta, "name", locale) : level.name}
         lessonIndex={lessonIndex}
         totalLessons={level.lessons.length}
         lesson={currentLesson}

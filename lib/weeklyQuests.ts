@@ -6,7 +6,9 @@ export interface WeeklyQuestDef {
   id: string;
   emoji: string;
   title: string;
+  title_en?: string;
   desc: string;
+  desc_en?: string;
   reward: number;
   rewardType?: "gems" | "chest";
   chestLevel?: number;
@@ -26,17 +28,17 @@ interface WeeklyState {
 }
 
 const WEEKLY_QUEST_POOL: WeeklyQuestDef[] = [
-  { id: "wq_5lessons",         emoji: "📖", title: "Assidu",             desc: "Termine 5 leçons cette semaine",   reward: 100, target: 5,  type: "lessons_week"    },
-  { id: "wq_10lessons",        emoji: "📚", title: "Bosseur Pro",        desc: "Termine 10 leçons cette semaine",  reward: 200, target: 10, type: "lessons_week"    },
-  { id: "wq_3challenges",      emoji: "🎯", title: "Challenger",         desc: "Réussis 3 défis cette semaine",    reward: 120, target: 3,  type: "challenges_week" },
-  { id: "wq_5challenges",      emoji: "🏆", title: "Champion",           desc: "Réussis 5 défis cette semaine",    reward: 200, target: 5,  type: "challenges_week" },
-  { id: "wq_streak5",          emoji: "🔥", title: "Inarrêtable",        desc: "Maintiens un streak de 5 jours",   reward: 150, target: 5,  type: "streak"          },
-  { id: "wq_30lessons",        emoji: "🚀", title: "Marathon",           desc: "Atteins 30 leçons au total",       reward: 150, target: 30, type: "lessons_total"   },
-  { id: "wq_50lessons",        emoji: "💫", title: "Légende",            desc: "Atteins 50 leçons au total",       reward: 300, target: 50, type: "lessons_total"   },
+  { id: "wq_5lessons",         emoji: "📖", title: "Assidu",             title_en: "Dedicated",          desc: "Termine 5 leçons cette semaine",   desc_en: "Complete 5 lessons this week",   reward: 100, target: 5,  type: "lessons_week"    },
+  { id: "wq_10lessons",        emoji: "📚", title: "Bosseur Pro",        title_en: "Pro Worker",         desc: "Termine 10 leçons cette semaine",  desc_en: "Complete 10 lessons this week",  reward: 200, target: 10, type: "lessons_week"    },
+  { id: "wq_3challenges",      emoji: "🎯", title: "Challenger",         title_en: "Challenger",         desc: "Réussis 3 défis cette semaine",    desc_en: "Complete 3 challenges this week",reward: 120, target: 3,  type: "challenges_week" },
+  { id: "wq_5challenges",      emoji: "🏆", title: "Champion",           title_en: "Champion",           desc: "Réussis 5 défis cette semaine",    desc_en: "Complete 5 challenges this week",reward: 200, target: 5,  type: "challenges_week" },
+  { id: "wq_streak5",          emoji: "🔥", title: "Inarrêtable",        title_en: "Unstoppable",        desc: "Maintiens un streak de 5 jours",   desc_en: "Keep a 5-day streak",            reward: 150, target: 5,  type: "streak"          },
+  { id: "wq_30lessons",        emoji: "🚀", title: "Marathon",           title_en: "Marathon",           desc: "Atteins 30 leçons au total",       desc_en: "Reach 30 lessons in total",      reward: 150, target: 30, type: "lessons_total"   },
+  { id: "wq_50lessons",        emoji: "💫", title: "Légende",            title_en: "Legend",             desc: "Atteins 50 leçons au total",       desc_en: "Reach 50 lessons in total",      reward: 300, target: 50, type: "lessons_total"   },
   // Quêtes à coffre (rare)
-  { id: "wq_chest_12lessons",  emoji: "📦", title: "Semaine de code",    desc: "Termine 12 leçons cette semaine",  reward: 0, rewardType: "chest", chestLevel: 2, target: 12, type: "lessons_week"    },
-  { id: "wq_chest_7challenges",emoji: "📦", title: "Maître des défis",   desc: "Réussis 7 défis cette semaine",    reward: 0, rewardType: "chest", chestLevel: 2, target: 7,  type: "challenges_week" },
-  { id: "wq_chest_streak10",   emoji: "📦", title: "Streak légendaire",  desc: "Maintiens un streak de 10 jours",  reward: 0, rewardType: "chest", chestLevel: 3, target: 10, type: "streak"          },
+  { id: "wq_chest_12lessons",  emoji: "📦", title: "Semaine de code",    title_en: "Code Week",          desc: "Termine 12 leçons cette semaine",  desc_en: "Complete 12 lessons this week",  reward: 0, rewardType: "chest", chestLevel: 2, target: 12, type: "lessons_week"    },
+  { id: "wq_chest_7challenges",emoji: "📦", title: "Maître des défis",   title_en: "Challenge Master",   desc: "Réussis 7 défis cette semaine",    desc_en: "Complete 7 challenges this week",reward: 0, rewardType: "chest", chestLevel: 2, target: 7,  type: "challenges_week" },
+  { id: "wq_chest_streak10",   emoji: "📦", title: "Streak légendaire",  title_en: "Legendary Streak",   desc: "Maintiens un streak de 10 jours",  desc_en: "Keep a 10-day streak",           reward: 0, rewardType: "chest", chestLevel: 3, target: 10, type: "streak"          },
 ];
 
 const STORAGE_KEY = "pythonkids_weekly_quests";

@@ -6,7 +6,9 @@ export interface QuestDef {
   id: string;
   emoji: string;
   title: string;
+  title_en?: string;
   desc: string;
+  desc_en?: string;
   reward: number;
   rewardType?: "gems" | "chest";
   chestLevel?: number;
@@ -26,19 +28,19 @@ interface QuestState {
 }
 
 const QUEST_POOL: QuestDef[] = [
-  { id: "q_2lessons",        emoji: "📖", title: "Studieux !",       desc: "Termine 2 leçons aujourd'hui",      reward: 30,  target: 2,  type: "lessons_today"    },
-  { id: "q_3lessons",        emoji: "📚", title: "Bosseur",          desc: "Termine 3 leçons aujourd'hui",      reward: 50,  target: 3,  type: "lessons_today"    },
-  { id: "q_1challenge",      emoji: "🎯", title: "Relevé !",         desc: "Réussis 1 défi",                    reward: 40,  target: 1,  type: "challenges_total" },
-  { id: "q_3challenges",     emoji: "🏆", title: "Champion",         desc: "Réussis 3 défis",                   reward: 80,  target: 3,  type: "challenges_total" },
-  { id: "q_streak3",         emoji: "🔥", title: "Chaud devant",     desc: "Maintiens un streak de 3 jours",    reward: 60,  target: 3,  type: "streak"           },
-  { id: "q_streak5",         emoji: "⚡", title: "Inarrêtable",      desc: "Maintiens un streak de 5 jours",    reward: 100, target: 5,  type: "streak"           },
-  { id: "q_5lessons",        emoji: "🌟", title: "Curieux",          desc: "Atteins 5 leçons au total",         reward: 40,  target: 5,  type: "lessons_total"    },
-  { id: "q_10lessons",       emoji: "💫", title: "Assidu",           desc: "Atteins 10 leçons au total",        reward: 60,  target: 10, type: "lessons_total"    },
-  { id: "q_20lessons",       emoji: "🚀", title: "Productif",        desc: "Atteins 20 leçons au total",        reward: 80,  target: 20, type: "lessons_total"    },
+  { id: "q_2lessons",        emoji: "📖", title: "Studieux !",        title_en: "Studious!",          desc: "Termine 2 leçons aujourd'hui",      desc_en: "Complete 2 lessons today",       reward: 30,  target: 2,  type: "lessons_today"    },
+  { id: "q_3lessons",        emoji: "📚", title: "Bosseur",           title_en: "Hard Worker",        desc: "Termine 3 leçons aujourd'hui",      desc_en: "Complete 3 lessons today",       reward: 50,  target: 3,  type: "lessons_today"    },
+  { id: "q_1challenge",      emoji: "🎯", title: "Relevé !",          title_en: "Challenger!",        desc: "Réussis 1 défi",                    desc_en: "Complete 1 challenge",           reward: 40,  target: 1,  type: "challenges_total" },
+  { id: "q_3challenges",     emoji: "🏆", title: "Champion",          title_en: "Champion",           desc: "Réussis 3 défis",                   desc_en: "Complete 3 challenges",          reward: 80,  target: 3,  type: "challenges_total" },
+  { id: "q_streak3",         emoji: "🔥", title: "Chaud devant",      title_en: "Heating Up",         desc: "Maintiens un streak de 3 jours",    desc_en: "Keep a 3-day streak",            reward: 60,  target: 3,  type: "streak"           },
+  { id: "q_streak5",         emoji: "⚡", title: "Inarrêtable",       title_en: "Unstoppable",        desc: "Maintiens un streak de 5 jours",    desc_en: "Keep a 5-day streak",            reward: 100, target: 5,  type: "streak"           },
+  { id: "q_5lessons",        emoji: "🌟", title: "Curieux",           title_en: "Curious",            desc: "Atteins 5 leçons au total",         desc_en: "Reach 5 lessons in total",       reward: 40,  target: 5,  type: "lessons_total"    },
+  { id: "q_10lessons",       emoji: "💫", title: "Assidu",            title_en: "Dedicated",          desc: "Atteins 10 leçons au total",        desc_en: "Reach 10 lessons in total",      reward: 60,  target: 10, type: "lessons_total"    },
+  { id: "q_20lessons",       emoji: "🚀", title: "Productif",         title_en: "Productive",         desc: "Atteins 20 leçons au total",        desc_en: "Reach 20 lessons in total",      reward: 80,  target: 20, type: "lessons_total"    },
   // Quêtes à coffre
-  { id: "q_chest_4lessons",  emoji: "📦", title: "Coffre surprise !", desc: "Termine 4 leçons aujourd'hui",     reward: 0, rewardType: "chest", chestLevel: 0, target: 4,  type: "lessons_today" },
-  { id: "q_chest_streak7",   emoji: "📦", title: "Gardien du streak", desc: "Maintiens un streak de 7 jours",  reward: 0, rewardType: "chest", chestLevel: 1, target: 7,  type: "streak"        },
-  { id: "q_chest_lessons30", emoji: "📦", title: "Explorateur",       desc: "Atteins 30 leçons au total",      reward: 0, rewardType: "chest", chestLevel: 1, target: 30, type: "lessons_total" },
+  { id: "q_chest_4lessons",  emoji: "📦", title: "Coffre surprise !",  title_en: "Surprise Chest!",   desc: "Termine 4 leçons aujourd'hui",     desc_en: "Complete 4 lessons today",        reward: 0, rewardType: "chest", chestLevel: 0, target: 4,  type: "lessons_today" },
+  { id: "q_chest_streak7",   emoji: "📦", title: "Gardien du streak",  title_en: "Streak Guardian",   desc: "Maintiens un streak de 7 jours",   desc_en: "Keep a 7-day streak",             reward: 0, rewardType: "chest", chestLevel: 1, target: 7,  type: "streak"        },
+  { id: "q_chest_lessons30", emoji: "📦", title: "Explorateur",        title_en: "Explorer",          desc: "Atteins 30 leçons au total",       desc_en: "Reach 30 lessons in total",       reward: 0, rewardType: "chest", chestLevel: 1, target: 30, type: "lessons_total" },
 ];
 
 const STORAGE_KEY = "pythonkids_quests";

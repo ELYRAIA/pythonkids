@@ -1,29 +1,30 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { addGems } from "@/lib/gems";
 
 const PAIRS = [
-  { keyword: "print()", definition: "Afficher du texte" },
-  { keyword: "def", definition: "Définir une fonction" },
-  { keyword: "for", definition: "Boucle d'itération" },
-  { keyword: "if", definition: "Condition" },
-  { keyword: "len()", definition: "Longueur d'une liste" },
-  { keyword: "import", definition: "Charger un module" },
-  { keyword: "return", definition: "Renvoyer une valeur" },
-  { keyword: "while", definition: "Boucle conditionnelle" },
-  { keyword: "list()", definition: "Créer une liste" },
-  { keyword: "True/False", definition: "Valeur booléenne" },
-  { keyword: "dict()", definition: "Créer un dictionnaire" },
-  { keyword: "input()", definition: "Lire une saisie" },
+  { keyword: "print()", definition: "Afficher du texte", definition_en: "Display text" },
+  { keyword: "def", definition: "Définir une fonction", definition_en: "Define a function" },
+  { keyword: "for", definition: "Boucle d'itération", definition_en: "Iteration loop" },
+  { keyword: "if", definition: "Condition", definition_en: "Condition" },
+  { keyword: "len()", definition: "Longueur d'une liste", definition_en: "Length of a list" },
+  { keyword: "import", definition: "Charger un module", definition_en: "Load a module" },
+  { keyword: "return", definition: "Renvoyer une valeur", definition_en: "Return a value" },
+  { keyword: "while", definition: "Boucle conditionnelle", definition_en: "Conditional loop" },
+  { keyword: "list()", definition: "Créer une liste", definition_en: "Create a list" },
+  { keyword: "True/False", definition: "Valeur booléenne", definition_en: "Boolean value" },
+  { keyword: "dict()", definition: "Créer un dictionnaire", definition_en: "Create a dictionary" },
+  { keyword: "input()", definition: "Lire une saisie", definition_en: "Read user input" },
 ];
 
 type Difficulty = "facile" | "moyen" | "difficile";
 
-const DIFFICULTY_CONFIG: Record<Difficulty, { pairs: number; label: string; gems: number; color: string }> = {
-  facile:    { pairs: 4,  label: "Facile",    gems: 3,  color: "from-green-400 to-emerald-500" },
-  moyen:     { pairs: 6,  label: "Moyen",     gems: 5,  color: "from-yellow-400 to-orange-400" },
-  difficile: { pairs: 12, label: "Difficile", gems: 10, color: "from-pink-500 to-rose-600" },
+const DIFFICULTY_CONFIG: Record<Difficulty, { pairs: number; labelFr: string; labelEn: string; gems: number; color: string }> = {
+  facile:    { pairs: 4,  labelFr: "Facile",    labelEn: "Easy",   gems: 3,  color: "from-green-400 to-emerald-500" },
+  moyen:     { pairs: 6,  labelFr: "Moyen",     labelEn: "Medium", gems: 5,  color: "from-yellow-400 to-orange-400" },
+  difficile: { pairs: 12, labelFr: "Difficile", labelEn: "Hard",   gems: 10, color: "from-pink-500 to-rose-600" },
 };
 
 interface Card {
@@ -44,16 +45,20 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-function buildCards(pairs: typeof PAIRS): Card[] {
+function buildCards(pairs: typeof PAIRS, locale: string): Card[] {
   const cards: Card[] = [];
   pairs.forEach((p, i) => {
-    cards.push({ id: i * 2,     text: p.keyword,    pairId: i, type: "keyword",    matched: false, flipped: false });
-    cards.push({ id: i * 2 + 1, text: p.definition, pairId: i, type: "definition", matched: false, flipped: false });
+    const def = locale === "en" ? (p.definition_en ?? p.definition) : p.definition;
+    cards.push({ id: i * 2,     text: p.keyword, pairId: i, type: "keyword",    matched: false, flipped: false });
+    cards.push({ id: i * 2 + 1, text: def,        pairId: i, type: "definition", matched: false, flipped: false });
   });
   return shuffle(cards);
 }
 
 export default function MemoryGame() {
+  const locale = useLocale();
+  const t = useTranslations("MemoryGame");
+
   const [difficulty, setDifficulty] = useState<Difficulty | null>(null);
   const [cards, setCards]           = useState<Card[]>([]);
   const [selected, setSelected]     = useState<number[]>([]);
@@ -76,7 +81,7 @@ export default function MemoryGame() {
     const cfg = DIFFICULTY_CONFIG[diff];
     const selectedPairs = shuffle(PAIRS).slice(0, cfg.pairs);
     setDifficulty(diff);
-    setCards(buildCards(selectedPairs));
+    setCards(buildCards(selectedPairs, locale));
     setSelected([]);
     setMoves(0);
     setMatched(0);
@@ -84,7 +89,7 @@ export default function MemoryGame() {
     setGemsEarned(0);
     setShake([]);
     lockRef.current = false;
-  }, []);
+  }, [locale]);
 
   const handleFlip = useCallback((cardId: number) => {
     if (lockRef.current) return;
@@ -164,7 +169,7 @@ export default function MemoryGame() {
         <div>
           <h2 className="text-2xl font-extrabold text-gray-800 dark:text-white mb-1">🃏 Memory Python</h2>
           <p className="text-sm text-gray-500 dark:text-slate-400">
-            Associe chaque mot-clé Python à sa définition. Gagne des 💎 !
+            {t("subtitle")}
           </p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -177,15 +182,15 @@ export default function MemoryGame() {
               <div className="text-2xl mb-1">
                 {key === "facile" ? "🌱" : key === "moyen" ? "🚀" : "🏆"}
               </div>
-              <div className="font-bold">{cfg.label}</div>
-              <div className="text-xs opacity-90 mt-1">{cfg.pairs} paires · +{cfg.gems} 💎</div>
+              <div className="font-bold">{locale === "en" ? cfg.labelEn : cfg.labelFr}</div>
+              <div className="text-xs opacity-90 mt-1">{cfg.pairs} {t("pairs")} · +{cfg.gems} 💎</div>
               {bestMoves[key] !== null && (
-                <div className="text-xs opacity-80 mt-1">Record : {bestMoves[key]} coups</div>
+                <div className="text-xs opacity-80 mt-1">{t("record")} : {bestMoves[key]} {t("moves")}</div>
               )}
             </button>
           ))}
         </div>
-        <p className="text-xs text-gray-400 dark:text-slate-500">Adapte-toi à ton niveau !</p>
+        <p className="text-xs text-gray-400 dark:text-slate-500">{t("adapt_hint")}</p>
       </div>
     );
   }
@@ -198,29 +203,29 @@ export default function MemoryGame() {
     return (
       <div className="text-center space-y-5 py-6">
         <div className="text-6xl animate-bounce">🎉</div>
-        <h2 className="text-2xl font-extrabold text-gray-800 dark:text-white">Bravo !</h2>
+        <h2 className="text-2xl font-extrabold text-gray-800 dark:text-white">{t("bravo")}</h2>
         <p className="text-gray-600 dark:text-slate-400">
-          Tu as trouvé toutes les paires en <strong>{moves}</strong> coups !
+          {t("found_all_pairs", { moves })}
         </p>
         <div className="inline-flex items-center gap-2 bg-yellow-50 dark:bg-yellow-950/30 border border-yellow-200 dark:border-yellow-800 rounded-2xl px-6 py-3">
           <span className="text-2xl">💎</span>
           <span className="text-xl font-extrabold text-yellow-600 dark:text-yellow-400">+{gemsEarned}</span>
         </div>
         {bestMoves[difficulty] === moves && (
-          <p className="text-sm text-green-600 dark:text-green-400 font-bold">🏆 Nouveau record !</p>
+          <p className="text-sm text-green-600 dark:text-green-400 font-bold">🏆 {t("new_record")}</p>
         )}
         <div className="flex gap-3 justify-center flex-wrap">
           <button
             onClick={() => startGame(difficulty)}
             className={`bg-gradient-to-r ${cfg.color} text-white px-6 py-2.5 rounded-full font-bold hover:opacity-90 transition-opacity text-sm`}
           >
-            Rejouer
+            {t("play_again")}
           </button>
           <button
             onClick={() => setDifficulty(null)}
             className="bg-white dark:bg-slate-700 text-gray-600 dark:text-slate-300 border border-gray-200 dark:border-slate-600 px-6 py-2.5 rounded-full font-bold hover:bg-gray-50 dark:hover:bg-slate-600 transition-colors text-sm"
           >
-            Changer de niveau
+            {t("change_level")}
           </button>
         </div>
       </div>
@@ -233,17 +238,17 @@ export default function MemoryGame() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <span className={`text-xs font-bold px-3 py-1 rounded-full bg-gradient-to-r ${cfg.color} text-white`}>
-            {cfg.label}
+            {locale === "en" ? cfg.labelEn : cfg.labelFr}
           </span>
           <span className="text-sm text-gray-500 dark:text-slate-400">
-            {matched}/{cfg.pairs} paires · {moves} coups
+            {matched}/{cfg.pairs} {t("pairs")} · {moves} {t("moves")}
           </span>
         </div>
         <button
           onClick={() => setDifficulty(null)}
           className="text-xs text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 transition-colors"
         >
-          ✕ Quitter
+          ✕ {t("quit")}
         </button>
       </div>
 

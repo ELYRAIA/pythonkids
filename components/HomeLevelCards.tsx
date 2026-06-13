@@ -2,10 +2,14 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
 import { LEVELS } from "@/lib/levels";
 import { getProgress } from "@/lib/progress";
+import { lf } from "@/lib/localize";
 
 export default function HomeLevelCards() {
+  const locale = useLocale();
+  const t = useTranslations("HomeLevelCards");
   const [completedLessons, setCompletedLessons] = useState<Record<string, number[]>>({});
   const [earnedBadges, setEarnedBadges] = useState<string[]>([]);
   const [mounted, setMounted] = useState(false);
@@ -61,19 +65,19 @@ export default function HomeLevelCards() {
               </div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wide">
-                  Niveau {level.id}
+                  {t("level_prefix")} {level.id}
                 </span>
                 <span className="text-xs bg-white dark:bg-slate-800 px-2 py-1 rounded-full text-gray-500 dark:text-slate-400 border border-gray-200 dark:border-slate-600 font-medium">
-                  {level.ages}
+                  {lf(level, "ages", locale)}
                 </span>
               </div>
-              <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-2">{level.name}</h3>
-              <p className="text-gray-600 dark:text-slate-300 text-sm mb-4 leading-relaxed">{level.description}</p>
+              <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-2">{lf(level, "name", locale)}</h3>
+              <p className="text-gray-600 dark:text-slate-300 text-sm mb-4 leading-relaxed">{lf(level, "description", locale)}</p>
 
               {/* Barre de progression */}
               <div className="mb-3">
                 <div className="flex items-center justify-between text-xs mb-1.5">
-                  <span className="text-gray-400 dark:text-slate-500">{done}/{total} leçons</span>
+                  <span className="text-gray-400 dark:text-slate-500">{done}/{total} {t("lessons")}</span>
                   {done > 0 && (
                     <span className="text-gray-400 dark:text-slate-500">{percent}%</span>
                   )}
@@ -88,7 +92,7 @@ export default function HomeLevelCards() {
 
               <div className="flex items-center justify-end">
                 <span className={`text-sm font-bold bg-gradient-to-r ${level.color} bg-clip-text text-transparent`}>
-                  {isComplete ? "Revoir →" : done > 0 ? "Continuer →" : "Commencer →"}
+                  {isComplete ? t("review") : done > 0 ? t("continue_cta") : t("start")}
                 </span>
               </div>
             </div>

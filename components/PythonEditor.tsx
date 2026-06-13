@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { EditorView, keymap, lineNumbers } from "@codemirror/view";
 import { EditorState } from "@codemirror/state";
 import { python } from "@codemirror/lang-python";
@@ -31,6 +32,7 @@ export default function PythonEditor({
   height = "200px",
   storageKey,
 }: PythonEditorProps) {
+  const t = useTranslations("LessonExercise");
   const getInitialCode = () => {
     if (storageKey && typeof window !== "undefined") {
       const saved = localStorage.getItem(`pythonkids_code_${storageKey}`);
@@ -232,7 +234,7 @@ async def _async_input(msg=""):
         <span className="text-gray-400 text-sm font-mono">main.py</span>
         <div className="flex items-center gap-4">
           {!pyodideReady && !setupError && (
-            <span className="text-yellow-400 text-xs animate-pulse">⏳ Chargement Python...</span>
+            <span className="text-yellow-400 text-xs animate-pulse">{t("loading")}</span>
           )}
           {setupError && (
             <span className="text-red-400 text-xs">{setupError}</span>

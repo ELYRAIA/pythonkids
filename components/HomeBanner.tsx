@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { lf } from "@/lib/localize";
 import { getProgress } from "@/lib/progress";
 import { getStreak } from "@/lib/streak";
 import { getXPInfo } from "@/lib/xp";
@@ -12,6 +13,7 @@ import { LEVELS } from "@/lib/levels";
 export default function HomeBanner() {
   const t = useTranslations("HomeBanner");
   const tg = useTranslations("GlobalUI");
+  const locale = useLocale();
 
   const streakMessage = (streak: number): { msg: string; emoji: string } => {
     if (streak === 0) return { msg: tg("start_series"), emoji: "💤" };
@@ -96,7 +98,7 @@ export default function HomeBanner() {
         <div className="px-5 pb-3">
           <div className="flex items-center justify-between mb-1.5">
             <span className="text-xs font-bold text-gray-500 dark:text-slate-400">
-              Niveau {levelProgress.levelId} — {levelProgress.levelName}
+              {t("level_name", { id: levelProgress.levelId, name: lf(LEVELS.find(l => l.id === levelProgress.levelId) ?? { name: levelProgress.levelName }, "name", locale) })}
             </span>
             <span className="text-xs font-semibold text-gray-400 dark:text-slate-500">
               {t("level_progress", { done: levelProgress.done, total: levelProgress.total, percent: pct })}

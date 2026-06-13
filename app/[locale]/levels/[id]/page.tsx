@@ -3,14 +3,16 @@
 import { notFound } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { useParams } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import AppHeader from "@/components/AppHeader";
 import { LEVELS_DATA } from "@/lib/lessons";
 import { LEVELS } from "@/lib/levels";
 import LevelLessonsGrid from "@/components/LevelLessonsGrid";
+import { lf } from "@/lib/localize";
 
 export default function LevelPage() {
   const t = useTranslations("LevelPage");
+  const locale = useLocale();
   const params = useParams();
   const id = params.id as string;
   const level = LEVELS_DATA[id];
@@ -29,15 +31,15 @@ export default function LevelPage() {
             {level.emoji}
           </div>
           <h1 className="text-3xl font-extrabold text-gray-800 dark:text-white mb-2">
-            {t("title", { id: level.id, name: level.name })}
+            {t("title", { id: level.id, name: levelMeta ? lf(levelMeta, "name", locale) : level.name })}
           </h1>
           {levelMeta && (
             <p className="text-sm text-gray-600 dark:text-slate-300 max-w-lg mx-auto mb-2">
-              {levelMeta.description}
+              {lf(levelMeta, "description", locale)}
             </p>
           )}
           <p className="text-xs text-gray-400 dark:text-slate-500">
-            {t("lessons_count", { count: level.lessons.length })} · {levelMeta?.ages ?? ""} · {t("lesson_start_hint")}
+            {t("lessons_count", { count: level.lessons.length })} · {levelMeta ? lf(levelMeta, "ages", locale) : ""} · {t("lesson_start_hint")}
           </p>
         </div>
 
@@ -47,7 +49,7 @@ export default function LevelPage() {
             {level.lessons.map((lesson, i) => (
               <div key={i} className="flex items-start gap-2 text-xs text-white opacity-90">
                 <span className="mt-0.5 shrink-0 font-bold">{i + 1}.</span>
-                <span>{lesson.title}</span>
+                <span>{lf(lesson, "title", locale)}</span>
               </div>
             ))}
           </div>

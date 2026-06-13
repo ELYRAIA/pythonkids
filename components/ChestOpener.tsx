@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import {
   Chest, ChestReward,
   getLevelRarity, CHEST_EMOJI_BY_RARITY, CHEST_GLOW_BY_RARITY,
@@ -15,12 +16,12 @@ interface Props {
   onClose: () => void;
 }
 
-function RewardSlot({ reward, revealed }: { reward: ChestReward; revealed: boolean }) {
+function RewardSlot({ reward, revealed, t }: { reward: ChestReward; revealed: boolean; t: ReturnType<typeof useTranslations> }) {
   if (!revealed) {
     return (
       <div className="w-24 h-28 rounded-2xl bg-gray-800 border-2 border-gray-600 flex flex-col items-center justify-center gap-1 shrink-0">
         <span className="text-3xl">❓</span>
-        <span className="text-xs text-gray-400 font-medium">Mystère</span>
+        <span className="text-xs text-gray-400 font-medium">{t("mystery")}</span>
       </div>
     );
   }
@@ -36,7 +37,7 @@ function RewardSlot({ reward, revealed }: { reward: ChestReward; revealed: boole
       <span className="text-xs font-bold text-white text-center leading-tight px-1">{reward.name}</span>
       {!isStars && !isGems && (
         <span className="text-[10px] bg-white/25 px-2 py-0.5 rounded-full font-bold text-white">
-          {reward.type === "head" ? "🎭 Tête" : RARITY_LABELS[reward.rarity]}
+          {reward.type === "head" ? t("head_label") : RARITY_LABELS[reward.rarity]}
         </span>
       )}
     </div>
@@ -44,6 +45,7 @@ function RewardSlot({ reward, revealed }: { reward: ChestReward; revealed: boole
 }
 
 export default function ChestOpener({ chest, onClose }: Props) {
+  const t = useTranslations("ChestOpener");
   const [revealedCount, setRevealedCount] = useState(chest.revealedCount);
   const [slotRevealKeys, setSlotRevealKeys] = useState<number[]>(() => chest.rewards.map((_, i) => (i < chest.revealedCount ? 1 : 0)));
   const [confetti, setConfetti] = useState(false);
@@ -118,7 +120,7 @@ export default function ChestOpener({ chest, onClose }: Props) {
 
           {/* Header */}
           <p className="text-xs font-bold uppercase tracking-widest opacity-60 mb-1">
-            Coffre — Niveau {chest.levelId}
+            {t("header", { level: chest.levelId })}
           </p>
           <p className={`text-sm font-extrabold mb-6 bg-gradient-to-r ${RARITY_COLORS[rarity]} bg-clip-text text-transparent`}>
             {RARITY_LABELS[rarity]}
@@ -129,7 +131,7 @@ export default function ChestOpener({ chest, onClose }: Props) {
             ref={chestRef}
             className={`text-8xl mb-3 inline-block cursor-pointer select-none ${chestGlow} rounded-full`}
             onClick={handleChestClick}
-            title={allRevealed ? "Tout révélé !" : "Clique pour ouvrir !"}
+            title={allRevealed ? t("all_revealed_title") : t("click_to_open")}
           >
             {allRevealed ? "🎁" : chestEmoji}
           </div>
@@ -137,10 +139,12 @@ export default function ChestOpener({ chest, onClose }: Props) {
           {/* Status text */}
           <p className="text-sm font-semibold opacity-80 mb-6 h-5">
             {allRevealed
-              ? "🎉 Tout révélé !"
+              ? t("all_revealed")
               : remaining === totalRewards
-                ? "Clique pour ouvrir !"
-                : `Encore ${remaining} clic${remaining > 1 ? "s" : ""} !`}
+                ? t("click_to_open")
+                : remaining > 1
+                  ? t("clicks_remaining_plural", { count: remaining })
+                  : t("clicks_remaining", { count: remaining })}
           </p>
 
           {/* Reward slots */}
@@ -151,6 +155,7 @@ export default function ChestOpener({ chest, onClose }: Props) {
                 key={`${i}-${slotRevealKeys[i]}`}
                 reward={reward}
                 revealed={i < revealedCount}
+                t={t}
               />
             ))}
           </div>
@@ -161,14 +166,14 @@ export default function ChestOpener({ chest, onClose }: Props) {
               onClick={handleClaim}
               className={`w-full py-3 rounded-full text-sm font-extrabold bg-gradient-to-r ${RARITY_COLORS[rarity]} hover:opacity-90 transition-opacity shadow-lg`}
             >
-              Récupérer tout 🎉
+              {t("claim_all")}
             </button>
           ) : (
             <button
               onClick={onClose}
               className="text-xs text-white/30 hover:text-white/60 transition-colors"
             >
-              Fermer sans ouvrir
+              {t("close_without_opening")}
             </button>
           )}
         </div>

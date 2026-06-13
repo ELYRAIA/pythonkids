@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { getProgress, BADGES } from "@/lib/progress";
 import { getCompletedChallenges } from "@/lib/challenges";
@@ -9,7 +9,13 @@ import { LEVELS } from "@/lib/levels";
 
 const ALL_LEVEL_BADGES = LEVELS.map((l) => `level_${l.id}`);
 
-function downloadCertificatePNG(username: string, badgeCount: number, challengeCount: number, date: string) {
+interface CertLabels {
+  academy: string; cert_title: string; certifies: string;
+  canvas_desc1: string; canvas_desc2: string;
+  badges: string; challenges: string; date_issued: string; canvas_signature: string;
+}
+
+function downloadCertificatePNG(username: string, badgeCount: number, challengeCount: number, date: string, labels: CertLabels) {
   const W = 1200, H = 848;
   const canvas = document.createElement("canvas");
   canvas.width = W;
@@ -55,7 +61,7 @@ function downloadCertificatePNG(username: string, badgeCount: number, challengeC
 
   ctx.font = "16px sans-serif";
   ctx.fillStyle = "#9ca3af";
-  ctx.fillText("ACADÉMIE DE PROGRAMMATION PYTHON", W / 2, 235);
+  ctx.fillText(labels.academy, W / 2, 235);
 
   ctx.strokeStyle = "#e9d5ff";
   ctx.lineWidth = 2;
@@ -66,11 +72,11 @@ function downloadCertificatePNG(username: string, badgeCount: number, challengeC
 
   ctx.font = "20px sans-serif";
   ctx.fillStyle = "#6b7280";
-  ctx.fillText("CERTIFICAT D'EXCELLENCE", W / 2, 305);
+  ctx.fillText(labels.cert_title, W / 2, 305);
 
   ctx.font = "22px sans-serif";
   ctx.fillStyle = "#374151";
-  ctx.fillText("Ceci certifie que", W / 2, 350);
+  ctx.fillText(labels.certifies, W / 2, 350);
 
   ctx.font = "bold 64px sans-serif";
   ctx.fillStyle = titleGrad;
@@ -78,9 +84,8 @@ function downloadCertificatePNG(username: string, badgeCount: number, challengeC
 
   ctx.font = "20px sans-serif";
   ctx.fillStyle = "#4b5563";
-  const desc = "a brillamment complété les niveaux de PythonKids et maîtrise";
-  ctx.fillText(desc, W / 2, 480);
-  ctx.fillText("les fondamentaux de la programmation Python.", W / 2, 510);
+  ctx.fillText(labels.canvas_desc1, W / 2, 480);
+  ctx.fillText(labels.canvas_desc2, W / 2, 510);
 
   ctx.beginPath();
   ctx.moveTo(W / 2 - 300, 545);
@@ -90,9 +95,9 @@ function downloadCertificatePNG(username: string, badgeCount: number, challengeC
   const statsY = 610;
   const cols = [W / 2 - 280, W / 2, W / 2 + 280];
   const statsData = [
-    { emoji: "🏅", value: String(badgeCount), label: "badges gagnés" },
-    { emoji: "🎯", value: String(challengeCount), label: "défis réussis" },
-    { emoji: "📅", value: date, label: "date d'obtention" },
+    { emoji: "🏅", value: String(badgeCount), label: labels.badges },
+    { emoji: "🎯", value: String(challengeCount), label: labels.challenges },
+    { emoji: "📅", value: date, label: labels.date_issued },
   ];
   statsData.forEach(({ emoji, value, label }, i) => {
     ctx.font = "36px serif";
@@ -112,7 +117,7 @@ function downloadCertificatePNG(username: string, badgeCount: number, challengeC
 
   ctx.font = "14px sans-serif";
   ctx.fillStyle = "#9ca3af";
-  ctx.fillText("pythonkids.app · Apprendre à coder, c'est super ! 🚀", W / 2, H - 60);
+  ctx.fillText(labels.canvas_signature, W / 2, H - 60);
 
   canvas.toBlob((blob) => {
     if (!blob) return;
@@ -127,6 +132,7 @@ function downloadCertificatePNG(username: string, badgeCount: number, challengeC
 
 export default function CertificatePage() {
   const t = useTranslations("Certificate");
+  const locale = useLocale();
   const [username, setUsername] = useState("");
   const [earnedBadges, setEarnedBadges] = useState<string[]>([]);
   const [allDone, setAllDone] = useState(false);
@@ -148,7 +154,7 @@ export default function CertificatePage() {
     const done = levelsDone.length >= 5;
     setAllDone(done);
 
-    const date = new Date().toLocaleDateString("fr-FR", {
+    const date = new Date().toLocaleDateString(locale, {
       day: "numeric", month: "long", year: "numeric",
     });
     setCompletionDate(date);
@@ -188,7 +194,12 @@ export default function CertificatePage() {
           {t("print_button")}
         </button>
         <button
-          onClick={() => downloadCertificatePNG(username, badgesToShow.length, challengeCount, completionDate)}
+          onClick={() => downloadCertificatePNG(username, badgesToShow.length, challengeCount, completionDate, {
+              academy: t("academy"), cert_title: t("cert_title"), certifies: t("certifies"),
+              canvas_desc1: t("canvas_desc1"), canvas_desc2: t("canvas_desc2"),
+              badges: t("badges_earned"), challenges: t("challenges_completed"), date_issued: t("date_issued"),
+              canvas_signature: t("canvas_signature"),
+            })}
           className="bg-gradient-to-r from-teal-400 to-cyan-500 text-white px-5 py-2 rounded-full text-sm font-bold hover:opacity-90 transition-opacity"
         >
           {t("download_button")}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import { addGems } from "@/lib/gems";
 
 // ── Constants ──────────────────────────────────────────────────────────────
@@ -55,19 +56,22 @@ function spawnParticles(cx: number, cy: number): Particle[] {
   });
 }
 
-function levelLabel(score: number): string {
-  if (score >= 50) return "🌟 Légende";
-  if (score >= 30) return "🐍 Maître";
-  if (score >= 20) return "⚡ Expert";
-  if (score >= 10) return "💻 Pro";
-  if (score >= 5)  return "📝 Joueur";
-  return "🌱 Novice";
+function levelKey(score: number): string {
+  if (score >= 50) return "level_legend";
+  if (score >= 30) return "level_master";
+  if (score >= 20) return "level_expert";
+  if (score >= 10) return "level_pro";
+  if (score >= 5)  return "level_player";
+  return "level_novice";
 }
 
 // ── Component ──────────────────────────────────────────────────────────────
 type Phase = "idle" | "playing" | "dead";
 
 export default function SnakeGame() {
+  const t = useTranslations("SnakeGame");
+  const levelLabel = (s: number) => t(levelKey(s) as Parameters<typeof t>[0]);
+
   const canvasRef  = useRef<HTMLCanvasElement>(null);
   const gs         = useRef(makeState());
   const parts      = useRef<Particle[]>([]);
@@ -398,10 +402,10 @@ export default function SnakeGame() {
       {/* Status bar */}
       <div className="w-full max-w-[400px] bg-slate-900 rounded-2xl border border-purple-500/25 p-4 shadow-xl flex items-stretch gap-0">
         {[
-          { label: "Score",  value: <span className="text-3xl font-black text-purple-400">{score}</span> },
-          { label: "Record", value: <span className="text-2xl font-black text-amber-400">🏆{highScore}</span> },
-          { label: "Niveau", value: <span className="text-sm font-black text-emerald-400 leading-tight">{lv}</span> },
-          ...(gemsEarned > 0 ? [{ label: "Gagnées", value: <span className="text-xl font-black text-cyan-400">+{gemsEarned}💎</span> }] : []),
+          { label: t("label_score"),  value: <span className="text-3xl font-black text-purple-400">{score}</span> },
+          { label: t("label_record"), value: <span className="text-2xl font-black text-amber-400">🏆{highScore}</span> },
+          { label: t("label_level"),  value: <span className="text-sm font-black text-emerald-400 leading-tight">{lv}</span> },
+          ...(gemsEarned > 0 ? [{ label: t("label_earned"), value: <span className="text-xl font-black text-cyan-400">+{gemsEarned}💎</span> }] : []),
         ].map((item, i, arr) => (
           <div key={item.label} className={`flex-1 text-center flex flex-col items-center justify-center gap-0.5 ${i < arr.length-1 ? "border-r border-slate-700" : ""}`}>
             {item.value}
@@ -413,7 +417,7 @@ export default function SnakeGame() {
       {/* Milestone toast */}
       {milestone && (
         <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-gradient-to-r from-cyan-500 to-blue-600 text-white px-6 py-3 rounded-2xl shadow-2xl font-bold text-sm animate-bounce pointer-events-none">
-          🎉 Score {milestone} ! +{GEM_MILESTONES[milestone]} 💎 gagnées !
+          🎉 {t("milestone_toast", { score: milestone, gems: GEM_MILESTONES[milestone] })}
         </div>
       )}
 
@@ -439,12 +443,12 @@ export default function SnakeGame() {
               <span className="text-8xl drop-shadow-2xl select-none">🐍</span>
               <p className="text-white text-3xl font-black tracking-wide">Snake Python</p>
               <p className="text-white/50 text-sm px-8 text-center">
-                Mange les 🍎, évite les murs et ton corps !
+                {t("idle_hint")}
               </p>
             </div>
             <button onClick={startGame}
               className="bg-gradient-to-r from-purple-600 to-pink-500 text-white px-12 py-3.5 rounded-full font-extrabold text-xl shadow-2xl shadow-purple-900/60 hover:opacity-90 transition-opacity active:scale-95">
-              Jouer 🎮
+              {t("play_button")}
             </button>
             <div className="flex flex-wrap justify-center gap-1.5 px-8">
               {Object.entries(GEM_MILESTONES).map(([pts,gems]) => (
@@ -453,7 +457,7 @@ export default function SnakeGame() {
                 </span>
               ))}
             </div>
-            <p className="text-white/25 text-xs">Flèches / WASD / swipe</p>
+            <p className="text-white/25 text-xs">{t("controls_hint")}</p>
           </div>
         )}
 
@@ -464,31 +468,31 @@ export default function SnakeGame() {
             <span className="text-7xl">{newRecord ? "🏆" : "💀"}</span>
             <div className="text-center">
               <p className="text-white text-2xl font-black tracking-wide mb-1">
-                {newRecord ? "Nouveau record !" : "Game Over !"}
+                {newRecord ? t("new_record") : t("game_over")}
               </p>
               <p className="text-slate-400 text-sm">{levelLabel(score)}</p>
             </div>
             <div className="flex items-center gap-6 bg-slate-900/70 rounded-2xl px-6 py-3 border border-slate-700">
               <div className="text-center">
                 <p className="text-purple-300 text-2xl font-black">{score}</p>
-                <p className="text-slate-500 text-xs">Score</p>
+                <p className="text-slate-500 text-xs">{t("label_score")}</p>
               </div>
               {newRecord && (
                 <div className="text-center">
                   <p className="text-amber-400 text-xl font-black">🏆 {score}</p>
-                  <p className="text-slate-500 text-xs">Record</p>
+                  <p className="text-slate-500 text-xs">{t("label_record")}</p>
                 </div>
               )}
               {gemsEarned > 0 && (
                 <div className="text-center">
                   <p className="text-cyan-400 text-xl font-black">+{gemsEarned}💎</p>
-                  <p className="text-slate-500 text-xs">Gagnées</p>
+                  <p className="text-slate-500 text-xs">{t("label_earned")}</p>
                 </div>
               )}
             </div>
             <button onClick={startGame}
               className="bg-gradient-to-r from-purple-600 to-pink-500 text-white px-12 py-3.5 rounded-full font-extrabold text-xl shadow-2xl shadow-purple-900/60 hover:opacity-90 transition-opacity active:scale-95">
-              Rejouer 🔄
+              {t("play_again")}
             </button>
           </div>
         )}
@@ -522,7 +526,7 @@ export default function SnakeGame() {
       </div>
 
       <p className="hidden sm:block text-xs text-slate-500">
-        ↑ ↓ ← → ou WASD · la vitesse augmente avec le score
+        {t("keyboard_hint")}
       </p>
     </div>
   );

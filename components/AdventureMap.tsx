@@ -1,13 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { LEVELS } from "@/lib/levels";
 import { getProgress } from "@/lib/progress";
+import { lf } from "@/lib/localize";
 
 export default function AdventureMap() {
   const t = useTranslations("AdventureMap");
+  const locale = useLocale();
   const [completedLessons, setCompletedLessons] = useState<Record<string, number[]>>({});
   const [earnedBadges, setEarnedBadges] = useState<string[]>([]);
   const [mounted, setMounted] = useState(false);
@@ -92,14 +94,14 @@ export default function AdventureMap() {
                   }`}>
                     <div className="flex items-center justify-between mb-1">
                       <div>
-                        <span className="text-xs font-semibold text-gray-400 dark:text-slate-500">Niveau {level.id}</span>
-                        <span className="text-xs text-gray-400 dark:text-slate-500 ml-2">{level.ages}</span>
+                        <span className="text-xs font-semibold text-gray-400 dark:text-slate-500">{t("level_prefix")} {level.id}</span>
+                        <span className="text-xs text-gray-400 dark:text-slate-500 ml-2">{lf(level, "ages", locale)}</span>
                       </div>
                       {isComplete && <span className="text-xs font-bold text-green-500">{t("completed")}</span>}
                       {isCurrent && done > 0 && <span className="text-xs font-bold text-purple-500">{pct}%</span>}
                     </div>
-                    <h3 className="font-bold text-gray-800 dark:text-white text-sm mb-1">{level.name}</h3>
-                    <p className="text-xs text-gray-400 dark:text-slate-500 mb-2 line-clamp-2 leading-relaxed">{level.description}</p>
+                    <h3 className="font-bold text-gray-800 dark:text-white text-sm mb-1">{lf(level, "name", locale)}</h3>
+                    <p className="text-xs text-gray-400 dark:text-slate-500 mb-2 line-clamp-2 leading-relaxed">{lf(level, "description", locale)}</p>
 
                     {/* Barre de progression */}
                     <div className="w-full bg-gray-100 dark:bg-slate-700 rounded-full h-1.5 mb-2">

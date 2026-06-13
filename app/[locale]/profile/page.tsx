@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { lf } from "@/lib/localize";
 import AppHeader from "@/components/AppHeader";
 import PlayerAvatar from "@/components/PlayerAvatar";
 import { getProgress, BADGES, getPlayerLevel } from "@/lib/progress";
@@ -41,6 +43,8 @@ interface FriendStatus {
 }
 
 export default function ProfilePage() {
+  const t = useTranslations("Profile");
+  const locale = useLocale();
   const [username, setUsername] = useState("");
   const [score, setScore] = useState(0);
   const [streak, setStreak] = useState({ currentStreak: 0, longestStreak: 0, lastPlayDate: "", playDates: [] as string[] });
@@ -221,7 +225,7 @@ export default function ProfilePage() {
               <div className="mb-4 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-bold text-white/80"
                    style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.18)" }}>
                 <span>{currentLevelMeta.emoji}</span>
-                <span>Niveau {currentLevelMeta.id} — {currentLevelMeta.name}</span>
+                <span>{t("level_badge", { id: currentLevelMeta.id, name: lf(currentLevelMeta, "name", locale) })}</span>
               </div>
             )}
 
@@ -235,7 +239,7 @@ export default function ProfilePage() {
 
             <h1 className="text-2xl font-extrabold text-white mt-1 tracking-tight"
                 style={{ textShadow: "0 2px 16px rgba(167,139,250,0.5)" }}>
-              {username || "Codeur anonyme"}
+              {username || t("anonymous")}
             </h1>
 
             {mounted && (() => {
@@ -269,9 +273,9 @@ export default function ProfilePage() {
 
             <div className="w-full max-w-xs mt-5">
               <div className="flex justify-between text-[11px] text-white/45 mb-1.5">
-                <span>Niv. {playerLevel}</span>
-                <span className="text-white/70 font-semibold">{currentLevelDone} / {currentLevelTotal} leçons — {levelXP}%</span>
-                {playerLevel < 5 && <span>Niv. {playerLevel + 1}</span>}
+                <span>{t("level_prev", { n: playerLevel })}</span>
+                <span className="text-white/70 font-semibold">{t("level_progress", { done: currentLevelDone, total: currentLevelTotal, pct: levelXP })}</span>
+                {playerLevel < 5 && <span>{t("level_next", { n: playerLevel + 1 })}</span>}
               </div>
               <div className="h-3 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.1)" }}>
                 <div className="h-full rounded-full transition-all duration-700 relative overflow-hidden"
@@ -308,11 +312,11 @@ export default function ProfilePage() {
             )}
 
             <div className="grid grid-cols-5 gap-2 mt-5 w-full">
-              <StatChip value={score > 999 ? `${(score / 1000).toFixed(1)}k` : String(score)} label="points" emoji="⭐" />
-              <StatChip value={String(mounted ? gems : 0)} label="gemmes" emoji="💎" />
-              <StatChip value={`${streak.currentStreak}j`} label="streak" emoji="🔥" />
-              <StatChip value={`${mounted ? earnedBadges.length : 0}`} label="badges" emoji="🏅" />
-              <StatChip value={String(mounted ? duelWins : 0)} label="duels" emoji="⚔️" />
+              <StatChip value={score > 999 ? `${(score / 1000).toFixed(1)}k` : String(score)} label={t("stat_points")} emoji="⭐" />
+              <StatChip value={String(mounted ? gems : 0)} label={t("stat_gems")} emoji="💎" />
+              <StatChip value={`${streak.currentStreak}j`} label={t("stat_streak")} emoji="🔥" />
+              <StatChip value={`${mounted ? earnedBadges.length : 0}`} label={t("stat_badges")} emoji="🏅" />
+              <StatChip value={String(mounted ? duelWins : 0)} label={t("stat_duels")} emoji="⚔️" />
             </div>
 
             <div className="mt-5 w-full max-w-xs flex gap-2">
@@ -320,28 +324,28 @@ export default function ProfilePage() {
                 href="/editor"
                 className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-pink-500 hover:opacity-90 active:scale-95 transition-all text-white font-bold text-sm rounded-2xl py-3 shadow-lg"
               >
-                <span className="text-lg">💻</span> Coder
+                <span className="text-lg">💻</span> {t("cta_code")}
               </a>
               <button
-                onClick={() => generateShareCard({ username, score, streak: streak.currentStreak, lessons: doneLessons, totalLessons, badges: earnedBadges.length, achievements: unlockedAchievements.length, duelWins })}
+                onClick={() => generateShareCard({ username, score, streak: streak.currentStreak, lessons: doneLessons, totalLessons, badges: earnedBadges.length, achievements: unlockedAchievements.length, duelWins, locale, tLabels: { points: t("card_points"), streak: t("card_streak"), lessons: t("card_lessons"), badges: t("card_badges"), duels: t("card_duels"), achievements: t("card_achievements") } })}
                 className="px-3 py-3 rounded-2xl text-sm font-bold transition-all hover:opacity-90 active:scale-95"
                 style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.2)", color: "rgba(255,255,255,0.9)" }}
-                title="Télécharger ma carte de profil"
+                title={t("share_card_title")}
               >
                 📸
               </button>
               <button
                 onClick={() => {
-                  const text = `🐍 ${username} sur PythonKids !\n${xpInfo.rank.emoji} Rang : ${xpInfo.rank.title}\n⭐ ${score} points · 🔥 Streak ${streak.currentStreak}j\n✏️ ${doneLessons}/${totalLessons} leçons · 🏅 ${earnedBadges.length} badges`;
+                  const text = t("share_text", { username, rankEmoji: xpInfo.rank.emoji, rankTitle: xpInfo.rank.title, score, streak: streak.currentStreak, lessons: doneLessons, totalLessons, badges: earnedBadges.length });
                   if (navigator.share) {
-                    navigator.share({ title: "Mon profil PythonKids", text }).catch(() => {});
+                    navigator.share({ title: t("share_profile_title"), text }).catch(() => {});
                   } else {
                     navigator.clipboard.writeText(text).then(() => { setShareCopied(true); setTimeout(() => setShareCopied(false), 2000); }).catch(() => {});
                   }
                 }}
                 className="px-3 py-3 rounded-2xl text-sm font-bold transition-all hover:opacity-90 active:scale-95"
                 style={{ background: shareCopied ? "rgba(74,222,128,0.25)" : "rgba(255,255,255,0.12)", border: shareCopied ? "1px solid rgba(74,222,128,0.5)" : "1px solid rgba(255,255,255,0.2)", color: "rgba(255,255,255,0.9)" }}
-                title="Partager mon profil"
+                title={t("share_profile")}
               >
                 {shareCopied ? "✓" : "🔗"}
               </button>
@@ -349,7 +353,7 @@ export default function ProfilePage() {
                 onClick={() => { const next = toggleAudio(); setAudioOn(next); }}
                 className="px-3 py-3 rounded-2xl text-sm font-bold transition-all hover:opacity-90 active:scale-95"
                 style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.2)", color: "rgba(255,255,255,0.9)" }}
-                title={audioOn ? "Couper les sons" : "Activer les sons"}
+                title={audioOn ? t("sound_mute") : t("sound_unmute")}
               >
                 {mounted ? (audioOn ? "🔊" : "🔇") : "🔊"}
               </button>
@@ -359,7 +363,7 @@ export default function ProfilePage() {
 
         {mounted && <AccountSync username={username} />}
 
-        {mounted && <FriendsWidget statuses={friendStatuses} />}
+        {mounted && <FriendsWidget statuses={friendStatuses} t={t} />}
 
         {/* ── COLLECTION DE TÊTES ── */}
         <div className="rounded-3xl overflow-hidden shadow-lg relative"
@@ -370,9 +374,9 @@ export default function ProfilePage() {
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h2 className="text-base font-extrabold text-white flex items-center gap-2">
-                  🎭 Collection de Têtes
+                  {t("heads_title")}
                 </h2>
-                <p className="text-xs text-white/40 mt-0.5">Gagne des coffres pour débloquer des têtes</p>
+                <p className="text-xs text-white/40 mt-0.5">{t("heads_desc")}</p>
               </div>
               <div className="text-right">
                 <span className="text-lg font-extrabold text-white">{mounted ? unlockedHeads.length : 0}</span>
@@ -449,13 +453,13 @@ export default function ProfilePage() {
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <span className="text-lg">🔥</span>
-                <span className="text-sm font-bold text-gray-700 dark:text-slate-200">Calendrier</span>
+                <span className="text-sm font-bold text-gray-700 dark:text-slate-200">{t("calendar_title")}</span>
               </div>
               <div className="flex items-center gap-3 text-xs">
                 {streak.longestStreak > 0 && (
-                  <span className="text-orange-500 dark:text-orange-400 font-semibold">Record : {streak.longestStreak}j</span>
+                  <span className="text-orange-500 dark:text-orange-400 font-semibold">{t("streak_record", { days: streak.longestStreak })}</span>
                 )}
-                <span className="text-gray-400 dark:text-slate-500">{streak.currentStreak} jour{streak.currentStreak > 1 ? "s" : ""} 🔥</span>
+                <span className="text-gray-400 dark:text-slate-500">{streak.currentStreak > 1 ? t("streak_current_plural", { days: streak.currentStreak }) : t("streak_current", { days: streak.currentStreak })}</span>
               </div>
             </div>
             <StreakCalendar streakData={streak} />
@@ -467,10 +471,10 @@ export default function ProfilePage() {
           <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
             <div className="flex items-center gap-2 mb-3">
               <span className="text-lg">📖</span>
-              <span className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wide">Leçons</span>
+              <span className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wide">{t("lessons_title")}</span>
             </div>
             <p className="text-4xl font-extrabold text-purple-600 dark:text-purple-400 leading-none">{doneLessons}</p>
-            <p className="text-xs text-gray-400 dark:text-slate-500 mt-1 mb-3">sur {totalLessons} au total</p>
+            <p className="text-xs text-gray-400 dark:text-slate-500 mt-1 mb-3">{t("lessons_out_of", { total: totalLessons })}</p>
             <div className="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2.5">
               <div className="h-2.5 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-700"
                    style={{ width: `${Math.round((doneLessons / totalLessons) * 100)}%` }} />
@@ -483,10 +487,10 @@ export default function ProfilePage() {
           <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
             <div className="flex items-center gap-2 mb-3">
               <span className="text-lg">🎯</span>
-              <span className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wide">Défis</span>
+              <span className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wide">{t("challenges_title")}</span>
             </div>
             <p className="text-4xl font-extrabold text-green-600 dark:text-green-400 leading-none">{mounted ? completedChallenges.length : 0}</p>
-            <p className="text-xs text-gray-400 dark:text-slate-500 mt-1 mb-3">sur {CHALLENGES.length} défis</p>
+            <p className="text-xs text-gray-400 dark:text-slate-500 mt-1 mb-3">{t("challenges_out_of", { total: CHALLENGES.length })}</p>
             <div className="space-y-2">
               {challengeStats.map(({ diff, done, total }) => {
                 const cfg = {
@@ -512,7 +516,7 @@ export default function ProfilePage() {
         {/* ── PROGRESSION PAR NIVEAU ── */}
         <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
           <div className="px-5 pt-5 pb-3">
-            <h2 className="text-sm font-extrabold text-gray-800 dark:text-white">📊 Progression par niveau</h2>
+            <h2 className="text-sm font-extrabold text-gray-800 dark:text-white">{t("level_progress_title")}</h2>
           </div>
           <div className="divide-y divide-slate-100 dark:divide-slate-700">
             {Object.values(LEVELS_DATA).map((level) => {
@@ -530,7 +534,7 @@ export default function ProfilePage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-center mb-1">
                         <span className="text-xs font-bold text-gray-700 dark:text-slate-300 truncate">
-                          Niv. {level.id} — {level.name}
+                          {t("level_row", { id: level.id, name: lf(levelMeta ?? level, "name", locale) })}
                         </span>
                         <span className="text-xs font-semibold text-gray-400 dark:text-slate-500 ml-2 shrink-0">{done}/{total}</span>
                       </div>
@@ -551,16 +555,16 @@ export default function ProfilePage() {
         {mounted && pendingChests.length === 0 && doneLessons === 0 && (
           <div className="bg-white dark:bg-slate-800 rounded-2xl border border-amber-200 dark:border-amber-800/50 p-6 text-center shadow-sm">
             <p className="text-4xl mb-2">📦</p>
-            <p className="text-sm font-bold text-gray-700 dark:text-slate-300">Aucun coffre pour l&apos;instant</p>
+            <p className="text-sm font-bold text-gray-700 dark:text-slate-300">{t("chests_empty_title")}</p>
             <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">
-              Fais ta première leçon pour recevoir ton premier coffre !
+              {t("chests_empty_desc")}
             </p>
           </div>
         )}
         {mounted && pendingChests.length > 0 && (
           <div>
             <h2 className="text-sm font-extrabold text-gray-800 dark:text-white mb-3 flex items-center gap-2">
-              🎁 Coffres à ouvrir
+              {t("chests_pending")}
               <span className="bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400 text-xs font-extrabold px-2 py-0.5 rounded-full">{pendingChests.length}</span>
             </h2>
             <div className="flex flex-wrap gap-3">
@@ -576,14 +580,14 @@ export default function ProfilePage() {
                   >
                     <span className="text-4xl">{chestEmoji}</span>
                     <div className="text-center">
-                      <p className="text-xs font-extrabold text-gray-800 dark:text-white">Niveau {chest.levelId}</p>
+                      <p className="text-xs font-extrabold text-gray-800 dark:text-white">{t("chest_level", { id: chest.levelId })}</p>
                       <p className={`text-[10px] font-bold bg-gradient-to-r ${RARITY_COLORS[rarity]} bg-clip-text text-transparent`}>
                         {RARITY_LABELS[rarity]}
                       </p>
                     </div>
                     {chest.revealedCount > 0 && (
                       <span className="text-[10px] text-orange-500 font-semibold">
-                        {chest.revealedCount}/{chest.rewards.length} révélés
+                        {t("chest_revealed", { done: chest.revealedCount, total: chest.rewards.length })}
                       </span>
                     )}
                   </button>
@@ -597,10 +601,10 @@ export default function ProfilePage() {
         {mounted && unlockedCosmetics.length > 0 && (
           <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
             <div className="flex items-center justify-between mb-1">
-              <h2 className="text-sm font-extrabold text-gray-800 dark:text-white">🎨 Effets avatar</h2>
+              <h2 className="text-sm font-extrabold text-gray-800 dark:text-white">{t("avatar_effects_title")}</h2>
               <span className="text-xs text-purple-500 font-bold">{unlockedCosmetics.length}/{AVATAR_COSMETICS.length}</span>
             </div>
-            <p className="text-xs text-gray-400 dark:text-slate-500 mb-3">Clique sur un effet pour l&apos;équiper.</p>
+            <p className="text-xs text-gray-400 dark:text-slate-500 mb-3">{t("avatar_effects_desc")}</p>
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
               {AVATAR_COSMETICS.map((item) => {
                 const owned = unlockedCosmetics.includes(item.id);
@@ -622,7 +626,7 @@ export default function ProfilePage() {
                     </p>
                     {owned && (
                       <span className="text-[9px] bg-white/25 px-1.5 py-0.5 rounded-full text-white font-bold">
-                        {isEquipped ? "✓ Équipé" : RARITY_LABELS[item.rarity]}
+                        {isEquipped ? t("avatar_equipped") : RARITY_LABELS[item.rarity]}
                       </span>
                     )}
                   </div>
@@ -635,7 +639,7 @@ export default function ProfilePage() {
         {/* ── BADGES ── */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-extrabold text-gray-800 dark:text-white">🏅 Mes badges</h2>
+            <h2 className="text-sm font-extrabold text-gray-800 dark:text-white">{t("badges_title")}</h2>
             {mounted && (
               <span className="text-xs font-bold text-purple-500">{earnedBadges.length}/{BADGES.length}</span>
             )}
@@ -668,38 +672,38 @@ export default function ProfilePage() {
         </div>
 
         {/* ── SUCCÈS ── */}
-        <AchievementsSection unlocked={mounted ? unlockedAchievements : []} />
+        <AchievementsSection unlocked={mounted ? unlockedAchievements : []} t={t} />
 
         {/* ── ACTIONS ── */}
         <div className="grid grid-cols-3 gap-3 pb-8">
           <Link href="/stats"
                 className="col-span-3 flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/30 dark:to-purple-950/30 border border-indigo-200 dark:border-indigo-800 rounded-2xl p-3 hover:border-indigo-300 dark:hover:border-indigo-600 transition-colors group">
             <span className="text-xl group-hover:scale-110 transition-transform">📊</span>
-            <span className="text-sm font-bold text-indigo-700 dark:text-indigo-300">Voir mes statistiques détaillées</span>
+            <span className="text-sm font-bold text-indigo-700 dark:text-indigo-300">{t("stats_link")}</span>
             <span className="text-indigo-400 group-hover:translate-x-1 transition-transform">→</span>
           </Link>
           <Link href="/quiz"
                 className="col-span-3 flex items-center justify-center gap-2 bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-950/30 dark:to-cyan-950/30 border border-teal-200 dark:border-teal-800 rounded-2xl p-3 hover:border-teal-300 dark:hover:border-teal-600 transition-colors group">
             <span className="text-xl group-hover:scale-110 transition-transform">🧠</span>
-            <span className="text-sm font-bold text-teal-700 dark:text-teal-300">Quiz de révision · +5 💎 par bonne réponse</span>
+            <span className="text-sm font-bold text-teal-700 dark:text-teal-300">{t("quiz_link")}</span>
             <span className="text-teal-400 group-hover:translate-x-1 transition-transform">→</span>
           </Link>
           <Link href="/shop"
                 className="flex flex-col items-center gap-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 text-center hover:border-teal-300 dark:hover:border-teal-600 hover:shadow-md transition-all group shadow-sm">
             <span className="text-2xl group-hover:scale-110 transition-transform">🛒</span>
-            <span className="text-xs font-bold text-gray-700 dark:text-slate-300">Boutique</span>
+            <span className="text-xs font-bold text-gray-700 dark:text-slate-300">{t("shop_link")}</span>
             <span className="text-[10px] text-gray-400 dark:text-slate-500">{mounted ? gems : 0} 💎</span>
           </Link>
           <Link href="/leaderboard"
                 className="flex flex-col items-center gap-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 text-center hover:border-pink-300 dark:hover:border-pink-600 hover:shadow-md transition-all group shadow-sm">
             <span className="text-2xl group-hover:scale-110 transition-transform">🏆</span>
-            <span className="text-xs font-bold text-gray-700 dark:text-slate-300">Classement</span>
+            <span className="text-xs font-bold text-gray-700 dark:text-slate-300">{t("leaderboard_link")}</span>
             <span className="text-[10px] text-gray-400 dark:text-slate-500">{score.toLocaleString()} pts</span>
           </Link>
           <Link href="/challenges"
                 className="flex flex-col items-center gap-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 text-center hover:border-purple-300 dark:hover:border-purple-600 hover:shadow-md transition-all group shadow-sm">
             <span className="text-2xl group-hover:scale-110 transition-transform">🎯</span>
-            <span className="text-xs font-bold text-gray-700 dark:text-slate-300">Défis</span>
+            <span className="text-xs font-bold text-gray-700 dark:text-slate-300">{t("challenges_link")}</span>
             <span className="text-[10px] text-gray-400 dark:text-slate-500">{mounted ? completedChallenges.length : 0}/{CHALLENGES.length}</span>
           </Link>
         </div>
@@ -720,9 +724,10 @@ export default function ProfilePage() {
   );
 }
 
-function generateShareCard({ username, score, streak, lessons, totalLessons, badges, achievements, duelWins }: {
+function generateShareCard({ username, score, streak, lessons, totalLessons, badges, achievements, duelWins, locale, tLabels }: {
   username: string; score: number; streak: number; lessons: number; totalLessons: number;
-  badges: number; achievements: number; duelWins: number;
+  badges: number; achievements: number; duelWins: number; locale: string;
+  tLabels: { points: string; streak: string; lessons: string; badges: string; duels: string; achievements: string };
 }) {
   const W = 700, H = 370;
   const canvas = document.createElement("canvas");
@@ -757,12 +762,12 @@ function generateShareCard({ username, score, streak, lessons, totalLessons, bad
   c.fillText(username || "Codeur", ax, 232);
 
   const stats = [
-    { emoji: "⭐", label: "Points", val: score > 999 ? `${(score / 1000).toFixed(1)}k` : String(score) },
-    { emoji: "🔥", label: "Streak", val: `${streak}j` },
-    { emoji: "📖", label: "Leçons", val: `${lessons}/${totalLessons}` },
-    { emoji: "🏅", label: "Badges", val: String(badges) },
-    { emoji: "⚔️", label: "Duels", val: String(duelWins) },
-    { emoji: "✨", label: "Succès", val: String(achievements) },
+    { emoji: "⭐", label: tLabels.points, val: score > 999 ? `${(score / 1000).toFixed(1)}k` : String(score) },
+    { emoji: "🔥", label: tLabels.streak, val: `${streak}j` },
+    { emoji: "📖", label: tLabels.lessons, val: `${lessons}/${totalLessons}` },
+    { emoji: "🏅", label: tLabels.badges, val: String(badges) },
+    { emoji: "⚔️", label: tLabels.duels, val: String(duelWins) },
+    { emoji: "✨", label: tLabels.achievements, val: String(achievements) },
   ];
   const bw = 100, bh = 64, gap = 10;
   const totalW = stats.length * bw + (stats.length - 1) * gap;
@@ -777,7 +782,7 @@ function generateShareCard({ username, score, streak, lessons, totalLessons, bad
     c.fillText(s.label, x + bw / 2, by + 48);
   });
 
-  const today = new Date().toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+  const today = new Date().toLocaleDateString(locale, { day: "numeric", month: "long", year: "numeric" });
   c.font = "12px system-ui,sans-serif"; c.fillStyle = "rgba(255,255,255,0.25)"; c.textBaseline = "bottom";
   c.fillText(today, W / 2, H - 12);
 
@@ -789,11 +794,11 @@ function generateShareCard({ username, score, streak, lessons, totalLessons, bad
   }, "image/png");
 }
 
-function AchievementsSection({ unlocked }: { unlocked: string[] }) {
+function AchievementsSection({ unlocked, t }: { unlocked: string[]; t: ReturnType<typeof useTranslations> }) {
   return (
     <div>
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-sm font-extrabold text-gray-800 dark:text-white">✨ Succès</h2>
+        <h2 className="text-sm font-extrabold text-gray-800 dark:text-white">{t("achievements_title")}</h2>
         <span className="text-xs font-bold text-purple-500">{unlocked.length}/{ACHIEVEMENTS.length}</span>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
@@ -825,25 +830,28 @@ function AchievementsSection({ unlocked }: { unlocked: string[] }) {
   );
 }
 
-const ACTIVITY_VERBS: Record<ActivityEvent["type"], string> = {
-  lesson:    "📖 Fait une leçon",
-  badge:     "🏅 Badge obtenu",
-  challenge: "🎯 Défi réussi",
-  streak:    "🔥 Streak",
-};
+function getActivityVerbs(t: ReturnType<typeof useTranslations>): Record<ActivityEvent["type"], string> {
+  return {
+    lesson:    t("activity_lesson"),
+    badge:     t("activity_badge"),
+    challenge: t("activity_challenge"),
+    streak:    t("activity_streak"),
+  };
+}
 
-function timeAgo(iso: string): string {
+function timeAgo(iso: string, justNow: string): string {
   const diff = Date.now() - new Date(iso).getTime();
   const m = Math.floor(diff / 60000);
-  if (m < 1) return "à l'instant";
+  if (m < 1) return justNow;
   if (m < 60) return `${m} min`;
   const h = Math.floor(m / 60);
   if (h < 24) return `${h}h`;
   return `${Math.floor(h / 24)}j`;
 }
 
-function FriendsWidget({ statuses }: { statuses: FriendStatus[] }) {
+function FriendsWidget({ statuses, t }: { statuses: FriendStatus[]; t: ReturnType<typeof useTranslations> }) {
   const onlineCount = statuses.filter((s) => s.online).length;
+  const activityVerbs = getActivityVerbs(t);
 
   if (statuses.length === 0) {
     return (
@@ -851,20 +859,20 @@ function FriendsWidget({ statuses }: { statuses: FriendStatus[] }) {
         <div className="flex items-center justify-between px-5 pt-4 pb-3">
           <div className="flex items-center gap-2">
             <span className="text-base">👥</span>
-            <span className="text-sm font-extrabold text-gray-800 dark:text-white">Mes amis</span>
+            <span className="text-sm font-extrabold text-gray-800 dark:text-white">{t("friends_title")}</span>
           </div>
           <a href="/friends" className="text-xs text-purple-500 dark:text-purple-400 font-semibold hover:underline">
-            Ajouter →
+            {t("friends_add")}
           </a>
         </div>
         <div className="px-5 pb-4 flex flex-col items-center gap-2 text-center">
           <span className="text-3xl">🤝</span>
-          <p className="text-sm text-gray-500 dark:text-slate-400">Tu n&apos;as pas encore d&apos;amis.</p>
+          <p className="text-sm text-gray-500 dark:text-slate-400">{t("friends_no_friends")}</p>
           <a
             href="/friends"
             className="bg-gradient-to-r from-purple-600 to-pink-500 text-white px-4 py-1.5 rounded-full text-xs font-bold hover:opacity-90 transition-opacity mt-1"
           >
-            Trouver des amis
+            {t("friends_find")}
           </a>
         </div>
       </div>
@@ -876,15 +884,15 @@ function FriendsWidget({ statuses }: { statuses: FriendStatus[] }) {
       <div className="flex items-center justify-between px-5 pt-4 pb-3">
         <div className="flex items-center gap-2">
           <span className="text-base">👥</span>
-          <span className="text-sm font-extrabold text-gray-800 dark:text-white">Mes amis</span>
+          <span className="text-sm font-extrabold text-gray-800 dark:text-white">{t("friends_title")}</span>
           {onlineCount > 0 && (
             <span className="bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400 text-xs font-bold px-2 py-0.5 rounded-full">
-              {onlineCount} en ligne
+              {t("friends_online", { count: onlineCount })}
             </span>
           )}
         </div>
         <a href="/friends" className="text-xs text-purple-500 dark:text-purple-400 font-semibold hover:underline">
-          Voir tout →
+          {t("friends_see_all")}
         </a>
       </div>
 
@@ -901,18 +909,18 @@ function FriendsWidget({ statuses }: { statuses: FriendStatus[] }) {
               <p className="text-sm font-bold text-gray-800 dark:text-white truncate">{s.name}</p>
               {s.lastEvent ? (
                 <p className="text-xs text-gray-400 dark:text-slate-500 truncate">
-                  {ACTIVITY_VERBS[s.lastEvent.type]}
+                  {activityVerbs[s.lastEvent.type]}
                   {s.lastEvent.type !== "streak" && (
                     <span className="text-purple-500 dark:text-purple-400"> · {s.lastEvent.detail}</span>
                   )}
                 </p>
               ) : (
-                <p className="text-xs text-gray-300 dark:text-slate-600">Pas encore d&apos;activité</p>
+                <p className="text-xs text-gray-300 dark:text-slate-600">{t("friends_no_activity")}</p>
               )}
             </div>
             {s.lastEvent && (
               <span className={`text-xs font-semibold shrink-0 ${s.online ? "text-green-500 dark:text-green-400" : "text-gray-400 dark:text-slate-500"}`}>
-                {timeAgo(s.lastEvent.timestamp)}
+                {timeAgo(s.lastEvent.timestamp, t("time_just_now"))}
               </span>
             )}
           </div>

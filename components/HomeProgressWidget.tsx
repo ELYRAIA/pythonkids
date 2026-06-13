@@ -37,7 +37,7 @@ export default function HomeProgressWidget() {
               {t("label")}
             </span>
             <span className="text-sm font-extrabold text-purple-600 dark:text-purple-400">
-              {done}/{TOTAL_LESSONS} leçons · {pct}%
+              {t("lessons_pct", { done, total: TOTAL_LESSONS, pct })}
             </span>
           </div>
           <div className="w-full bg-gray-100 dark:bg-slate-700 rounded-full h-2.5 overflow-hidden">

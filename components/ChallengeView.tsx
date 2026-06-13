@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { EditorView, keymap, lineNumbers } from "@codemirror/view";
@@ -13,6 +14,7 @@ import { useIsMobile } from "@/lib/useIsMobile";
 import { parsePythonError } from "@/lib/pythonErrors";
 import { playChallengeWinSound, playErrorSound } from "@/lib/sounds";
 import { markChallengeComplete, getCompletedChallenges, type Challenge } from "@/lib/challenges";
+import { lf, lfa } from "@/lib/localize";
 import { trackChallengeWeek, refreshWeeklyQuests } from "@/lib/weeklyQuests";
 import { BADGES, type Badge } from "@/lib/progress";
 import { updateStreak } from "@/lib/streak";
@@ -45,6 +47,8 @@ export default function ChallengeView({
   nextChallenge,
 }: ChallengeViewProps) {
   const router = useRouter();
+  const locale = useLocale();
+  const t = useTranslations("ChallengeView");
   const [status, setStatus] = useState<Status>("idle");
   const [actualOutput, setActualOutput] = useState("");
   const [hintLevel, setHintLevel] = useState(0); // 0 = caché, 1/2/3 = indices révélés
@@ -57,9 +61,10 @@ export default function ChallengeView({
   const [finalTime, setFinalTime] = useState(0);
   const [bestTime, setBestTime] = useState<number | null>(null);
 
+  const starterCode = lf(challenge, "starterCode", locale) || challenge.starterCode;
   const getSavedCode = () => {
-    if (typeof window === "undefined") return challenge.starterCode;
-    return localStorage.getItem(`pythonkids_code_challenge_${challenge.id}`) ?? challenge.starterCode;
+    if (typeof window === "undefined") return starterCode;
+    return localStorage.getItem(`pythonkids_code_challenge_${challenge.id}`) ?? starterCode;
   };
   const codeRef = useRef<string>(getSavedCode());
   const isMobile = useIsMobile();
@@ -145,15 +150,15 @@ export default function ChallengeView({
   };
 
   const resetCode = () => {
-    codeRef.current = challenge.starterCode;
-    setMobileCode(challenge.starterCode);
+    codeRef.current = starterCode;
+    setMobileCode(starterCode);
     setStatus("idle");
     setActualOutput("");
     setShowSolution(false);
     localStorage.removeItem(`pythonkids_code_challenge_${challenge.id}`);
     const view = editorViewRef.current;
     if (view) {
-      view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: challenge.starterCode } });
+      view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: starterCode } });
     }
   };
 
@@ -169,12 +174,13 @@ export default function ChallengeView({
       py.setStdout({ batched: (t: string) => { output += (output ? "\n" : "") + t; } });
       py.setStderr({ batched: () => {} });
       const timeout = new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error("⏱️ Temps dépassé (5s). Tu as peut-être une boucle infinie !")), 5000)
+        setTimeout(() => reject(new Error(t("timeout"))), 5000)
       );
       await Promise.race([py.runPythonAsync(codeRef.current), timeout]);
 
       const normalise = (s: string) => s.replace(/\r\n/g, "\n").trim();
-      const pass = normalise(output) === normalise(challenge.expectedOutput);
+      const expectedOutput = lf(challenge, "expectedOutput", locale) || challenge.expectedOutput;
+      const pass = normalise(output) === normalise(expectedOutput);
       setActualOutput(output);
 
       if (pass) {
@@ -252,21 +258,21 @@ export default function ChallengeView({
                     Défi #{challengeIndex + 1} / {totalChallenges}
                   </span>
                   <h1 className="text-xl font-extrabold text-gray-800 dark:text-white mt-1">
-                    {challenge.emoji} {challenge.title}
+                    {challenge.emoji} {lf(challenge, "title", locale)}
                   </h1>
                 </div>
                 <span className={`shrink-0 text-xs px-3 py-1.5 rounded-full font-bold text-white bg-gradient-to-r ${challenge.difficultyColor}`}>
-                  {challenge.difficulty}
+                  {locale === "en" ? (challenge.difficulty === "Facile" ? "Easy" : challenge.difficulty === "Moyen" ? "Medium" : "Hard") : challenge.difficulty}
                 </span>
               </div>
 
               <p className="text-sm text-gray-600 dark:text-slate-300 leading-relaxed whitespace-pre-line mb-4">
-                {challenge.description}
+                {lf(challenge, "description", locale)}
               </p>
 
               <div className="bg-gray-50 dark:bg-slate-900 rounded-xl p-3 border border-gray-100 dark:border-slate-700">
-                <p className="text-xs text-gray-400 dark:text-slate-500 mb-1 font-medium">Sortie attendue :</p>
-                <pre className="text-sm font-mono text-green-700 dark:text-green-400 whitespace-pre-wrap">{challenge.expectedOutput}</pre>
+                <p className="text-xs text-gray-400 dark:text-slate-500 mb-1 font-medium">{t("expected_output")}</p>
+                <pre className="text-sm font-mono text-green-700 dark:text-green-400 whitespace-pre-wrap">{lf(challenge, "expectedOutput", locale) || challenge.expectedOutput}</pre>
               </div>
             </div>
 
@@ -304,7 +310,7 @@ export default function ChallengeView({
               {/* Indices révélés */}
               {hintLevel > 0 && (
                 <div className="space-y-2">
-                  {challenge.hints.slice(0, hintLevel).map((h, i) => (
+                  {lfa(challenge, "hints", locale).slice(0, hintLevel).map((h, i) => (
                     <div key={i} className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-xl p-3 text-xs text-yellow-800 dark:text-yellow-300 whitespace-pre-wrap">
                       {"💡".repeat(i + 1)} {h}
                     </div>
@@ -324,10 +330,10 @@ export default function ChallengeView({
                 >
                   {"💡".repeat(hintLevel + 1)}{" "}
                   {hintLevel === 0
-                    ? "Voir un indice (gratuit)"
+                    ? t("hint_free")
                     : hintLevel === 1
-                    ? "Indice plus précis (-5 💎)"
-                    : "Dernier indice (-10 💎)"}
+                    ? t("hint_precise")
+                    : t("hint_last")}
                 </button>
               )}
 
@@ -337,24 +343,25 @@ export default function ChallengeView({
                     onClick={() => setShowSolution(!showSolution)}
                     className="text-xs text-red-400 hover:text-red-600 dark:hover:text-red-300 font-medium transition-colors"
                   >
-                    {showSolution ? "▾ Cacher la solution" : "🔓 Voir une solution (après 5 essais)"}
+                    {showSolution ? t("hide_solution") : t("show_solution")}
                   </button>
                   {showSolution && (
                     <div className="mt-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-xl p-3">
                       <p className="text-xs text-red-600 dark:text-red-400 font-bold mb-2">Une solution possible :</p>
-                      <pre className="text-xs font-mono text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{challenge.solutionCode}</pre>
+                      <pre className="text-xs font-mono text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{lf(challenge, "solutionCode", locale) || challenge.solutionCode}</pre>
                       <button
                         onClick={() => {
-                          codeRef.current = challenge.solutionCode;
-                          setMobileCode(challenge.solutionCode);
+                          const sol = lf(challenge, "solutionCode", locale) || challenge.solutionCode;
+                          codeRef.current = sol;
+                          setMobileCode(sol);
                           const view = editorViewRef.current;
                           if (view) {
-                            view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: challenge.solutionCode } });
+                            view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: sol } });
                           }
                         }}
                         className="mt-2 text-xs bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400 px-3 py-1 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/60 transition-colors font-medium"
                       >
-                        Copier dans l'éditeur →
+                        {t("copy_to_editor")}
                       </button>
                     </div>
                   )}
@@ -369,7 +376,7 @@ export default function ChallengeView({
                   href={`/challenges/${prevChallenge.id}`}
                   className="flex-1 text-center py-2.5 rounded-xl text-xs font-bold border-2 border-gray-200 dark:border-slate-600 text-gray-500 dark:text-slate-400 hover:border-purple-300 dark:hover:border-purple-600 hover:text-purple-600 dark:hover:text-purple-300 transition-all"
                 >
-                  ← {prevChallenge.title}
+                  ← {lf(prevChallenge, "title", locale)}
                 </Link>
               ) : (
                 <div className="flex-1" />
@@ -379,7 +386,7 @@ export default function ChallengeView({
                   href={`/challenges/${nextChallenge.id}`}
                   className={`flex-1 text-center py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r ${nextChallenge.difficultyColor} hover:opacity-90 transition-opacity`}
                 >
-                  {nextChallenge.title} →
+                  {lf(nextChallenge, "title", locale)} →
                 </Link>
               )}
             </div>
@@ -399,10 +406,10 @@ export default function ChallengeView({
                 <span className="text-gray-400 text-xs font-mono">solution.py</span>
                 <div className="flex items-center gap-2">
                   {!pyodideReady && !pyodideError && (
-                    <span className="text-yellow-400 text-xs animate-pulse">⏳ Chargement…</span>
+                    <span className="text-yellow-400 text-xs animate-pulse">{t("pyodide_loading")}</span>
                   )}
                   {pyodideError && (
-                    <span className="text-red-400 text-xs">⚠️ Python indisponible</span>
+                    <span className="text-red-400 text-xs">{t("pyodide_error")}</span>
                   )}
                   <button
                     onClick={resetCode}
@@ -454,7 +461,7 @@ export default function ChallengeView({
                 {status === "success" && (
                   <div className="text-center">
                     <p className="text-4xl mb-2">🎉</p>
-                    <p className="text-xl font-extrabold text-green-700 dark:text-green-400 mb-3">Défi réussi !</p>
+                    <p className="text-xl font-extrabold text-green-700 dark:text-green-400 mb-3">{t("challenge_success")}</p>
                     <div className="flex justify-center gap-3 text-sm mb-4 flex-wrap">
                       <span className="flex items-center gap-1 text-green-600 dark:text-green-500">⏱ <span className="font-bold tabular-nums">{formatTime(finalTime)}</span></span>
                       <span className="flex items-center gap-1 text-green-600 dark:text-green-500">🎯 <span className="font-bold">{attempts}</span> tentative{attempts > 1 ? "s" : ""}</span>
@@ -467,7 +474,7 @@ export default function ChallengeView({
                         onClick={() => router.push(`/challenges/${nextChallenge.id}`)}
                         className={`bg-gradient-to-r ${nextChallenge.difficultyColor} text-white px-6 py-2.5 rounded-full text-sm font-bold hover:opacity-90 transition-opacity shadow-md`}
                       >
-                        Défi suivant : {nextChallenge.title} →
+                        {t("next_challenge_btn", { title: lf(nextChallenge, "title", locale) })}
                       </button>
                     )}
                     {!nextChallenge && (
@@ -475,7 +482,7 @@ export default function ChallengeView({
                         href="/challenges"
                         className="inline-block bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-2.5 rounded-full text-sm font-bold hover:opacity-90 transition-opacity shadow-md"
                       >
-                        Voir tous les défis 🏆
+                        {t("see_all_challenges")}
                       </Link>
                     )}
                   </div>

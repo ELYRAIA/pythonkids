@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import AppHeader from "@/components/AppHeader";
 import { getProgress, BADGES } from "@/lib/progress";
@@ -14,6 +14,7 @@ import { getPlayerRank } from "@/lib/ranks";
 import { getBattlePassState, getBPXPInfo, BP_MAX_LEVEL, BP_SEASON_END } from "@/lib/battlePass";
 import { getFailedChallenges } from "@/lib/mistakes";
 import { getSessionHistory, getTotalSeconds, getSecondsForDate, formatDuration } from "@/lib/sessionTime";
+import { lf } from "@/lib/localize";
 
 interface SharedData {
   username: string;
@@ -25,6 +26,7 @@ interface SharedData {
 
 export default function ParentPage() {
   const t = useTranslations("Parent");
+  const locale = useLocale();
   const [username, setUsername] = useState("");
   const [mounted, setMounted] = useState(false);
   const [earnedBadges, setEarnedBadges] = useState<string[]>([]);
@@ -402,7 +404,7 @@ export default function ParentPage() {
                     <div className="flex-1">
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-bold text-gray-700 dark:text-slate-300">
-                          Niveau {level.id} — {level.name}
+                          {t("level_heading", { id: level.id, name: lf(level, "name", locale) })}
                           <span className="text-xs text-gray-400 dark:text-slate-500 ml-2">{level.ages}</span>
                         </span>
                         <div className="flex items-center gap-2">
@@ -496,7 +498,7 @@ export default function ParentPage() {
                 <p className="text-xs text-gray-400 dark:text-slate-500">
                   {bpLevel >= BP_MAX_LEVEL
                     ? t("bp_completed")
-                    : t("bp_season_end", { level: bpLevel, date: new Date(BP_SEASON_END).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }) })}
+                    : t("bp_season_end", { level: bpLevel, date: new Date(BP_SEASON_END).toLocaleDateString(locale, { day: "numeric", month: "long", year: "numeric" }) })}
                 </p>
               </div>
             </div>
